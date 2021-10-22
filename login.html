@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Login</title>
+
+  <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+  <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+
+  <link rel="stylesheet" href="assets/css/signup.css">
+
+  <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
+    crossorigin="anonymous"></script>
+
+</head>
+
+<body>
+  <div class="center">
+    <div class="container">
+      <div id="carouselExampleCaptions" class="text_login carousel slide carousel-fade" data-bs-ride="carousel">
+        <div class="carousel-indicators">
+          <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0" class="active"
+            aria-current="true" aria-label="Slide 1"></button>
+          <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1"
+            aria-label="Slide 2"></button>
+          <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="2"
+            aria-label="Slide 3"></button>
+        </div>
+        <div class="carousel-inner">
+          <div class="carousel-item active">
+            <img src="assets/img/City Grid.png" class="" alt="...">
+            <div class="carousel-caption d-none d-md-block">
+              <h2 style="font-size: 300%; font-weight: 500;">The Easiest Way To Invest</h2>
+            </div>
+          </div>
+          <div class="carousel-item">
+            <img src="assets/img/peakpx.jpg" class="" alt="...">
+            <div class="carousel-caption d-none d-md-block">
+              <h2 style="font-size: 300%; font-weight: 500;">Trade among five different asset classes from one
+                convenient account</h2>
+            </div>
+          </div>
+          <div class="carousel-item">
+            <img src="assets/img/peakpx (1).jpg" class="" alt="...">
+            <div class="carousel-caption d-none d-md-block">
+              <h2 style="font-size: 300%; font-weight: 500;">You can choose from cryptos, metals, equities, currencies
+                and more.</h2>
+            </div>
+          </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions"
+          data-bs-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions"
+          data-bs-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Next</span>
+        </button>
+      </div>
+
+      <div class="login-content" id="loginsection">
+        <form class="loginform l1" action="" method="">
+          <img src="">
+          <h2 class="title">Welcome</h2>
+          <div class="input-div one">
+            <div class="inc">
+              <i class="usr"></i>
+            </div>
+            <div class="div">
+              <h5>Email</h5>
+              <input type="email" class="input" name="email">
+            </div>
+          </div>
+          <div class="input-div pass">
+            <div class="inc">
+              <i class="pass"></i>
+            </div>
+            <div class="div">
+              <h5>Password</h5>
+              <input type="password" class="input" name="password">
+            </div>
+          </div>
+          <a href="#loginsection" id="forgotPwd" class="forgot">Forgot Password?</a>
+          <input type="submit" class="btn" value="Login">
+          Not a member?&nbsp <a href="signup.html" class="sign-up">signup now</a>
+        </form>
+
+        <form class="loginform l2 hidden" action="" method="">
+          <img src="">
+          <h2 class="title">Forgot your password, no worries</h2>
+          <h3 class="title">Enter your email and we'll send a code to you.</h3>
+          <div class="input-div one">
+            <div class="inc">
+              <i class="usr"></i>
+            </div>
+            <div class="div">
+              <h5>Email</h5>
+              <input type="email" class="input" name="email">
+            </div>
+          </div>
+
+          <a href="#loginsection" id="backTol1" class="forgot">Go back</a>
+          <input id="tol3" class="btn" value="Next">
+        </form>
+
+        <form class="loginform l3 hidden" action="" method="">
+          <img src="">
+          <h2 class="title">Please enter the code you recieved here.</h2>
+          <div class="input-div one">
+            <div class="inc">
+              <i class="usr"></i>
+            </div>
+            <div class="div">
+              <h5>Code</h5>
+              <input type="text" class="input" name="text">
+            </div>
+          </div>
+          <a href="#loginsection" id="backTol2" class="forgot">Go back</a>
+          <input id="tol4" class="btn" value="Next">
+        </form>
+
+        <form class="loginform l4 hidden">
+          <img src="">
+          <h2 class="title">Change your password here.</h2>
+          <div class="input-div pass">
+            <div class="inc">
+              <i class="pass"></i>
+            </div>
+            <div class="div">
+              <h5>New Password</h5>
+              <input type="password" class="input" name="password">
+            </div>
+          </div>
+          <div class="input-div pass">
+            <div class="inc">
+              <i class="pass"></i>
+            </div>
+            <div class="div">
+              <h5>Confirm Password</h5>
+              <input type="password" class="input" name="password">
+            </div>
+          </div>
+          <a href="" id="backTol3" class="forgot">Go back</a>
+          <input id="passchanged" type="submit" class="btn" value="Change Password">
+        </form>
+
+        <div class="toast" role="alert" aria-live="assertive" aria-atomic="true"
+          style="position: absolute; top: 0; right: 0;">
+          <div class="toast-header">
+            <strong class="me-auto">Password Change Successful</strong>
+            <small>Just now</small>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close">
+            </button>
+          </div>
+          <div class="toast-body">
+            Your new password has been set, proceed to <a href="login.html">login</a> now
+          </div>
+        </div>
+
+      </div>
+
+
+    </div>
+  </div>
+
+
+  <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    const inputs = document.querySelectorAll(".input");
+    function addcl() {
+      let parent = this.parentNode.parentNode;
+      parent.classList.add("focus");
+    }
+    function remcl() {
+      let parent = this.parentNode.parentNode;
+      if (this.value == "") {
+        parent.classList.remove("focus");
+      }
+    }
+    inputs.forEach((input) => {
+      input.addEventListener("focus", addcl);
+      input.addEventListener("blur", remcl);
+    });
+
+    $(document).ready(function () {
+      $("#forgotPwd").click(function () {
+        $(".l1").removeClass("show");
+        $(".l1").addClass("fadeout");
+        $(".l1").addClass("hidden");
+        $(".l2").removeClass("hidden");
+        $(".l2").addClass("fadeout");
+        $(".l2").addClass("show");
+      });
+
+      $("#backTol1").click(function () {
+        $(".l2").removeClass("show");
+        $(".l2").addClass("fadeout");
+        $(".l2").addClass("hidden");
+        $(".l1").removeClass("hidden");
+        $(".l1").addClass("fadeout");
+        $(".l1").addClass("show");
+      });
+
+      $("#tol3").click(function () {
+        $(".l2").removeClass("show");
+        $(".l2").addClass("fadeout");
+        $(".l2").addClass("hidden");
+        $(".l3").removeClass("hidden");
+        $(".l3").addClass("fadeout");
+        $(".l3").addClass("show");
+      });
+
+      $("#backTol2").click(function () {
+        $(".l3").removeClass("show");
+        $(".l3").addClass("fadeout");
+        $(".l3").addClass("hidden");
+        $(".l2").removeClass("hidden");
+        $(".l2").addClass("fadeout");
+        $(".l2").addClass("show");
+      });
+
+      $("#tol4").click(function () {
+        $(".l3").removeClass("show");
+        $(".l3").addClass("fadeout");
+        $(".l3").addClass("hidden");
+        $(".l4").removeClass("hidden");
+        $(".l4").addClass("fadeout");
+        $(".l4").addClass("show");
+      });
+
+      $("#backTol3").click(function () {
+        $(".l4").removeClass("show");
+        $(".l4").addClass("fadeout");
+        $(".l4").addClass("hidden");
+        $(".l3").removeClass("hidden");
+        $(".l3").addClass("fadeout");
+        $(".l3").addClass("show");
+      });
+
+      $(".l4").submit(function () {
+        console.log('nada');
+        $('.toast').toast()
+        $('.toast').toast('show')
+      })
+    });
+  </script>
+</body>
+
+</html>
