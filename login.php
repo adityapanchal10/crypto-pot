@@ -1,0 +1,382 @@
+<?php
+
+session_start();
+
+include "db_connect.php";
+require_once 'recaptcha/src/autoload.php';
+
+function getClientIP() {       
+  if (array_key_exists('HTTP_X_FORWARDED_FOR', $_SERVER)){
+    return  $_SERVER["HTTP_X_FORWARDED_FOR"];  
+  }else if (array_key_exists('REMOTE_ADDR', $_SERVER)) { 
+    return $_SERVER["REMOTE_ADDR"]; 
+  }else if (array_key_exists('HTTP_CLIENT_IP', $_SERVER)) {
+    return $_SERVER["HTTP_CLIENT_IP"]; 
+  } 
+}
+
+if (!isset($_SESSION['email'])) {
+    if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['login'])) {        
+    
+        if ( !isset($_POST['email'], $_POST['password'], $_POST['g-recaptcha-response']) ) {
+            // Could not get the data that should have been sent.
+            exit('Please fill both the email and password fields!');
+        }
+        $secret = '6Le7_sEcAAAAAJv3txTswyqjBFuv-y0w2CeYMJLE';
+        $gRecaptchaResponse = $_POST['g-recaptcha-response'];
+        $remoteIp = getClientIP();
+        $recaptcha = new \ReCaptcha\ReCaptcha($secret);
+        $resp = $recaptcha->setExpectedHostname('crypto-honeypot.forenzythreatlabs.com')->verify($gRecaptchaResponse, $remoteIp);
+
+        if ($resp->isSuccess()) {
+          // Verified!
+        } else {
+          $errors = $resp->getErrorCodes();
+          exit($errors);
+        }
+
+        if ($stmt = $con->prepare('SELECT userid, password FROM userMaster WHERE email_id = ?')) {
+            $stmt->bind_param('s', $_POST['email']);
+            $stmt->execute();
+            // Store the result so we can check if the account exists in the database.
+            $stmt->store_result();
+    
+            if ($stmt->num_rows > 0) {
+              $stmt->bind_result($user_id, $password);
+              $stmt->fetch();
+              // Account exists, now we verify the password.
+              // Note: remember to use password_hash in your registration file to store the hashed passwords.
+              $password_hash = hash('sha256', $_POST['password']);
+              if ($password_hash == $password) {
+                // Verification success! User has logged-in!
+                // Create sessions, so we know the user is logged in, they basically act like cookies but remember the data on the server.
+                session_regenerate_id();
+                // $_SESSION['loggedin'] = TRUE;
+                $_SESSION['email'] = $_POST['email'];
+                $_SESSION['id'] = $user_id;
+                // echo 'Welcome ' . $_SESSION['name'] . '!';
+                if ($stmt_2 = $con->prepare('UPDATE userMaster SET lastLogin = ?, lastLogin_http_user_agent = ? WHERE email_id = ?')) {
+                  $lastLogin = date('Y/m/d H:i:s');
+                  $stmt_2->bind_param('sss', $lastLogin, $_SERVER['HTTP_USER_AGENT'], $_SESSION['email']);
+                  if(!$stmt_2->execute()){
+                    echo $stmt_2->error;
+                  } else {
+                    if ($stmt_3 = $con->prepare('INSERT INTO logMaster (userid, loginDatetime, loginIPv4, loginIPv6, login_http_user_agent) VALUES (?, ?, ?, ?, ?)')) {
+                      $ip = getClientIP();
+                      if(filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+                        $ipv6 = '0000:0000:0000:0000:0000:0000:0000:0000';
+                        $stmt_3->bind_param('issss', $_SESSION['id'], $lastLogin, $ip, $ipv6, $_SERVER['HTTP_USER_AGENT']);
+                      } else {
+                        $ipv4 = '0.0.0.0';
+                        $stmt_3->bind_param('issss', $_SESSION['id'], $lastLogin, $ipv4, $ip, $_SERVER['HTTP_USER_AGENT']);
+                      }
+                      if (!$stmt_3->execute()){
+                        echo $stmt_3->error;
+                      } else {
+                        // header('Location: dashboard.php');
+                        echo('window.location = "dashboard.php";');
+                      }
+                    }
+                  }
+                } else {
+                  echo 'error prepraring statement';
+                }
+              } else {
+                  // Incorrect password
+                  echo 'Incorrect email and/or password!';
+              }
+            } else {
+                // Incorrect email
+                echo 'Incorrect email and/or password!';
+            }
+    
+            //$stmt->close();
+        }
+    
+    } else {
+        echo '<!DOCTYPE html>
+        <html lang="en">
+        
+        <head>
+          <meta charset="UTF-8">
+          <title>Login</title>
+        
+          <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+          <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
+          <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
+        
+          <link rel="stylesheet" href="assets/css/signup.css">
+        
+          <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+          <script src="https://www.google.com/recaptcha/api.js"></script>
+          <script>
+            function onSubmit(token) {
+              $.post("login.php", $("#login-form").serialize() + "&login", function(data){
+                // alert(data);
+                console.log(data);
+                jQuery.globalEval(data);
+              });
+            }
+            /* $("#login-btn").click(function(){
+              e.preventDefault();
+              grecaptcha.ready(function() {
+                grecaptcha.execute("6Le7_sEcAAAAAOKBLU84MM8cYoN9DvOEexSMFYSm", {action: "submit"}).then(function(token) {
+                  
+                });
+              });
+            });
+            function onSubmit(token) {
+              
+              // document.getElementById("login-form").submit();
+              // $("#login-form").submit();
+              $.post("login.php", $("#login-form").serialize(), function(data) {
+                alert(data);
+                jQuery.globalEval(data);
+              });
+            }*/
+          </script>
+        </head>
+        
+        <body>
+          <div class="center">
+            <div class="container">
+              <div id="carouselExampleCaptions" class="text_login carousel slide carousel-fade" data-bs-ride="carousel">
+                <div class="carousel-indicators">
+                  <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="0" class="active"
+                    aria-current="true" aria-label="Slide 1"></button>
+                  <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="1"
+                    aria-label="Slide 2"></button>
+                  <button type="button" data-bs-target="#carouselExampleCaptions" data-bs-slide-to="2"
+                    aria-label="Slide 3"></button>
+                </div>
+                <div class="carousel-inner">
+                  <div class="carousel-item active">
+                    <img src="assets/img/CityGrid.png" class="" alt="...">
+                    <div class="carousel-caption d-none d-md-block">
+                      <h2 style="font-size: 300%; font-weight: 500;">The Easiest Way To Invest</h2>
+                    </div>
+                  </div>
+                  <div class="carousel-item">
+                    <img src="assets/img/peakpx.jpg" class="" alt="...">
+                    <div class="carousel-caption d-none d-md-block">
+                      <h2 style="font-size: 300%; font-weight: 500;">Trade among five different asset classes from one
+                        convenient account</h2>
+                    </div>
+                  </div>
+                  <div class="carousel-item">
+                    <img src="assets/img/peakpx(1).jpg" class="" alt="...">
+                    <div class="carousel-caption d-none d-md-block">
+                      <h2 style="font-size: 300%; font-weight: 500;">You can choose from cryptos, metals, equities, currencies
+                        and more.</h2>
+                    </div>
+                  </div>
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleCaptions"
+                  data-bs-slide="prev">
+                  <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                  <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleCaptions"
+                  data-bs-slide="next">
+                  <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                  <span class="visually-hidden">Next</span>
+                </button>
+              </div>
+        
+              <div class="login-content">
+                <form id="login-form" class="loginform l1" action="login.php" method="POST">
+                  <img src="">
+                  <h2 class="title">Welcome</h2>
+                  <div class="input-div one">
+                    <div class="inc">
+                      <i class="usr"></i>
+                    </div>
+                    <div class="div">
+                      <h5>Email</h5>
+                      <input type="email" class="input" name="email">
+                    </div>
+                  </div>
+                  <div class="input-div pass">
+                    <div class="inc">
+                      <i class="pass"></i>
+                    </div>
+                    <div class="div">
+                      <h5>Password</h5>
+                      <input type="password" class="input" name="password">
+                    </div>
+                  </div>
+                  <a href="#" id="forgotPwd" class="forgot">Forgot Password?</a>
+                  <button id="login-btn" class="btn g-recaptcha" value="Login" name="login" data-sitekey="6Le7_sEcAAAAAOKBLU84MM8cYoN9DvOEexSMFYSm" data-callback="onSubmit" data-action="submit">LOGIN</button>
+                  Not a member?&nbsp <a href="signup.php" class="sign-up">signup now</a>
+                </form>
+        
+                <form class="loginform l2 hidden" action="forgot-password.php" method="GET">
+                  <img src="">
+                  <h2 class="title">Forgot your password, no worries</h2>
+                  <h3 class="title">Enter your email and we\'ll send a code to you.</h3>
+                  <div class="input-div one">
+                    <div class="inc">
+                      <i class="usr"></i>
+                    </div>
+                    <div class="div">
+                      <h5>Email</h5>
+                      <input type="email" class="input" name="email">
+                    </div>
+                  </div>
+        
+                  <a href="#" id="backTol1" class="forgot">Go back</a>
+                  <input type="submit" id="submit" class="btn" value="submit">
+                </form>
+        
+                <form class="loginform l3 hidden" action="" method="">
+                  <img src="">
+                  <h2 class="title">Please enter the code you recieved here.</h2>
+                  <div class="input-div one">
+                    <div class="inc">
+                      <i class="usr"></i>
+                    </div>
+                    <div class="div">
+                      <h5>Code</h5>
+                      <input type="text" class="input" name="text">
+                    </div>
+                  </div>
+                  <a href="#" id="backTol2" class="forgot">Go back</a>
+                  <input id="tol4" class="btn" value="Next">
+                </form>
+        
+                <form class="loginform l4 hidden" action="" method="">
+                  <img src="">
+                  <h2 class="title">Change your password here.</h2>
+                  <div class="input-div pass">
+                    <div class="inc">
+                      <i class="pass"></i>
+                    </div>
+                    <div class="div">
+                      <h5>New Password</h5>
+                      <input type="password" class="input" name="password">
+                    </div>
+                  </div>
+                  <div class="input-div pass">
+                    <div class="inc">
+                      <i class="pass"></i>
+                    </div>
+                    <div class="div">
+                      <h5>Confirm Password</h5>
+                      <input type="password" class="input" name="password">
+                    </div>
+                  </div>
+                  <a href="#" id="backTol3" class="forgot">Go back</a>
+                  <input id="passchanged" type="submit" class="btn" value="Change Password">
+                </form>
+        
+                <div class="toast" role="alert" aria-live="assertive" aria-atomic="true"
+                  style="position: absolute; top: 0; right: 0;">
+                  <div class="toast-header">
+                    <strong class="me-auto">Password Change Successful</strong>
+                    <small>Just now</small>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close">
+                    </button>
+                  </div>
+                  <div class="toast-body">
+                    Your new password has been set, proceed to <a href="login.html">login</a> now
+                  </div>
+                </div>
+        
+              </div>
+        
+        
+            </div>
+          </div>
+        
+        
+          <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+        
+          <script>
+            const inputs = document.querySelectorAll(".input");
+            function addcl() {
+              let parent = this.parentNode.parentNode;
+              parent.classList.add("focus");
+            }
+            function remcl() {
+              let parent = this.parentNode.parentNode;
+              if (this.value == "") {
+                parent.classList.remove("focus");
+              }
+            }
+            inputs.forEach((input) => {
+              input.addEventListener("focus", addcl);
+              input.addEventListener("blur", remcl);
+            });
+        
+            $(document).ready(function () {
+              $("#forgotPwd").click(function () {
+                $(".l1").removeClass("show");
+                $(".l1").addClass("fadeout");
+                $(".l1").addClass("hidden");
+                $(".l2").removeClass("hidden");
+                $(".l2").addClass("fadeout");
+                $(".l2").addClass("show");
+              });
+        
+              $("#backTol1").click(function () {
+                $(".l2").removeClass("show");
+                $(".l2").addClass("fadeout");
+                $(".l2").addClass("hidden");
+                $(".l1").removeClass("hidden");
+                $(".l1").addClass("fadeout");
+                $(".l1").addClass("show");
+              });
+        
+              $("#tol3").click(function () {
+                $(".l2").removeClass("show");
+                $(".l2").addClass("fadeout");
+                $(".l2").addClass("hidden");
+                $(".l3").removeClass("hidden");
+                $(".l3").addClass("fadeout");
+                $(".l3").addClass("show");
+              });
+        
+              $("#backTol2").click(function () {
+                $(".l3").removeClass("show");
+                $(".l3").addClass("fadeout");
+                $(".l3").addClass("hidden");
+                $(".l2").removeClass("hidden");
+                $(".l2").addClass("fadeout");
+                $(".l2").addClass("show");
+              });
+        
+              $("#tol4").click(function () {
+                $(".l3").removeClass("show");
+                $(".l3").addClass("fadeout");
+                $(".l3").addClass("hidden");
+                $(".l4").removeClass("hidden");
+                $(".l4").addClass("fadeout");
+                $(".l4").addClass("show");
+              });
+        
+              $("#backTol3").click(function () {
+                $(".l4").removeClass("show");
+                $(".l4").addClass("fadeout");
+                $(".l4").addClass("hidden");
+                $(".l3").removeClass("hidden");
+                $(".l3").addClass("fadeout");
+                $(".l3").addClass("show");
+              });
+        
+              $(".l4").submit(function () {
+                console.log("nada");
+                $(".toast").toast()
+                $(".toast").toast("show")
+              })
+            });
+          </script>
+        </body>
+        
+        </html>
+        ';
+    }
+} else {
+    header('Location: dashboard.php');
+}
+
+?>
