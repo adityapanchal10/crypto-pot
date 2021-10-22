@@ -26,14 +26,14 @@ if (isset($_SESSION['email'])) {
         // Now we check if the data was submitted, isset() function will check if the data exists.
         if (!isset($_POST['email'], $_POST['password'])) {
             // Could not get the data that should have been sent.
-            exit('<script>alert("Please complete the registration form"); window.location = "signup.php";</script>');
+            echo '<script>alert("Please complete the registration form"); window.location = "signup.php";';
             // header('Location: signup.php');
 
         }
         // Make sure the submitted registration values are not empty.
         if (empty($_POST['email']) || empty($_POST['password']) || empty($_POST['fname']) || empty($_POST['lname']) || empty($_POST['mobile_no'])) {
             // One or more values are empty.
-            exit('<script>alert("Please complete the registration form");  window.location = "signup.php"</script>');
+            echo 'alert("Please complete the registration form");  window.location = "signup.php"';
             // header('Location: signup.php');
         }
 
@@ -47,7 +47,7 @@ if (isset($_SESSION['email'])) {
           // Verified!
         } else {
           $errors = $resp->getErrorCodes();
-          exit($errors);
+          echo $errors;
         }
 
         if ($stmt = $con->prepare('SELECT userid, password FROM userMaster WHERE email_id = ?')) {
@@ -59,7 +59,7 @@ if (isset($_SESSION['email'])) {
             if ($stmt->num_rows > 0) {
                 // email already exists
                 // echo 'Email exists, please choose another!';
-                exit('<script>alert("Email exists, please choose another!"); window.location = "signup.php";</script>');
+                echo 'alert("Email exists, please choose another!"); window.location = "signup.php";';
             } else {
                 if ($stmt = $con->prepare('INSERT INTO userMaster (first_name, last_name, email_id, country, mobile, password, sign_up_date, recovery_code, init_account_balance, remaining_balance, lastLogin, lastLogin_http_user_agent) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')) {
                     $country = "USA";
@@ -111,7 +111,7 @@ if (isset($_SESSION['email'])) {
         } else {
             // Something is wrong with the sql statement, check to make sure accounts table exists with all 3 fields.
             // echo 'Could not prepare statement!';
-            exit('<script>alert("Please complete the registration form"); window.location = "signup.php";</script>');
+            echo 'alert("Please complete the registration form"); window.location = "signup.php";';
         }
         $con->close();
     } 
