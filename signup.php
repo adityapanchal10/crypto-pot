@@ -43,12 +43,12 @@ if (isset($_SESSION['email'])) {
         $recaptcha = new \ReCaptcha\ReCaptcha($secret);
         $resp = $recaptcha->setExpectedHostname('crypto-honeypot.forenzythreatlabs.com')->verify($gRecaptchaResponse, $remoteIp);
 
-        // if ($resp->isSuccess()) {
-        //   // Verified!
-        // } else {
-        //   $errors = $resp->getErrorCodes();
-        //   exit($errors);
-        // }        
+        if ($resp->isSuccess()) {
+          // Verified!
+        } else {
+          $errors = $resp->getErrorCodes();
+          exit($errors);
+        }
 
         if ($stmt = $con->prepare('SELECT userid, password FROM userMaster WHERE email_id = ?')) {
             // Bind parameters (s = string, i = int, b = blob, etc), hash the password using the PHP password_hash function.
@@ -99,7 +99,8 @@ if (isset($_SESSION['email'])) {
                       $mail->IsHTML(true);
                       $mail->Body    = 'Welcome to our portal! Thank you for choosing crypto honeypot as your cryptocurrency trading platform. You can trade among five different asset classes from one convenient account. Please verify your email and KYC to gain full access to the platform.';
                       $mail->Send();
-                      header('Location: verify-email.php');
+                      // header('Location: verify-email.php');
+                      echo('<script>window.location = "verify-email.php";</script>');
                     }
                 } else {
                     // Something is wrong with the sql statement, check to make sure accounts table exists with all 3 fields.
@@ -129,7 +130,7 @@ if (isset($_SESSION['email'])) {
           <script src="https://www.google.com/recaptcha/api.js"></script>
           <script>
             function onSubmit(token) {
-              $.post("login.php", $("#reg-form").serialize() + "&signup", function(data){
+              $.post("signup.php", $("#reg-form").serialize() + "&signup", function(data){
                 // alert(data);
                 console.log(data);
                 jQuery.globalEval(data);
@@ -249,7 +250,7 @@ if (isset($_SESSION['email'])) {
                       <input type="password" class="input">
                     </div>
                   </div>
-                  <button type="submit" id="reg-btn" class="btn g-recaptcha" value="signup" name="signup" data-sitekey="6Le7_sEcAAAAAOKBLU84MM8cYoN9DvOEexSMFYSm" data-callback="onSubmit" data-action="submit">Signup</button>
+                  <button onclick="onSubmit" id="reg-btn" class="btn g-recaptcha" value="signup" name="signup" data-sitekey="6Le7_sEcAAAAAOKBLU84MM8cYoN9DvOEexSMFYSm" data-callback="onSubmit" data-action="submit">Signup</button>
                   Already a member?&nbsp<a href="login.php" class="sign-up">login here</a>
                 </form>
               </div>
