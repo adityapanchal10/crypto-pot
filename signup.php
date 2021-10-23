@@ -26,14 +26,16 @@ if (isset($_SESSION['email'])) {
         // Now we check if the data was submitted, isset() function will check if the data exists.
         if (!isset($_POST['email'], $_POST['password'])) {
             // Could not get the data that should have been sent.
-            echo '<script>alert("Please complete the registration form"); window.location = "signup.php";';
+            echo 'alert("Please complete the registration form"); window.location = "signup.php";';
+            exit;
             // header('Location: signup.php');
 
         }
         // Make sure the submitted registration values are not empty.
         if (empty($_POST['email']) || empty($_POST['password']) || empty($_POST['fname']) || empty($_POST['lname']) || empty($_POST['mobile_no'])) {
             // One or more values are empty.
-            echo 'alert("Please complete the registration form");  window.location = "signup.php"';
+            echo 'alert("Please complete the registration form"); window.location = "signup.php"';
+            exit;
             // header('Location: signup.php');
         }
 
@@ -60,6 +62,7 @@ if (isset($_SESSION['email'])) {
                 // email already exists
                 // echo 'Email exists, please choose another!';
                 echo 'alert("Email exists, please choose another!"); window.location = "signup.php";';
+                exit;
             } else {
                 if ($stmt = $con->prepare('INSERT INTO userMaster (first_name, last_name, email_id, country, mobile, password, sign_up_date, recovery_code, init_account_balance, remaining_balance, lastLogin, lastLogin_http_user_agent) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')) {
                     $country = "USA";
@@ -74,6 +77,7 @@ if (isset($_SESSION['email'])) {
                     $stmt->bind_param('ssssssssiiss', $_POST['fname'], $_POST['lname'], $_POST['email'], $country, $_POST['mobile_no'], $password_sha256, $date, $recovery_code, $init_account_balance, $remaining_balance, $date, $_SERVER['HTTP_USER_AGENT']);
                     if(!$stmt->execute()){
                       echo $stmt->error;
+                      exit;
                     } else {
                       // echo 'You have successfully registered, you can now login!';
                       session_regenerate_id();
@@ -100,11 +104,13 @@ if (isset($_SESSION['email'])) {
                       $mail->Body    = 'Welcome to our portal! Thank you for choosing crypto honeypot as your cryptocurrency trading platform. You can trade among five different asset classes from one convenient account. Please verify your email and KYC to gain full access to the platform.';
                       $mail->Send();
                       // header('Location: verify-email.php');
-                      echo('<script>window.location = "verify-email.php";</script>');
+                      echo('window.location = "verify-email.php";');
+                      exit;
                     }
                 } else {
                     // Something is wrong with the sql statement, check to make sure accounts table exists with all 3 fields.
                     echo 'Could not prepare statement!';
+                    exit;
                 }
             }
             $stmt->close();
@@ -112,6 +118,7 @@ if (isset($_SESSION['email'])) {
             // Something is wrong with the sql statement, check to make sure accounts table exists with all 3 fields.
             // echo 'Could not prepare statement!';
             echo 'alert("Please complete the registration form"); window.location = "signup.php";';
+            exit;
         }
         $con->close();
     } 
@@ -127,6 +134,7 @@ if (isset($_SESSION['email'])) {
           <link href="assets/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
           
           <link rel="stylesheet" href="assets/css/signup.css">
+          <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
           <script src="https://www.google.com/recaptcha/api.js"></script>
           <script>
             function onSubmit(token) {
@@ -198,7 +206,7 @@ if (isset($_SESSION['email'])) {
                     </div>
                     <div class="div">
                       <h5>Email</h5>
-                      <input type="text" class="input" name="email">
+                      <input type="email" class="input" name="email">
                     </div>
                   </div>
                   <div class="row">
@@ -247,10 +255,10 @@ if (isset($_SESSION['email'])) {
                     </div>
                     <div class="div">
                       <h5>Confirm Password</h5>
-                      <input type="password" class="input">
+                      <input type="password" class="input" name="password-verify">
                     </div>
                   </div>
-                  <button onclick="onSubmit" id="reg-btn" class="btn g-recaptcha" value="signup" name="signup" data-sitekey="6Le7_sEcAAAAAOKBLU84MM8cYoN9DvOEexSMFYSm" data-callback="onSubmit" data-action="submit">Signup</button>
+                  <button id="reg-btn" class="btn g-recaptcha" value="Signup" name="signup" data-sitekey="6Le7_sEcAAAAAOKBLU84MM8cYoN9DvOEexSMFYSm" data-callback="onSubmit" data-action="submit">Signup</button>
                   Already a member?&nbsp<a href="login.php" class="sign-up">login here</a>
                 </form>
               </div>
