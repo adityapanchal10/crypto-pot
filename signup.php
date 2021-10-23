@@ -26,7 +26,7 @@ if (isset($_SESSION['email'])) {
         // Now we check if the data was submitted, isset() function will check if the data exists.
         if (!isset($_POST['email'], $_POST['password'])) {
             // Could not get the data that should have been sent.
-            echo 'alert("Please complete the registration form"); window.location = "signup.php";';
+            echo '<script>alert("Please complete the registration form"); window.location = "signup.php";</script>';
             exit;
             // header('Location: signup.php');
 
@@ -34,12 +34,12 @@ if (isset($_SESSION['email'])) {
         // Make sure the submitted registration values are not empty.
         if (empty($_POST['email']) || empty($_POST['password']) || empty($_POST['fname']) || empty($_POST['lname']) || empty($_POST['mobile_no'])) {
             // One or more values are empty.
-            echo 'alert("Please complete the registration form"); window.location = "signup.php"';
+            echo '<script>alert("Please complete the registration form"); window.location = "signup.php"</script>';
             exit;
             // header('Location: signup.php');
         }
 
-        $secret = '6Le7_sEcAAAAAJv3txTswyqjBFuv-y0w2CeYMJLE';
+        $secret = '6Lfv_cEcAAAAAKAB_TEZdFFYrPqlUWMKy4dH25mr';
         $gRecaptchaResponse = $_POST['g-recaptcha-response'];
         $remoteIp = getClientIP();
         $recaptcha = new \ReCaptcha\ReCaptcha($secret);
@@ -61,7 +61,7 @@ if (isset($_SESSION['email'])) {
             if ($stmt->num_rows > 0) {
                 // email already exists
                 // echo 'Email exists, please choose another!';
-                echo 'alert("Email exists, please choose another!"); window.location = "signup.php";';
+                echo '<script>alert("Email exists, please choose another!"); window.location = "signup.php";</script>';
                 exit;
             } else {
                 if ($stmt = $con->prepare('INSERT INTO userMaster (first_name, last_name, email_id, country, mobile, password, sign_up_date, recovery_code, init_account_balance, remaining_balance, lastLogin, lastLogin_http_user_agent) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')) {
@@ -104,7 +104,7 @@ if (isset($_SESSION['email'])) {
                       $mail->Body    = 'Welcome to our portal! Thank you for choosing crypto honeypot as your cryptocurrency trading platform. You can trade among five different asset classes from one convenient account. Please verify your email and KYC to gain full access to the platform.';
                       $mail->Send();
                       // header('Location: verify-email.php');
-                      echo('window.location = "verify-email.php";');
+                      echo('<script>window.location = "verify-email.php";</script>');
                       exit;
                     }
                 } else {
@@ -117,7 +117,7 @@ if (isset($_SESSION['email'])) {
         } else {
             // Something is wrong with the sql statement, check to make sure accounts table exists with all 3 fields.
             // echo 'Could not prepare statement!';
-            echo 'alert("Please complete the registration form"); window.location = "signup.php";';
+            echo '<script>alert("Please complete the registration form"); window.location = "signup.php";</script>';
             exit;
         }
         $con->close();
@@ -258,7 +258,8 @@ if (isset($_SESSION['email'])) {
                       <input type="password" class="input" name="password-verify">
                     </div>
                   </div>
-                  <button id="reg-btn" class="btn g-recaptcha" value="Signup" name="signup" data-sitekey="6Le7_sEcAAAAAOKBLU84MM8cYoN9DvOEexSMFYSm" data-callback="onSubmit" data-action="submit">Signup</button>
+                  <div class="div g-recaptcha" data-sitekey="6Lfv_cEcAAAAAHjezfbopIsXDtuGNMHzFTO1mbIE"></div>
+                  <button id="reg-btn" class="btn" value="Signup" name="signup" type="submit">Signup</button>
                   Already a member?&nbsp<a href="login.php" class="sign-up">login here</a>
                 </form>
               </div>

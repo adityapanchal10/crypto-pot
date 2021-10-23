@@ -22,7 +22,7 @@ if (!isset($_SESSION['email'])) {
             // Could not get the data that should have been sent.
             exit('Please fill both the email and password fields!');
         }
-        $secret = '6Le7_sEcAAAAAJv3txTswyqjBFuv-y0w2CeYMJLE';
+        $secret = '6Lfv_cEcAAAAAKAB_TEZdFFYrPqlUWMKy4dH25mr';
         $gRecaptchaResponse = $_POST['g-recaptcha-response'];
         $remoteIp = getClientIP();
         $recaptcha = new \ReCaptcha\ReCaptcha($secret);
@@ -74,7 +74,7 @@ if (!isset($_SESSION['email'])) {
                         echo $stmt_3->error;
                       } else {
                         // header('Location: dashboard.php');
-                        echo('window.location = "dashboard.php";');
+                        echo('<script>window.location = "dashboard.php";</script>');
                       }
                     }
                   }
@@ -205,8 +205,9 @@ if (!isset($_SESSION['email'])) {
                       <input type="password" class="input" name="password">
                     </div>
                   </div>
+                  <div class="div g-recaptcha" data-sitekey="6Lfv_cEcAAAAAHjezfbopIsXDtuGNMHzFTO1mbIE"></div>
                   <a href="#" id="forgotPwd" class="forgot">Forgot Password?</a>
-                  <button id="login-btn" class="btn g-recaptcha" value="Login" name="login" data-sitekey="6Le7_sEcAAAAAOKBLU84MM8cYoN9DvOEexSMFYSm" data-callback="onSubmit" data-action="submit">LOGIN</button>
+                  <button id="login-btn" class="btn" value="Login" name="login" type="submit">LOGIN</button>
                   Not a member?&nbsp <a href="signup.php" class="sign-up">signup now</a>
                 </form>
         
