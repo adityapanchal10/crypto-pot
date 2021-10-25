@@ -1,9 +1,4 @@
-<!-- 
-=========================================================
- Light Bootstrap Dashboard - v2.0.1
-=========================================================
--->
-<!-- <?php
+<?php
 // We need to use sessions, so you should always start sessions using the below code.
 session_start();
 // If the user is not logged in redirect to the login page...
@@ -22,8 +17,8 @@ if (!isset($_SESSION['email'])) {
         <link rel="icon" type="image/png" href="./assets/img/favicon.ico">
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
         <title>Crypto Dash</title>
-        <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no'
-            name='viewport' />
+        <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no"
+            name="viewport" />
         <!--     Fonts and icons     -->
         <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700,200" rel="stylesheet" />
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" />
@@ -210,7 +205,14 @@ if (!isset($_SESSION['email'])) {
                                         <p class="card-category">All products including Taxes</p>
                                     </div>
                                     <div class="scrollable-content">
-                                        <ul id="dataList" style="list-style-type:none;"></ul>
+                                    <div class="row0">
+                                        <div class="logo0"></div>
+                                        <div class="title0" align="center">Currency</div>
+                                        <div class="symbol0" align="center">ID</div>
+                                        <div class="amount0" align="center">Current Price</div>
+                                        <div class="change0" align="center">24h change</div>
+                                    </div>    
+                                    <ul id="dataList" style="list-style-type:none;"></ul>
                                         <div class="templates">
                                             <div id="listItem">
                                                 <div class="row1">
@@ -219,6 +221,7 @@ if (!isset($_SESSION['email'])) {
                                                     <div class="title"></div>
                                                     <div class="symbol"></div>
                                                     <div class="amount"></div>
+                                                    <div class="change"></div>
                                                 </div>
                                             </div>
                                         </div>
