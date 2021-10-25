@@ -5486,6 +5486,12 @@ License - nucleoapp.com/license/
     justify-items: center;
 }
 
+.row0 {
+    margin: 10px 20px 15px 20px;
+    display: flex;
+    align-items: center;
+}
+
 .row1 {
     margin: 15px;
     display: flex;
@@ -5498,16 +5504,24 @@ License - nucleoapp.com/license/
     margin-right: 10px;
 }
 
-.row1 .title {
-    width: 45%;
+.row1 .title,
+.row0 .title0 {
+    width: 30%;
 }
 
-.row1 .symbol {
+.row1 .symbol,
+.row0 .symbol0 {
     width: 20%;
 }
 
-.row1 .amount {
-    width: 35%;
+.row1 .amount,
+.row0 .amount0 {
+    width: 30%;
+}
+
+.row1 .change,
+.row0 .change0 {
+    width: 20%;
 }
 
 .scrollable-content {
