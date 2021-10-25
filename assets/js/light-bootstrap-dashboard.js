@@ -192,9 +192,12 @@ function debounce(func, wait, immediate) {
 }
 
 // Crypto Price list
-var list = {
+
+//https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,dogecoin,matic-network,cardano,solana,ripple,binancecoin,polkadot,uniswap,litecoin,monero,eos&order=market_cap_desc&per_page=100&page=1&sparkline=false
+
+https: var list = {
 	url:
-		"https://api.nomics.com/v1/currencies/ticker?key=f1e32917e66702d7c7c609a36eadd0f8e0bbf836&ids=BTC,ETH,XRP,EOS,LTC,XMR,ADA,BNB,SOL,DOT,DOGE,UNI,LUNA&convert=USD&per-page=100&page=1",
+		"https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,dogecoin,matic-network,tether,shiba-inu,cardano,solana,ripple,binancecoin,polkadot,terra-luna,uniswap,litecoin,monero,eos,avalanche-2,chainlink&order=market_cap_desc&per_page=100&page=1&sparkline=false&price_change_percentage=24h",
 	method: "GET",
 	timeout: 0,
 };
@@ -210,14 +213,18 @@ $.ajax(list).done(function (response) {
 		var listItem = $("<li>" + listItemString + "</li>");
 		// console.log(item.logo_url);
 		var logo = $(".logo", listItem);
-		logo.attr("src", item.logo_url);
+		logo.attr("src", item.image);
 		var listItemTitle = $(".title", listItem);
 		listItemTitle.html(item.name);
-		// console.log(typeof item.price);
+		// console.log(typeof item.current_price);
 		var listItemAmount = $(".amount", listItem);
-		listItemAmount.html("$ " + parseFloat(item.price).toFixed(2));
+		listItemAmount.html("$ " + parseFloat(item.current_price).toFixed(2));
 		var listItemDesc = $(".symbol", listItem);
-		listItemDesc.html(item.symbol);
+		listItemDesc.html(item.symbol.toString().toUpperCase());
+		var listItemChange = $(".change", listItem);
+		listItemChange.html(
+			parseFloat(item.price_change_percentage_24h_in_currency).toFixed(2) + "%"
+		);
 		$("#dataList").append(listItem);
 	}
 });
