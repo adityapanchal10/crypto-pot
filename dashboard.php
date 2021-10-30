@@ -1,3 +1,8 @@
+<!-- 
+=========================================================
+ Light Bootstrap Dashboard - v2.0.1
+=========================================================
+-->
 <?php
 // We need to use sessions, so you should always start sessions using the below code.
 session_start();
@@ -24,7 +29,7 @@ if (!isset($_SESSION['email'])) {
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" />
         <!-- CSS Files -->
         <link href="./assets/vendor/bootstrap_dash/bootstrap.min.css" rel="stylesheet" />
-        <link href="./assets/css/light-bootstrap-dashboard.css" rel="stylesheet" />
+        <link href="./assets/css/dashboard.css" rel="stylesheet" />
 
     </head>
 
@@ -50,15 +55,15 @@ if (!isset($_SESSION['email'])) {
                             </a>
                         </li>
                         <li>
-                            <a class="nav-link" href="./user.html">
+                            <a class="nav-link" href="./profile.php">
                                 <i class="nc-icon nc-circle-09"></i>
                                 <p>User Profile</p>
                             </a>
                         </li>
                         <li>
-                            <a class="nav-link" href="./table.html">
+                            <a class="nav-link" href="./login-history.php">
                                 <i class="nc-icon nc-notes"></i>
-                                <p>Transaction List</p>
+                                <p>Login History</p>
                             </a>
                         </li>
                         <!-- 

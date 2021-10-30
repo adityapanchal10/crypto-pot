@@ -1,4 +1,4 @@
-<?php
+f<?php
 
 session_start();
 
@@ -64,7 +64,7 @@ if (!isset($_SESSION['email'])) {
                     if ($stmt_3 = $con->prepare('INSERT INTO logMaster (userid, loginDatetime, loginIPv4, loginIPv6, login_http_user_agent) VALUES (?, ?, ?, ?, ?)')) {
                       $ip = getClientIP();
                       if(filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
-                        $ipv6 = '0000:0000:0000:0000:0000:0000:0000:0000';
+                        $ipv6 = '0:0:0:0:0:0:0:0';
                         $stmt_3->bind_param('issss', $_SESSION['id'], $lastLogin, $ip, $ipv6, $_SERVER['HTTP_USER_AGENT']);
                       } else {
                         $ipv4 = '0.0.0.0';
