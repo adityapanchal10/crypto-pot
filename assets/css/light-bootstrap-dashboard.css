@@ -5590,6 +5590,7 @@ svg {
     justify-content: center;
     align-items: center;
     height: 300px;
+    max-height: 300px;
 }
 
 .input-wrapper {
@@ -5703,4 +5704,59 @@ input:focus+label {
     100% {
         width: 100%;
     }
+}
+
+/*Transfer to a friend*/
+
+.hidden {
+    visibility: hidden;
+    opacity: 0;
+}
+
+.show {
+    visibility: visible;
+    opacity: 1;
+}
+
+.fadeout {
+    transition: visibility 0s linear 0ms, opacity 300ms;
+}
+
+.fadein {
+    transition: visibility 0s linear 300ms, opacity 300ms;
+}
+
+.h {
+    position: relative;
+    height: 30px;
+}
+
+.h h4 {
+    position: absolute;
+}
+
+.t {
+    position: relative;
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.t form {
+    position: absolute;
+    max-height: 250px;
+    display: flex;
+    flex-direction: column;    
+    align-items: center;
+    justify-content: center;
+}
+
+.transferTo {
+    width: 270px;
+    height: 60px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    outline: none;
 }

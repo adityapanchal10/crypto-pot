@@ -237,23 +237,63 @@ if (!isset($_SESSION['email'])) {
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="card  card-tasks">
-                                <div class="card-header ">
-                                    <h4 class="card-title">Transaction</h4>
-                                    <p class="card-category">Easy transactions on the go</p>
+                        <div class="col-md-6" id="tansactionSection">
+                            <div class="card card-tasks">
+                                <div class="card-header h">
+                                    <h4 class="card-title show" id="transactionH">Transaction</h4>
+                                    <h4 class="card-title hidden" id="transferFH">Transfer To A Friend</h4>
                                 </div>
-                                <div>
-                                    <form class="dasht" action="#">
+                                <div class="card-header">
+                                    <p class="card-category">Easy transactions on the go / <a href="#transactionSection"
+                                            id="transfer">Transfer</a> to a
+                                        friend.</p>
+                                </div>
+                                <div class="t">
+                                    <form class="dasht show" action="#" id="transaction">
                                         <div class="input-wrapper">
-                                            <input type="text" id="from" required>
-                                            <label for="from">From</label>
+                                            <select id="inputFrom" class="form-control">
+                                                <option selected>Choose...</option>
+                                                <option>Option 1</option>
+                                                <option>Option 2</option>
+                                                <option>Option 3</option>
+                                                <option>Option 4</option>
+                                                <option>Option 5</option>
+                                            </select>
+                                            <label for="inputFrom">From</label>
                                         </div>
                                         <div class="input-wrapper">
-                                            <input type="text" id="to" required>
-                                            <label for="to">To</label>
+                                            <select id="inputTo" class="form-control">
+                                                <option selected>Choose...</option>
+                                                <option>Option 1</option>
+                                                <option>Option 2</option>
+                                                <option>Option 3</option>
+                                                <option>Option 4</option>
+                                                <option>Option 5</option>
+                                            </select>
+                                            <label for="inputTo">To</label>
                                         </div>
 
+                                        <button class="submit-btn">Proceed</button>
+
+                                    </form>
+
+                                    <form class="dasht hidden" action="#" id="transferF">
+                                        <div class="input-wrapper">
+                                            <select id="inputFrom" class="form-control">
+                                                <option selected>Choose...</option>
+                                                <option>Option 1</option>
+                                                <option>Option 2</option>
+                                                <option>Option 3</option>
+                                                <option>Option 4</option>
+                                                <option>Option 5</option>
+                                            </select>
+                                            <label for="inputFrom">From</label>
+                                        </div>
+                                        <div class="input-wrapper">
+                                            <input type="text" id="transferTo" class="transferTo" required>
+                                            <label for="transferTo">Enter friend's wallet address</label>
+                                        </div>
+                                        <a href="#transactionSection" id="backToTransaction">Go back</a>
                                         <button class="submit-btn">Proceed</button>
 
                                     </form>

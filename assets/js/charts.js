@@ -3,19 +3,11 @@ var chart1 = new Chartist.Pie(
 	{
 		series: [
 			{
-				value: 53,
+				value: 100,
 				className: "pie1",
 			},
-			{
-				value: 36,
-				className: "pie2",
-			},
-			{
-				value: 11,
-				className: "pie3",
-			},
 		],
-		labels: ["53%", "36%", "11%"],
+		labels: ["100%"],
 	},
 	{
 		donut: true,

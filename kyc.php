@@ -535,9 +535,9 @@ if (!isset($_SESSION['email']) || !isset($_SESSION['id'])) {
             $stmt->fetch();
 
             if ($kyc_verified == 1) {
-                echo '';
+                echo '<script>window.location = "kyc.php";</script>';
             } else if ($kyc_request == 1) {
-                echo '';
+                echo '<script>window.location = "kyc.php";</script>';
             } else if ($email != $_POST['email']) {
                 echo '<script>alert("Please check your details"); window.location = "kyc.php";</script>';
             } else {

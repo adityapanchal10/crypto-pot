@@ -1,16 +1,85 @@
-<!-- 
-=========================================================
- Light Bootstrap Dashboard - v2.0.1
-=========================================================
--->
 <?php
 // We need to use sessions, so you should always start sessions using the below code.
 session_start();
+
+include "db_connect.php";
+
 // If the user is not logged in redirect to the login page...
 if (!isset($_SESSION['email'])) {
 	header('Location: login.php');
 	exit();
 } else {
+    if (!isset($_SESSION['id'])) {
+        if ($stmt = $con->prepare('SELECT userid FROM userMaster WHERE email_id = ?')) {
+            $stmt->bind_param('s', $_SESSION['email']);
+            $stmt->execute();
+            $stmt->bind_result($userid);
+            $stmt->fetch();
+            $stmt->close();
+            $_SESSION['id'] = $userid;
+        } else {
+            echo '<script>alert("Error!! Please try again."); window.location = "kyc.php";</script>';
+        }
+    } else {
+        $userid = $_SESSION['id'];
+    }
+    if ($stmt = $con->prepare('SELECT wallet_id, wallet_balance, currency_id FROM walletMappingMaster WHERE userid = ?')) {
+        $stmt->bind_param('s', $_SESSION['id']);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        # $stmt->bind_result($wallet_id, $wallet_balance);
+        $wallet_ids = array();
+        $wallet_balances = array();
+        $wallet_names = array();
+        $wallet_prices = array();
+        $wallet_values = array();
+        while($row = $result->fetch_assoc()){ 
+            array_push($wallet_ids, $row['wallet_id']);
+            array_push($wallet_balances, $row['wallet_balance']);
+            if ($stmt_2 = $con->prepare('SELECT wallet_name FROM walletMaster WHERE wallet_id = ?')) {
+                $stmt_2->bind_param('i', $row['wallet_id']);
+                $stmt_2->execute();
+                $stmt_2->bind_result($wallet_name);
+                $stmt_2->fetch();
+                $stmt_2->close();
+                array_push($wallet_names, $wallet_name);
+            }
+            if ($stmt_3 = $con->prepare('SELECT currency_price FROM priceMaster WHERE currency_id = ?')) {
+                $stmt_3->bind_param('i', $row['currency_id']);
+                $stmt_3->execute();
+                $stmt_3->bind_result($currency_price);
+                $stmt_3->fetch();
+                $stmt_3->close();
+                array_push($wallet_prices, $currency_price);
+                array_push($wallet_values, $row['wallet_balance'] * $currency_price);
+            }
+        }
+        $stmt->close();
+        $wallet_total = array_sum($wallet_values);
+        $wallet_per = array();
+        foreach ($wallet_values as $wallet_value ) {
+            array_push($wallet_per, ($wallet_value/$wallet_total)*100);
+        }
+        $series = '[';
+        $labels = '[';
+        $from_transfer_options = '';
+        $to_transfer_options = '';
+        for ($i=0; $i < count($wallet_ids); $i++) {
+            if ($wallet_balances[$i] !=0) {
+                $series .= '{
+                    value: '.$wallet_per[$i].',
+                    className: "pie'.$wallet_ids[$i].'",
+                },';
+                $labels .= '"'.$wallet_names[$i].'",';
+                $from_transfer_options .= '<option>'.$wallet_names[$i].'</option>';
+            }
+            $to_transfer_options .= '<option>'.$wallet_names[$i].'</option>';
+        }
+        $series .= ']';
+        $labels .= ']';
+    } else {
+        echo '<script>alert("Error!! Please try again."); window.location = "kyc.php";</script>';
+    }
     echo '
     <!DOCTYPE html>
 
@@ -29,7 +98,7 @@ if (!isset($_SESSION['email'])) {
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" />
         <!-- CSS Files -->
         <link href="./assets/vendor/bootstrap_dash/bootstrap.min.css" rel="stylesheet" />
-        <link href="./assets/css/dashboard.css" rel="stylesheet" />
+        <link href="./assets/css/light-bootstrap-dashboard.css" rel="stylesheet" />
 
     </head>
 
@@ -49,19 +118,25 @@ if (!isset($_SESSION['email'])) {
                     </div>
                     <ul class="nav">
                         <li class="nav-item active">
-                            <a class="nav-link" href="dashboard.html">
+                            <a class="nav-link" href="dashboard.php">
                                 <i class="nc-icon nc-chart-pie-35"></i>
                                 <p>Dashboard</p>
                             </a>
                         </li>
                         <li>
-                            <a class="nav-link" href="./profile.php">
+                            <a class="nav-link" href="profile.php">
                                 <i class="nc-icon nc-circle-09"></i>
                                 <p>User Profile</p>
                             </a>
                         </li>
                         <li>
-                            <a class="nav-link" href="./login-history.php">
+                            <a class="nav-link" href="transactions.php">
+                                <i class="nc-icon nc-notes"></i>
+                                <p>Transaction List</p>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="nav-link" href="login-history.php">
                                 <i class="nc-icon nc-notes"></i>
                                 <p>Login History</p>
                             </a>
@@ -165,9 +240,7 @@ if (!isset($_SESSION['email'])) {
                                     <div class="card-body ">
                                         <div id="chartPreferences" class="ct-chart ct-perfect-fourth"></div>
                                         <div class="legend">
-                                            <i class="fa fa-circle pie1"></i> BTC
-                                            <i class="fa fa-circle pie2"></i> ETH
-                                            <i class="fa fa-circle pie3"></i> MATIC
+                                            <i class="fa fa-circle pie1"></i> USD
                                         </div>
                                         <hr>
                                         <div class="stats">
@@ -233,35 +306,84 @@ if (!isset($_SESSION['email'])) {
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="card  card-tasks">
-                                    <div class="card-header ">
-                                        <h4 class="card-title">Transaction</h4>
-                                        <p class="card-category">Easy transactions on the go</p>
+                            <div class="col-md-6" id="tansactionSection">
+                                <div class="card card-tasks">
+                                    <div class="card-header h">
+                                    <h4 class="card-title show" id="transactionH">Transaction</h4>
+                                    <h4 class="card-title hidden" id="transferFH">Transfer To A Friend</h4>
                                     </div>
-                                    <div>
-                                        <form class="dasht" action="#">
-                                            <div class="input-wrapper">
-                                                <input type="text" id="from" required>
-                                                <label for="from">From</label>
-                                            </div>
-                                            <div class="input-wrapper">
-                                                <input type="text" id="to" required>
-                                                <label for="to">To</label>
-                                            </div>
-
-                                            <button class="submit-btn">Proceed</button>
-
-                                        </form>
+                                    <div class="card-header">
+                                    <p class="card-category">Easy transactions on the go / <a href="#transactionSection"
+                                            id="transfer">Transfer</a> to a
+                                        friend.</p>
                                     </div>
-                                    <div class="card-footer ">
-                                        <hr>
-                                        <div class="stats">
-                                            <i class="now-ui-icons loader_refresh spin"></i> Secure
+                                    <div class="t">
+                                    <form class="dasht show" action="trade.php" method="POST" id="transaction">
+                                        <div class="input-wrapper">
+                                            <select id="inputFrom" class="form-control" name="from-wallet">
+                                                <option selected>Choose...</option>
+                                                '.$from_transfer_options.'
+                                            </select>
+                                            <label for="inputFrom">From</label>
                                         </div>
+                                        <div class="input-wrapper">
+                                            <select id="inputTo" class="form-control" name="to-wallet">
+                                                <option selected>Choose...</option>
+                                                '.$to_transfer_options.'
+                                                <!-- <option>BTC</option>
+                                                <option>ETH</option>
+                                                <option>BNB</option>
+                                                <option>USDT</option>
+                                                <option>ADA</option>
+                                                <option>SOL</option>
+                                                <option>XRP</option>
+                                                <option>DOT</option>
+                                                <option>DOGE</option>
+                                                <option>SHIB</option>
+                                                <option>LUNA</option>
+                                                <option>AVAX</option>
+                                                <option>LINK</option>
+                                                <option>LTC</option>
+                                                <option>UNI</option>
+                                                <option>MATIC</option>
+                                                <option>XMR</option>
+                                                <option>EOS</option>-->
+                                                </select>
+                                            <label for="inputTo">To</label>
+                                        </div>
+                                        <div class="input-wrapper">
+                                            <input type="text" id="amount" class="transferTo" required name="amount">
+                                            <label for="transferTo">Enter amount</label>
+                                        </div>
+                                        <button class="submit-btn" type="submit" name="submit">Proceed</button>
+
+                                    </form>
+
+                                    <form class="dasht hidden"  action="trade.php" method="POST" id="transferF">
+                                        <div class="input-wrapper">
+                                            <select id="inputFrom" class="form-control" name="">
+                                                <option selected>Choose...</option>
+                                                '.$from_transfer_options.'
+                                            </select>
+                                            <label for="inputFrom">From</label>
+                                        </div>
+                                        <div class="input-wrapper">
+                                            <input type="text" id="transferTo" class="transferTo" required>
+                                            <label for="transferTo">Enter friend\'s wallet address</label>
+                                        </div>
+                                        <a href="#transactionSection" id="backToTransaction">Go back</a>
+                                        <button class="submit-btn"  type="submit" name="submit">Proceed</button>
+
+                                    </form>
+                                </div>
+                                <div class="card-footer ">
+                                    <hr>
+                                    <div class="stats">
+                                        <i class="now-ui-icons loader_refresh spin"></i> Secure
                                     </div>
                                 </div>
                             </div>
+                        </div>
                         </div>
                     </div>
                 </div>
@@ -315,13 +437,127 @@ if (!isset($_SESSION['email'])) {
     <!-- Control Center for Light Bootstrap Dashboard: scripts for the example pages etc -->
     <script src="./assets/js/light-bootstrap-dashboard.js" type="text/javascript"></script>
     <!-- Charts -->
-    <script src="./assets/js/charts.js"></script>
+    <script>
+        var chart1 = new Chartist.Pie(
+            "#chartPreferences",
+            {
+                series: '.$series.',
+                labels: '.$labels.',
+            },
+            {
+                donut: true,
+                showLabel: true,
+            }
+        );
+        
+        chart1.on("draw", function (data) {
+            if (data.type === "slice") {
+                // Get the total path length in order to use for dash array animation
+                var pathLength = data.element._node.getTotalLength();
+        
+                // Set a dasharray that matches the path length as prerequisite to animate dashoffset
+                data.element.attr({
+                    "stroke-dasharray": pathLength + "px " + pathLength + "px",
+                });
+        
+                // Create animation definition while also assigning an ID to the animation for later sync usage
+                var animationDefinition = {
+                    "stroke-dashoffset": {
+                        id: "anim" + data.index,
+                        dur: 1000,
+                        from: -pathLength + "px",
+                        to: "0px",
+                        easing: Chartist.Svg.Easing.easeOutQuint,
+                        // We need to use `fill: \'freeze\'` otherwise our animation will fall back to initial (not visible)
+                        fill: "freeze",
+                    },
+                };
+        
+                // If this was not the first slice, we need to time the animation so that it uses the end sync event of the previous animation
+                if (data.index !== 0) {
+                    animationDefinition["stroke-dashoffset"].begin =
+                        "anim" + (data.index - 1) + ".end";
+                }
+        
+                // We need to set an initial value before the animation starts as we are not in guided mode which would do that for us
+                data.element.attr({
+                    "stroke-dashoffset": -pathLength + "px",
+                });
+        
+                // We can\'t use guided mode as the animations need to rely on setting begin manually
+                // See http://gionkunz.github.io/chartist-js/api-documentation.html#chartistsvg-function-animate
+                data.element.animate(animationDefinition, false);
+            }
+        });
+        
+        // For the sake of the example we update the chart1 every time it\'s created with a delay of 8 seconds
+        chart1.on("created", function () {
+            if (window.__anim21278907124) {
+                clearTimeout(window.__anim21278907124);
+                window.__anim21278907124 = null;
+            }
+            window.__anim21278907124 = setTimeout(chart1.update.bind(chart1), 10000);
+        });
+        
+        var weekly = {
+            url:
+                "https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=6&interval=daily",
+            method: "GET",
+            timeout: 0,
+        };
+        
+        var price = [];
+        var time = [];
+        // portfolio_data[0] = "BTC";
+        // x[0] = "x";
+        
+        $.ajax(weekly).done(function (response) {
+            var dataObject = response.prices;
+            console.log(dataObject);
+            var i = 0;
+            dataObject.forEach((item) => {
+                price[i] = parseFloat(item[1]);
+                var d = new Date(item[0]);
+                // x[i] = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
+                time[i] = d.toDateString();
+                i++;
+            });
+            // console.log(x);
+            // console.log("-----------------//----------");
+            // console.log(portfolio_data);
+        
+            chart2 = new Chartist.Line(
+                "#chartHours",
+                {
+                    labels: time,
+                    series: [price],
+                },
+                {
+                    height: "300px",
+                    low: 40000,
+                    showArea: true,
+                    fullwidth: true,
+                    axisX: {
+                        showGrid: false,
+                    },
+                    axisY: {
+                        showGrid: false,
+                        showLabel: true,
+                        offset: 60,
+                        // The label interpolation function enables you to modify the values
+                        // used for the labels on each axis. Here we are converting the
+                        // values into million pound.
+                        labelInterpolationFnc: function (value) {
+                            return "$" + String(value)[0] + "." + String(value)[1] + "k";
+                        },
+                    },
+                }
+            );
+        });
+    </script>
 
 
     </html>
     ';
 }
 ?>
-
-
-

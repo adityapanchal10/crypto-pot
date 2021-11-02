@@ -239,3 +239,36 @@ $(".submit-btn").click(function () {
 		$this.removeClass("btn-contract");
 	}, 2200);
 });
+
+// Transfer to a friend
+$(document).ready(function () {
+	$("#transfer").click(function () {
+		$("#transactionH").removeClass("show");
+		$("#transactionH").addClass("fadeout");
+		$("#transactionH").addClass("hidden");
+		$("#transaction").removeClass("show");
+		$("#transaction").addClass("fadeout");
+		$("#transaction").addClass("hidden");
+		$("#transferFH").removeClass("hidden");
+		$("#transferFH").addClass("fadeout");
+		$("#transferFH").addClass("show");
+		$("#transferF").removeClass("hidden");
+		$("#transferF").addClass("fadeout");
+		$("#transferF").addClass("show");
+	});
+
+	$("#backToTransaction").click(function () {
+		$("#transferFH").removeClass("show");
+		$("#transferFH").addClass("fadeout");
+		$("#transferFH").addClass("hidden");
+		$("#transferF").removeClass("show");
+		$("#transferF").addClass("fadeout");
+		$("#transferF").addClass("hidden");
+		$("#transactionH").removeClass("hidden");
+		$("#transactionH").addClass("fadeout");
+		$("#transactionH").addClass("show");
+		$("#transaction").removeClass("hidden");
+		$("#transaction").addClass("fadeout");
+		$("#transaction").addClass("show");
+	});
+});
