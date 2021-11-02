@@ -18,7 +18,16 @@ if (!isset($_SESSION['email']) || !isset($_SESSION['id'])) {
         if ($stmt->num_rows > 0) {
             $stmt->bind_result($kyc_request, $kyc_verified);
             $stmt->fetch();
-
+            $stmt->close();
+            
+            if ($stmt = $con->prepare('SELECT fname, mname, lname, email, gender, addressLine1, addressLine2, city, state, zipCode, documentType, document FROM kycMaster WHERE userid = ?')) {
+                $stmt->bind_param('i', $_SESSION['id']);
+                $stmt->execute();
+                $stmt->bind_result($fname, $mname, $lname, $email, $gender, $addressLine1, $addressLine2, $city, $state, $zipCode, $documentType, $document);
+                $stmt->fetch();
+                $document = base64_encode($document);
+                $stmt->close();
+            }
             if ($kyc_verified == 1) {
                 echo '<!DOCTYPE html>
 
@@ -45,44 +54,32 @@ if (!isset($_SESSION['email']) || !isset($_SESSION['id'])) {
                             <div class="form-row">
                                 <div class="form-group col-md-4">
                                     <label for="inputEmail4">First Name</label>
-                                    <input type="text" class="form-control" id="inputtext" placeholder="John" name="fname" disabled>
+                                    <input type="text" class="form-control" id="inputtext" placeholder="'.$fname.'" name="fname" disabled>
                                 </div>
                                 <div class="form-group col-md-4">
                                     <label for="inputEmail4">Middle Name</label>
-                                    <input type="text" class="form-control" id="inputtext" placeholder="M." name="mname" disabled>
+                                    <input type="text" class="form-control" id="inputtext" placeholder="'.$mname.'" name="mname" disabled>
                                 </div>
                                 <div class="form-group col-md-4">
                                     <label for="inputEmail4">Last Name</label>
-                                    <input type="text" class="form-control" id="inputtext" placeholder="Doe" name="lname" disabled>
+                                    <input type="text" class="form-control" id="inputtext" placeholder="'.$lname.'" name="lname" disabled>
                                 </div>
                             </div>
                             <div class="form-row">
                                 <div class="form-group col-md-6">
                                     <label for="inputEmail4">Email</label>
-                                    <input type="email" class="form-control" id="email" placeholder="johndoe99@email.com" name="email" disabled>
+                                    <input type="email" class="form-control" id="email" placeholder="'.$email.'" name="email" disabled>
                                 </div>
                             </div>
                             <fieldset class="form-group">
                                 <div class="row">
                                     <legend class="col-form-label col-sm-2 pt-0">Gender</legend>
                                     <div class="col-auto">
-                                        <div class="form-check gender">
-                                            <label class="form-check-label radio-inline" for="gridRadios1">
-                                                <input class="form-check-input radio-inline" type="radio" name="gridRadios"
-                                                    id="gridRadios1" value="Male" disabled>
-                                                Male
-                                            </label>
-                
-                                            <label class="form-check-label radio-inline" for="gridRadios2">
-                                                <input class="form-check-input radio-inline" type="radio" name="gridRadios"
-                                                    id="gridRadios2" value="female" disabled>
-                                                Female
-                                            </label>
-                
+                                        <div class="form-check gender">                
                                             <label class="form-check-label radio-inline" for="gridRadios3">
                                                 <input class="form-check-input radio-inline" type="radio" name="gridRadios"
-                                                    id="gridRadios3" value="other" disabled>
-                                                Other
+                                                    id="gridRadios3" value="'.$gender.'" checked disabled>
+                                                '.$gender.'
                                             </label>
                                         </div>
                                     </div>
@@ -90,32 +87,32 @@ if (!isset($_SESSION['email']) || !isset($_SESSION['id'])) {
                             </fieldset>
                             <div class="form-group">
                                 <label for="inputAddress">Address Line 1</label>
-                                <input type="text" class="form-control" id="inputAddress" placeholder="1234 Main St" name="address_line_1" disabled>
+                                <input type="text" class="form-control" id="inputAddress" placeholder="'.$addressLine1.'" name="address_line_1" disabled>
                             </div>
                             <div class="form-group">
                                 <label for="inputAddress2">Address Line 2</label>
-                                <input type="text" class="form-control" id="inputAddress2" placeholder="Apartment, studio, or floor" name="address_line_2" disabled>
+                                <input type="text" class="form-control" id="inputAddress2" placeholder="'.$addressLine2.'" name="address_line_2" disabled>
                             </div>
                 
                             <div class="form-row">
                                 <div class="form-group col-md-6">
                                     <label for="inputCity">City</label>
-                                    <input type="text" class="form-control" id="inputCity" name="city" disabled>
+                                    <input type="text" class="form-control" id="inputCity" placeholder="'.$city.'" name="city" disabled>
                                 </div>
                                 <div class="form-group col-md-4">
                                     <label for="inputState">State</label>
-                                    <input type="text" class="form-control" id="inputState" name="state" disabled>
+                                    <input type="text" class="form-control" id="inputState" placeholder="'.$state.'" name="state" disabled>
                                 </div>
                                 <div class="form-group col-md-2">
                                     <label for="inputZip">Zip</label>
-                                    <input type="text" class="form-control" id="inputZip" name="zipCode" disabled>
+                                    <input type="text" class="form-control" id="inputZip" placeholder="'.$zipCode.'" name="zipCode" disabled>
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label for="kycmethod" class="col-md-5 col-form-label">Choose your document</label>
                                 <div class="col-md-7">
                                     <select id="inputState" class="form-control" name="document_type" disabled>
-                                        <option selected>Choose...</option>
+                                        <option selected>'.$documentType.'</option>
                                     </select>
                                 </div>
                             </div>
@@ -131,11 +128,7 @@ if (!isset($_SESSION['email']) || !isset($_SESSION['id'])) {
                 
                             <!-- Drop Zoon -->
                             <div id="dropZoon" class="upload-area__drop-zoon drop-zoon">
-                                <span class="drop-zoon__icon">
-                                    <i class="bx bxs-file-image"></i>
-                                </span>
-                                <img src="" alt="Preview Image" id="previewImage" class="drop-zoon__preview-image" draggable="false">
-                                <input type="file" id="fileInput" class="drop-zoon__file-input" accept="image/*" name="document" disabled>
+                                <img src="data:image/jpeg;base64,'.$document.'" alt="Preview Image" id="previewImage" class="drop-zoon__preview-image" draggable="false" style="display: block;">
                             </div>
                             <!-- End Drop Zoon -->
                 
@@ -203,44 +196,32 @@ if (!isset($_SESSION['email']) || !isset($_SESSION['id'])) {
                             <div class="form-row">
                                 <div class="form-group col-md-4">
                                     <label for="inputEmail4">First Name</label>
-                                    <input type="text" class="form-control" id="inputtext" placeholder="John" name="fname" disabled>
+                                    <input type="text" class="form-control" id="inputtext" placeholder="'.$fname.'" name="fname" disabled>
                                 </div>
                                 <div class="form-group col-md-4">
                                     <label for="inputEmail4">Middle Name</label>
-                                    <input type="text" class="form-control" id="inputtext" placeholder="M." name="mname" disabled>
+                                    <input type="text" class="form-control" id="inputtext" placeholder="'.$mname.'" name="mname" disabled>
                                 </div>
                                 <div class="form-group col-md-4">
                                     <label for="inputEmail4">Last Name</label>
-                                    <input type="text" class="form-control" id="inputtext" placeholder="Doe" name="lname" disabled>
+                                    <input type="text" class="form-control" id="inputtext" placeholder="'.$lname.'" name="lname" disabled>
                                 </div>
                             </div>
                             <div class="form-row">
                                 <div class="form-group col-md-6">
                                     <label for="inputEmail4">Email</label>
-                                    <input type="email" class="form-control" id="email" placeholder="johndoe99@email.com" name="email" disabled>
+                                    <input type="email" class="form-control" id="email" placeholder="'.$email.'" name="email" disabled>
                                 </div>
                             </div>
                             <fieldset class="form-group">
                                 <div class="row">
                                     <legend class="col-form-label col-sm-2 pt-0">Gender</legend>
                                     <div class="col-auto">
-                                        <div class="form-check gender">
-                                            <label class="form-check-label radio-inline" for="gridRadios1">
-                                                <input class="form-check-input radio-inline" type="radio" name="gridRadios"
-                                                    id="gridRadios1" value="Male" disabled>
-                                                Male
-                                            </label>
-                
-                                            <label class="form-check-label radio-inline" for="gridRadios2">
-                                                <input class="form-check-input radio-inline" type="radio" name="gridRadios"
-                                                    id="gridRadios2" value="female" disabled>
-                                                Female
-                                            </label>
-                
+                                        <div class="form-check gender">                
                                             <label class="form-check-label radio-inline" for="gridRadios3">
                                                 <input class="form-check-input radio-inline" type="radio" name="gridRadios"
-                                                    id="gridRadios3" value="other" disabled>
-                                                Other
+                                                    id="gridRadios3" value="'.$gender.'" checked disabled>
+                                                '.$gender.'
                                             </label>
                                         </div>
                                     </div>
@@ -248,32 +229,32 @@ if (!isset($_SESSION['email']) || !isset($_SESSION['id'])) {
                             </fieldset>
                             <div class="form-group">
                                 <label for="inputAddress">Address Line 1</label>
-                                <input type="text" class="form-control" id="inputAddress" placeholder="1234 Main St" name="address_line_1" disabled>
+                                <input type="text" class="form-control" id="inputAddress" placeholder="'.$addressLine1.'" name="address_line_1" disabled>
                             </div>
                             <div class="form-group">
                                 <label for="inputAddress2">Address Line 2</label>
-                                <input type="text" class="form-control" id="inputAddress2" placeholder="Apartment, studio, or floor" name="address_line_2" disabled>
+                                <input type="text" class="form-control" id="inputAddress2" placeholder="'.$addressLine2.'" name="address_line_2" disabled>
                             </div>
                 
                             <div class="form-row">
                                 <div class="form-group col-md-6">
                                     <label for="inputCity">City</label>
-                                    <input type="text" class="form-control" id="inputCity" name="city" disabled>
+                                    <input type="text" class="form-control" id="inputCity" placeholder="'.$city.'" name="city" disabled>
                                 </div>
                                 <div class="form-group col-md-4">
                                     <label for="inputState">State</label>
-                                    <input type="text" class="form-control" id="inputState" name="state" disabled>
+                                    <input type="text" class="form-control" id="inputState" placeholder="'.$state.'" name="state" disabled>
                                 </div>
                                 <div class="form-group col-md-2">
                                     <label for="inputZip">Zip</label>
-                                    <input type="text" class="form-control" id="inputZip" name="zipCode" disabled>
+                                    <input type="text" class="form-control" id="inputZip" placeholder="'.$zipCode.'" name="zipCode" disabled>
                                 </div>
                             </div>
                             <div class="form-group row">
-                                <label for="kycmethod" class="col-md-5 col-form-label">Document type:</label>
+                                <label for="kycmethod" class="col-md-5 col-form-label">Choose your document</label>
                                 <div class="col-md-7">
                                     <select id="inputState" class="form-control" name="document_type" disabled>
-                                        <option selected>Choose...</option>
+                                        <option selected>'.$documentType.'</option>
                                     </select>
                                 </div>
                             </div>
@@ -283,17 +264,13 @@ if (!isset($_SESSION['email']) || !isset($_SESSION['id'])) {
                         <div id="uploadArea" class="upload-area">
                             <!-- Header -->
                             <div class="upload-area__header">
-                                <h1 class="upload-area__title">You have already submitted KYC request.</h1>
+                                <h1 class="upload-area__title">KYC request already submitted.</h1>
                             </div>
                             <!-- End Header -->
                 
                             <!-- Drop Zoon -->
                             <div id="dropZoon" class="upload-area__drop-zoon drop-zoon">
-                                <span class="drop-zoon__icon">
-                                    <i class="bx bxs-file-image"></i>
-                                </span>
-                                <img src="" alt="Preview Image" id="previewImage" class="drop-zoon__preview-image" draggable="false">
-                                <input type="file" id="fileInput" class="drop-zoon__file-input" accept="image/*" name="document" disabled>
+                                <img src="data:image/jpeg;base64,'.$document.'" alt="Preview Image" id="previewImage" class="drop-zoon__preview-image" draggable="false" style="display: block;">
                             </div>
                             <!-- End Drop Zoon -->
                 
@@ -552,7 +529,7 @@ if (!isset($_SESSION['email']) || !isset($_SESSION['id'])) {
                         if(in_array($fileType, $allowTypes)){ 
                             $image = $_FILES['document']['tmp_name']; 
                             $imgContent = file_get_contents($image);
-                            $stmt->bind_param('isssssssssiss', $userid, $_POST['fname'], $_POST['mname'], $_POST['lname'], $email, $_POST['gridRadios'], $_POST['address_line_1'], $_POST['address_line_2'], $_POST['city'], $_POST['state'], $_POST['zip_code'], $_POST['document_type'], $imgContent);
+                            $stmt->bind_param('isssssssssiss', $userid, $_POST['fname'], $_POST['mname'], $_POST['lname'], $email, $_POST['gridRadios'], $_POST['address_line_1'], $_POST['address_line_2'], $_POST['city'], $_POST['state'], $_POST['zipCode'], $_POST['document_type'], $imgContent);
                             if(!$stmt->execute()){
                                 echo $stmt->error;
                                 exit;

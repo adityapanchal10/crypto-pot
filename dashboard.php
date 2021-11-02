@@ -62,6 +62,7 @@ if (!isset($_SESSION['email'])) {
         }
         $series = '[';
         $labels = '[';
+        $legends = '';
         $from_transfer_options = '';
         $to_transfer_options = '';
         for ($i=0; $i < count($wallet_ids); $i++) {
@@ -71,6 +72,7 @@ if (!isset($_SESSION['email'])) {
                     className: "pie'.$wallet_ids[$i].'",
                 },';
                 $labels .= '"'.$wallet_names[$i].'",';
+                $legends .= '<i class="fa fa-circle pie'.$wallet_ids[$i].'"></i> '.$wallet_names[$i];
                 $from_transfer_options .= '<option>'.$wallet_names[$i].'</option>';
             }
             $to_transfer_options .= '<option>'.$wallet_names[$i].'</option>';
@@ -133,6 +135,12 @@ if (!isset($_SESSION['email'])) {
                             <a class="nav-link" href="transactions.php">
                                 <i class="nc-icon nc-notes"></i>
                                 <p>Transaction List</p>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="nav-link" href="kyc.php">
+                                <i class="nc-icon nc-circle-09"></i>
+                                <p>Verify KYC</p>
                             </a>
                         </li>
                         <li>
@@ -240,7 +248,8 @@ if (!isset($_SESSION['email'])) {
                                     <div class="card-body ">
                                         <div id="chartPreferences" class="ct-chart ct-perfect-fourth"></div>
                                         <div class="legend">
-                                            <i class="fa fa-circle pie1"></i> USD
+                                            <!--<i class="fa fa-circle pie1"></i> USD-->
+                                            '.$legends.'
                                         </div>
                                         <hr>
                                         <div class="stats">

@@ -88,7 +88,7 @@ if (!isset($_SESSION['email'])) {
                                 $stmt->execute();
                                 $stmt->close();
                                 if ($stmt = $con->prepare('INSERT INTO transactionMaster (userid, currency_id, currency_purchase_amount, fromWallet, toWallet, remaining_balance, transaction_amount) VALUES (?, ?, ?, ?, ?, ?, ?)')) {
-                                    $stmt->bind_param('iiiiiii', $_SESSION['id'], $to_currency_id, $purchase_amount, $from_wallet, $to_wallet, $from_wallet_balance, $amount);
+                                    $stmt->bind_param('iiissii', $_SESSION['id'], $to_currency_id, $purchase_amount, $from_wallet, $to_wallet, $from_wallet_balance, $amount);
                                     $stmt->execute();
                                     $stmt->close();
                                     echo '<script>alert("Transaction successfull"); window.location="dashboard.php"</script>';
