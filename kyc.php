@@ -9,17 +9,26 @@ if (!isset($_SESSION['email']) || !isset($_SESSION['id'])) {
     $email = $_SESSION['email'];
 
     include "db_connect.php";
-    if ($stmt = $con->prepare('SELECT is_KYC_request_sent, isKYCverified FROM userMaster WHERE email_id = ?')) {
+    if ($stmt = $con->prepare('SELECT isVerified, is_KYC_request_sent, isKYCverified FROM userMaster WHERE email_id = ?')) {
+        $notification = '';
+        $notifications = 0;
         $stmt->bind_param('s', $_SESSION['email']);
         $stmt->execute();
         // Store the result so we can check if the account exists in the database.
         $stmt->store_result();
 
         if ($stmt->num_rows > 0) {
-            $stmt->bind_result($kyc_request, $kyc_verified);
+            $stmt->bind_result($isVerified, $kyc_request, $kyc_verified);
             $stmt->fetch();
             $stmt->close();
-            
+            if ($isVerified == 0) {
+              $notifications += 1;
+              $notification .= '<a class="dropdown-item" href="verify-email.php">Please verify your account</a>';
+            }
+            if ($kyc_request == 0) {
+                $notifications += 1;
+                $notification .= '<a class="dropdown-item" href="kyc.php">Please upload your KYC documents</a>';
+            }
             if ($stmt = $con->prepare('SELECT fname, mname, lname, email, gender, addressLine1, addressLine2, city, state, zipCode, documentType, document FROM kycMaster WHERE userid = ?')) {
                 $stmt->bind_param('i', $_SESSION['id']);
                 $stmt->execute();
@@ -29,146 +38,315 @@ if (!isset($_SESSION['email']) || !isset($_SESSION['id'])) {
                 $stmt->close();
             }
             if ($kyc_verified == 1) {
-                echo '<!DOCTYPE html>
+                echo '
+                <!DOCTYPE html>
 
-                <html>
-                
+                <html lang="en">
+            
                 <head>
-                    <meta charset="utf-8">
-                    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-                    <title></title>
-                    <meta name="description" content="">
-                    <meta name="viewport" content="width=device-width, initial-scale=1">
-                
-                    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-                        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-                
+                    <meta charset="utf-8" />
+                    <link rel="apple-touch-icon" sizes="76x76" href="./assets/img/apple-icon.png">
+                    <link rel="icon" type="image/png" href="./assets/img/favicon.ico">
+                    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+                    <title>Crypto Dash</title>
+                    <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no"
+                        name="viewport" />
+                    <!--     Fonts and icons     -->
+                    <link href="https://fonts.googleapis.com/css?family=Montserrat:400,700,200" rel="stylesheet" />
+                    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" />
+                    <!-- CSS Files -->
+                    <link href="./assets/vendor/bootstrap_dash/bootstrap.min.css" rel="stylesheet" />
+                    <link href="./assets/css/light-bootstrap-dashboard.css" rel="stylesheet" />
                     <link rel="stylesheet" href="assets/css/kyc.css">
-                
+            
                 </head>
-                
+            
                 <body>
-                    <form class="container" action="#" enctype="multipart/form-data">
-                        <div id="inputText" class="text-content">
-                
-                            <div class="form-row">
-                                <div class="form-group col-md-4">
-                                    <label for="inputEmail4">First Name</label>
-                                    <input type="text" class="form-control" id="inputtext" placeholder="'.$fname.'" name="fname" disabled>
+                    <div class="wrapper">
+                        <div class="sidebar" data-image="./assets/img/sidebar-5.jpg">
+                            <!--
+                        Tip 1: You can change the color of the sidebar using: data-color="purple | blue | green | orange | red"
+            
+                        Tip 2: you can also add an image using data-image tag
+                    -->
+                            <div class="sidebar-wrapper">
+                                <div class="logo">
+                                    <a href="#" class="simple-text">
+                                        Crypto
+                                    </a>
                                 </div>
-                                <div class="form-group col-md-4">
-                                    <label for="inputEmail4">Middle Name</label>
-                                    <input type="text" class="form-control" id="inputtext" placeholder="'.$mname.'" name="mname" disabled>
-                                </div>
-                                <div class="form-group col-md-4">
-                                    <label for="inputEmail4">Last Name</label>
-                                    <input type="text" class="form-control" id="inputtext" placeholder="'.$lname.'" name="lname" disabled>
-                                </div>
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group col-md-6">
-                                    <label for="inputEmail4">Email</label>
-                                    <input type="email" class="form-control" id="email" placeholder="'.$email.'" name="email" disabled>
-                                </div>
-                            </div>
-                            <fieldset class="form-group">
-                                <div class="row">
-                                    <legend class="col-form-label col-sm-2 pt-0">Gender</legend>
-                                    <div class="col-auto">
-                                        <div class="form-check gender">                
-                                            <label class="form-check-label radio-inline" for="gridRadios3">
-                                                <input class="form-check-input radio-inline" type="radio" name="gridRadios"
-                                                    id="gridRadios3" value="'.$gender.'" checked disabled>
-                                                '.$gender.'
-                                            </label>
-                                        </div>
-                                    </div>
-                                </div>
-                            </fieldset>
-                            <div class="form-group">
-                                <label for="inputAddress">Address Line 1</label>
-                                <input type="text" class="form-control" id="inputAddress" placeholder="'.$addressLine1.'" name="address_line_1" disabled>
-                            </div>
-                            <div class="form-group">
-                                <label for="inputAddress2">Address Line 2</label>
-                                <input type="text" class="form-control" id="inputAddress2" placeholder="'.$addressLine2.'" name="address_line_2" disabled>
-                            </div>
-                
-                            <div class="form-row">
-                                <div class="form-group col-md-6">
-                                    <label for="inputCity">City</label>
-                                    <input type="text" class="form-control" id="inputCity" placeholder="'.$city.'" name="city" disabled>
-                                </div>
-                                <div class="form-group col-md-4">
-                                    <label for="inputState">State</label>
-                                    <input type="text" class="form-control" id="inputState" placeholder="'.$state.'" name="state" disabled>
-                                </div>
-                                <div class="form-group col-md-2">
-                                    <label for="inputZip">Zip</label>
-                                    <input type="text" class="form-control" id="inputZip" placeholder="'.$zipCode.'" name="zipCode" disabled>
-                                </div>
-                            </div>
-                            <div class="form-group row">
-                                <label for="kycmethod" class="col-md-5 col-form-label">Choose your document</label>
-                                <div class="col-md-7">
-                                    <select id="inputState" class="form-control" name="document_type" disabled>
-                                        <option selected>'.$documentType.'</option>
-                                    </select>
-                                </div>
+                                <ul class="nav">
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="dashboard.php">
+                                            <i class="nc-icon nc-chart-pie-35"></i>
+                                            <p>Dashboard</p>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="nav-link" href="profile.php">
+                                            <i class="nc-icon nc-circle-09"></i>
+                                            <p>User Profile</p>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="nav-link" href="transactions.php">
+                                            <i class="nc-icon nc-notes"></i>
+                                            <p>Transaction List</p>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="nav-link" href="kyc.php">
+                                            <i class="nc-icon nc-circle-09"></i>
+                                            <p>Verify KYC</p>
+                                        </a>
+                                    </li>
+                                    <li class="nav-item active">
+                                        <a class="nav-link" href="login-history.php">
+                                            <i class="nc-icon nc-notes"></i>
+                                            <p>Login History</p>
+                                        </a>
+                                    </li>
+                                    <!-- 
+                                    <li>
+                                        <a class="nav-link" href="./maps.html">
+                                            <i class="nc-icon nc-pin-3"></i>
+                                            <p>Maps</p>
+                                        </a>
+                                    </li> -->
+                                    <li>
+                                        <a class="nav-link" href="./notifications.html">
+                                            <i class="nc-icon nc-bell-55"></i>
+                                            <p>Notifications</p>
+                                        </a>
+                                    </li>
+            
+                                </ul>
                             </div>
                         </div>
-                
-                        <!-- Upload Area -->
-                        <div id="uploadArea" class="upload-area">
-                            <!-- Header -->
-                            <div class="upload-area__header">
-                                <h1 class="upload-area__title">Your KYC is already verified.</h1>
-                            </div>
-                            <!-- End Header -->
-                
-                            <!-- Drop Zoon -->
-                            <div id="dropZoon" class="upload-area__drop-zoon drop-zoon">
-                                <img src="data:image/jpeg;base64,'.$document.'" alt="Preview Image" id="previewImage" class="drop-zoon__preview-image" draggable="false" style="display: block;">
-                            </div>
-                            <!-- End Drop Zoon -->
-                
-                            <!-- File Details -->
-                            <div id="fileDetails" class="upload-area__file-details file-details">
-                                <h3 class="file-details__title">Uploaded File</h3>
-                
-                                <div id="uploadedFile" class="uploaded-file">
-                                    <div class="uploaded-file__icon-container">
-                                        <i class="bx bxs-file-blank uploaded-file__icon"></i>
-                                        <span class="uploaded-file__icon-text"></span> <!-- Data Will be Comes From Js -->
-                                    </div>
-                
-                                    <div id="uploadedFileInfo" class="uploaded-file__info">
-                                        <span class="uploaded-file__name">Proejct 1</span>
-                                        <span class="uploaded-file__counter">0%</span>
+                        <div class="main-panel">
+                            <!-- Navbar -->
+                            <nav class="navbar navbar-expand-lg " color-on-scroll="500">
+                                <div class="container-fluid">
+                                    <a class="navbar-brand" href="#pablo"> Dashboard </a>
+                                    <button href="" class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+                                        aria-controls="navigation-index" aria-expanded="false" aria-label="Toggle navigation">
+                                        <span class="navbar-toggler-bar burger-lines"></span>
+                                        <span class="navbar-toggler-bar burger-lines"></span>
+                                        <span class="navbar-toggler-bar burger-lines"></span>
+                                    </button>
+                                    <div class="collapse navbar-collapse justify-content-end" id="navigation">
+                                        <ul class="nav navbar-nav mr-auto">
+                                            <li class="nav-item">
+                                                <a href="#" class="nav-link" data-toggle="dropdown">
+                                                    <i class="nc-icon nc-palette"></i>
+                                                    <span class="d-lg-none">Dashboard</span>
+                                                </a>
+                                            </li>
+                                            <li class="dropdown nav-item">
+                                                <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
+                                                    <i class="nc-icon nc-planet"></i>
+                                                    <span class="notification">'.$notifications.'</span>
+                                                    <span class="d-lg-none">Notification</span>
+                                                </a>
+                                                <ul class="dropdown-menu">
+                                                    '.$notification.'
+                                                </ul>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a href="#" class="nav-link">
+                                                    <i class="nc-icon nc-zoom-split"></i>
+                                                    <span class="d-lg-block">&nbsp;Search</span>
+                                                </a>
+                                            </li>
+                                        </ul>
+                                        <ul class="navbar-nav ml-auto">
+                                            <li class="nav-item">
+                                                <a class="nav-link" href="#pablo">
+                                                    <span class="no-icon">Account</span>
+                                                </a>
+                                            </li>
+                                            <li class="nav-item dropdown">
+                                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink"
+                                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    <span class="no-icon">Dropdown</span>
+                                                </a>
+                                                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                                                    <a class="dropdown-item" href="#">Action</a>
+                                                    <a class="dropdown-item" href="#">Another action</a>
+                                                    <a class="dropdown-item" href="#">Something</a>
+                                                    <a class="dropdown-item" href="#">Something else here</a>
+                                                    <div class="divider"></div>
+                                                    <a class="dropdown-item" href="#">Separated link</a>
+                                                </div>
+                                            </li>
+                                            <li class="nav-item">
+                                                <a class="nav-link" href="logout.php">
+                                                    <span class="no-icon">Log out</span>
+                                                </a>
+                                            </li>
+                                        </ul>
                                     </div>
                                 </div>
+                            </nav>
+                            <!-- End Navbar -->
+                            <div class="content">
+                              <div class="container-fluid">
+                              <form class="container" action="#" enctype="multipart/form-data">
+                              <div id="inputText" class="text-content">
+                      
+                                  <div class="form-row">
+                                      <div class="form-group col-md-4">
+                                          <label for="inputEmail4">First Name</label>
+                                          <input type="text" class="form-control" id="inputtext" placeholder="'.$fname.'" name="fname" disabled>
+                                      </div>
+                                      <div class="form-group col-md-4">
+                                          <label for="inputEmail4">Middle Name</label>
+                                          <input type="text" class="form-control" id="inputtext" placeholder="'.$mname.'" name="mname" disabled>
+                                      </div>
+                                      <div class="form-group col-md-4">
+                                          <label for="inputEmail4">Last Name</label>
+                                          <input type="text" class="form-control" id="inputtext" placeholder="'.$lname.'" name="lname" disabled>
+                                      </div>
+                                  </div>
+                                  <div class="form-row">
+                                      <div class="form-group col-md-6">
+                                          <label for="inputEmail4">Email</label>
+                                          <input type="email" class="form-control" id="email" placeholder="'.$email.'" name="email" disabled>
+                                      </div>
+                                  </div>
+                                  <fieldset class="form-group">
+                                      <div class="row">
+                                          <legend class="col-form-label col-sm-2 pt-0">Gender</legend>
+                                          <div class="col-auto">
+                                              <div class="form-check gender">                
+                                                  <label class="form-check-label radio-inline" for="gridRadios3">
+                                                      <input class="form-check-input radio-inline" type="radio" name="gridRadios"
+                                                          id="gridRadios3" value="'.$gender.'" checked disabled>
+                                                      '.$gender.'
+                                                  </label>
+                                              </div>
+                                          </div>
+                                      </div>
+                                  </fieldset>
+                                  <div class="form-group">
+                                      <label for="inputAddress">Address Line 1</label>
+                                      <input type="text" class="form-control" id="inputAddress" placeholder="'.$addressLine1.'" name="address_line_1" disabled>
+                                  </div>
+                                  <div class="form-group">
+                                      <label for="inputAddress2">Address Line 2</label>
+                                      <input type="text" class="form-control" id="inputAddress2" placeholder="'.$addressLine2.'" name="address_line_2" disabled>
+                                  </div>
+                      
+                                  <div class="form-row">
+                                      <div class="form-group col-md-6">
+                                          <label for="inputCity">City</label>
+                                          <input type="text" class="form-control" id="inputCity" placeholder="'.$city.'" name="city" disabled>
+                                      </div>
+                                      <div class="form-group col-md-4">
+                                          <label for="inputState">State</label>
+                                          <input type="text" class="form-control" id="inputState" placeholder="'.$state.'" name="state" disabled>
+                                      </div>
+                                      <div class="form-group col-md-2">
+                                          <label for="inputZip">Zip</label>
+                                          <input type="text" class="form-control" id="inputZip" placeholder="'.$zipCode.'" name="zipCode" disabled>
+                                      </div>
+                                  </div>
+                                  <div class="form-group row">
+                                      <label for="kycmethod" class="col-md-5 col-form-label">Choose your document</label>
+                                      <div class="col-md-7">
+                                          <select id="inputState" class="form-control" name="document_type" disabled>
+                                              <option selected>'.$documentType.'</option>
+                                          </select>
+                                      </div>
+                                  </div>
+                              </div>
+                      
+                              <!-- Upload Area -->
+                              <div id="uploadArea" class="upload-area">
+                                  <!-- Header -->
+                                  <div class="upload-area__header">
+                                      <h1 class="upload-area__title">Your KYC is already verified.</h1>
+                                  </div>
+                                  <!-- End Header -->
+                      
+                                  <!-- Drop Zoon -->
+                                  <div id="dropZoon" class="upload-area__drop-zoon drop-zoon">
+                                      <img src="data:image/jpeg;base64,'.$document.'" alt="Preview Image" id="previewImage" class="drop-zoon__preview-image" draggable="false" style="display: block;">
+                                  </div>
+                                  <!-- End Drop Zoon -->
+                      
+                                  <!-- File Details -->
+                                  <div id="fileDetails" class="upload-area__file-details file-details">
+                                      <h3 class="file-details__title">Uploaded File</h3>
+                      
+                                      <div id="uploadedFile" class="uploaded-file">
+                                          <div class="uploaded-file__icon-container">
+                                              <i class="bx bxs-file-blank uploaded-file__icon"></i>
+                                              <span class="uploaded-file__icon-text"></span> <!-- Data Will be Comes From Js -->
+                                          </div>
+                      
+                                          <div id="uploadedFileInfo" class="uploaded-file__info">
+                                              <span class="uploaded-file__name">Proejct 1</span>
+                                              <span class="uploaded-file__counter">0%</span>
+                                          </div>
+                                      </div>
+                                  </div>
+                                  <!-- End File Details -->
+                              </div>
+                              <!-- End Upload Area -->
+                          </form>
+                              </div>
                             </div>
-                            <!-- End File Details -->
+                            <footer class="footer">
+                                <div class="container-fluid">
+                                    <nav>
+                                        <ul class="footer-menu">
+                                            <li>
+                                                <a href="#">
+                                                    Home
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="#">
+                                                    Company
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="#">
+                                                    Portfolio
+                                                </a>
+                                            </li>
+                                        </ul>
+                                        <p class="copyright text-center">
+                                            ©
+                                            <script>
+                                                document.write(new Date().getFullYear());
+                                            </script>
+            
+                                        </p>
+                                    </nav>
+                                </div>
+                            </footer>
                         </div>
-                        <!-- End Upload Area -->
-                    </form>
-                    </>
-                
-                
-                
-                    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-                        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
-                        crossorigin="anonymous"></script>
-                    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
-                        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
-                        crossorigin="anonymous"></script>
-                    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-                        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-                        crossorigin="anonymous"></script>
-                
-                    <script src="assets/js/kyc.js"></script>
+                    </div>
+                    <!--   -->
+            
                 </body>
-                
+                <!--   Core JS Files   -->
+                <script src="./assets/vendor/core/jquery.3.2.1.min.js" type="text/javascript"></script>
+                <script src="./assets/vendor/core/popper.min.js" type="text/javascript"></script>
+                <script src="./assets/vendor/bootstrap_dash/bootstrap.min.js" type="text/javascript"></script>
+                <!--  Plugin for Switches, full documentation here: http://www.jque.re/plugins/version3/bootstrap.switch/ -->
+                <script src="./assets/vendor/plugins/bootstrap-switch.js"></script>
+                <!--  Google Maps Plugin    -->
+                <!-- <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=YOUR_KEY_HERE"></script> -->
+                <!--  Chartist Plugin  -->
+                <script src="./assets/vendor/plugins/chartist.min.js"></script>
+                <!--  Notifications Plugin    -->
+                <script src="./assets/vendor/plugins/bootstrap-notify.js"></script>
+                <!-- Control Center for Light Bootstrap Dashboard: scripts for the example pages etc -->
+                <script src="./assets/js/light-bootstrap-dashboard.js" type="text/javascript"></script>
+                <script src="assets/js/kyc.js"></script>
                 </html>';
             } else if ($kyc_request == 1) {
                 echo '<!DOCTYPE html>

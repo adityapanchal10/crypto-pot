@@ -26,7 +26,6 @@ if (!isset($_SESSION['email'])) {
                 $notifications += 1;
                 $notification .= '<a class="dropdown-item" href="kyc.php">Please upload your KYC documents</a>';
             }
-            $stmt->fetch();
             if ($stmt = $con->prepare('SELECT loginDatetime, loginIPv4, loginIPv6, login_http_user_agent FROM logMaster WHERE userid = ?')) {
                 $stmt->bind_param('i', $userid);
                 $stmt->execute();
@@ -261,7 +260,7 @@ if (!isset($_SESSION['email'])) {
                 <script src="./assets/vendor/plugins/bootstrap-notify.js"></script>
                 <!-- Control Center for Light Bootstrap Dashboard: scripts for the example pages etc -->
                 <script src="./assets/js/light-bootstrap-dashboard.js" type="text/javascript"></script>
-</html>';
+              </html>';
             }
         }
     }
