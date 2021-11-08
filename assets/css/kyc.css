@@ -25,20 +25,6 @@
     --clr-light-blue: rgb(171, 202, 255);
 }
 
-body {
-    margin: 0;
-    padding: 0;
-    background-color: var(--clr-light);
-    color: var(--clr-black);
-    font-family: Segoe UI, 'Roboto',
-        sans-serif;
-    font-size: 16px;
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
 /* End General Styles */
 
 .container {
