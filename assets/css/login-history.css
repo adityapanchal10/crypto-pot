@@ -46,29 +46,19 @@
   }
 }
 
-body {
-  padding: 0 2em;
-  font-family: Montserrat, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-  color: #444;
-  background: #eee;
-}
-
 h1 {
   font-weight: normal;
   letter-spacing: -1px;
-  color: #34495E;
+  color: #943bea ;
 }
 
 .rwd-table {
-  background: rgba(26, 24, 22, 0.85);
-  color: #fff;
+  color: #888888;
   border-radius: .4em;
   overflow: hidden;
 }
 .rwd-table tr {
-  border-color: #46637f;
+  border-color: #943bea ;
 }
 .rwd-table th, .rwd-table td {
   margin: .5em 1em;
@@ -79,5 +69,5 @@ h1 {
   }
 }
 .rwd-table th, .rwd-table td:before {
-  color: #ffb03b;
+  color: #943bea ;
 }

@@ -9,16 +9,25 @@ if (!isset($_SESSION['email'])) {
 	header('Location: login.php');
 	exit();
 } else {
+    $notifications = 0;
+    $notification = "";
     if (!isset($_SESSION['id'])) {
-        if ($stmt = $con->prepare('SELECT userid FROM userMaster WHERE email_id = ?')) {
+        if ($stmt = $con->prepare('SELECT isVerified, is_KYC_request_sent FROM userMaster WHERE email_id = ?')) {
             $stmt->bind_param('s', $_SESSION['email']);
             $stmt->execute();
-            $stmt->bind_result($userid);
+            $stmt->bind_result($isVerified, $is_KYC_request_sent);
             $stmt->fetch();
             $stmt->close();
-            $_SESSION['id'] = $userid;
+            if ($isVerified == 0) {
+                $notifications += 1;
+                $notification .= '<a class="dropdown-item" href="verify-email.php">Please verify your account</a>';
+            }
+            if ($is_KYC_request_sent == 0) {
+                $notifications += 1;
+                $notification .= '<a class="dropdown-item" href="kyc.php">Please upload your KYC documents</a>';
+            }
         } else {
-            echo '<script>alert("Error!! Please try again."); window.location = "kyc.php";</script>';
+            echo '<script>alert("Error!! Please try again."); window.location = "login.php";</script>';
         }
     } else {
         $userid = $_SESSION['id'];
@@ -188,15 +197,11 @@ if (!isset($_SESSION['email'])) {
                                 <li class="dropdown nav-item">
                                     <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
                                         <i class="nc-icon nc-planet"></i>
-                                        <span class="notification">5</span>
+                                        <span class="notification">'.$notifications.'</span>
                                         <span class="d-lg-none">Notification</span>
                                     </a>
                                     <ul class="dropdown-menu">
-                                        <a class="dropdown-item" href="#">Notification 1</a>
-                                        <a class="dropdown-item" href="#">Notification 2</a>
-                                        <a class="dropdown-item" href="#">Notification 3</a>
-                                        <a class="dropdown-item" href="#">Notification 4</a>
-                                        <a class="dropdown-item" href="#">Another notification</a>
+                                        '.$notification.'
                                     </ul>
                                 </li>
                                 <li class="nav-item">
