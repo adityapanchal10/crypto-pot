@@ -94,13 +94,13 @@ if (!isset($_SESSION['email']) || !isset($_SESSION['id'])) {
                                             <p>Transaction List</p>
                                         </a>
                                     </li>
-                                    <li>
+                                    <li class="nav-item active">
                                         <a class="nav-link" href="kyc.php">
                                             <i class="nc-icon nc-circle-09"></i>
                                             <p>Verify KYC</p>
                                         </a>
                                     </li>
-                                    <li class="nav-item active">
+                                    <li>
                                         <a class="nav-link" href="login-history.php">
                                             <i class="nc-icon nc-notes"></i>
                                             <p>Login History</p>
