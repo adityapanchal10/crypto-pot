@@ -74,11 +74,11 @@ if (!isset($_SESSION['email'])) {
         $legends = '';
         $from_transfer_options = '';
         $to_transfer_options = '';
-        for ($i=0; $i < count($wallet_ids); $i++) {
+        for ($i=1; $i <= count($wallet_ids); $i++) {
             if ($wallet_balances[$i] !=0) {
                 $series .= '{
                     value: '.$wallet_per[$i].',
-                    className: "pie'.$wallet_ids[$i].'",
+                    className: "pie'.$i.'",
                 },';
                 $labels .= '"'.$wallet_names[$i].'",';
                 $legends .= '<i class="fa fa-circle pie'.$wallet_ids[$i].'"></i> '.$wallet_names[$i];
@@ -88,6 +88,7 @@ if (!isset($_SESSION['email'])) {
         }
         $series .= ']';
         $labels .= ']';
+        echo $series.implode();
     } else {
         echo '<script>alert("Error!! Please try again."); window.location = "kyc.php";</script>';
     }
