@@ -5547,6 +5547,45 @@ License - nucleoapp.com/license/
     color: rgb(190, 190, 190);
 }
 
+.pie4 {
+    stroke: rgb(236, 100, 100);
+    color: rgb(236, 100, 100);
+}
+
+.pie5 {
+    stroke: rgb(250, 247, 104);
+    color: rgb(250, 247, 104);
+}
+
+.pie6 {
+    stroke: rgb(98, 255, 106);
+    color: rgb(98, 255, 106);
+}
+
+.pie7 {
+    stroke: rgb(255, 168, 6);
+    color: rgb(255, 168, 6);
+}
+
+.pie8 {
+    stroke: rgb(14, 212, 247);
+    color: rgb(14, 212, 247);
+}
+
+.pie9 {
+    stroke: rgb(245, 60, 69);
+    color: rgb(245, 60, 69);
+}
+
+.pie10 {
+    stroke: rgb(77, 36, 228);
+    color: rgb(77, 36, 228);
+}
+
+.pie11 {
+    stroke: rgb(2, 250, 105);
+    color: rgb(2, 250, 105);
+}
 svg {
     height: 0;
     position: absolute;

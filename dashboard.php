@@ -81,7 +81,7 @@ if (!isset($_SESSION['email'])) {
                     className: "pie'.($i+1).'",
                 },';
                 $labels .= '"'.$wallet_names[$i].'",';
-                $legends .= '<i class="fa fa-circle pie'.($i+1).'"></i> '.$wallet_names[$i];
+                $legends .= '<i class="fa fa-circle pie'.($i+1).'"></i>'.$wallet_names[$i].'      ';
                 $from_transfer_options .= '<option>'.$wallet_names[$i].'</option>';
             }
             $to_transfer_options .= '<option>'.$wallet_names[$i].'</option>';
@@ -422,7 +422,7 @@ if (!isset($_SESSION['email'])) {
                                 </li>
                             </ul>
                             <p class="copyright text-center">
-                                ©
+                                Â©
                                 <script>
                                     document.write(new Date().getFullYear());
                                 </script>
@@ -503,16 +503,6 @@ if (!isset($_SESSION['email'])) {
                 data.element.animate(animationDefinition, false);
             }
         });
-        
-        // For the sake of the example we update the chart1 every time it\'s created with a delay of 8 seconds
-        chart1.on("created", function () {
-            if (window.__anim21278907124) {
-                clearTimeout(window.__anim21278907124);
-                window.__anim21278907124 = null;
-            }
-            window.__anim21278907124 = setTimeout(chart1.update.bind(chart1), 10000);
-        });
-        
         var weekly = {
             url:
                 "https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=6&interval=daily",
