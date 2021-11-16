@@ -108,3 +108,10 @@ CREATE TABLE kycMaster (
     documentType VARCHAR(20),
     document LONGBLOB
 );
+
+CREATE TABLE ssoMaster (
+	userid BIGINT(20) PRIMARY KEY NOT NULL REFERENCES userMaster(userid),
+	email_id VARCHAR(150) NOT NULL REFERENCES userMaster(email_id),
+	sso_token VARCHAR(100) NOT NULL,
+	sso_token_expiry DATETIME NOT NULL
+);

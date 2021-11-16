@@ -40,7 +40,7 @@ if (isset($_SESSION['email'])) {
         }
 
         $secret = '6Lfv_cEcAAAAAKAB_TEZdFFYrPqlUWMKy4dH25mr';
-        $gRecaptchaResponse = $_POST['g-recaptcha-response'];
+        // $gRecaptchaResponse = $_POST['g-recaptcha-response'];
         $remoteIp = getClientIP();
         $recaptcha = new \ReCaptcha\ReCaptcha($secret);
         $resp = $recaptcha->setExpectedHostname('crypto-honeypot.forenzythreatlabs.com')->verify($gRecaptchaResponse, $remoteIp);
@@ -258,7 +258,7 @@ if (isset($_SESSION['email'])) {
                       <input type="password" class="input" name="password-verify">
                     </div>
                   </div>
-                  <div class="div g-recaptcha" data-sitekey="6Lfv_cEcAAAAAHjezfbopIsXDtuGNMHzFTO1mbIE"></div>
+                  <div style="display: flex; justify-content: center;" class="div g-recaptcha" data-sitekey="6Lfv_cEcAAAAAHjezfbopIsXDtuGNMHzFTO1mbIE"></div>
                   <button id="reg-btn" class="btn" value="Signup" name="signup" type="submit">Signup</button>
                   Already a member?&nbsp<a href="login.php" class="sign-up">login here</a>
                 </form>

@@ -16,84 +16,100 @@ function getClientIP() {
 }
 
 if (!isset($_SESSION['email'])) {
-    if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['login'])) {        
-    
-        if ( !isset($_POST['email'], $_POST['password'], $_POST['g-recaptcha-response']) ) {
-            // Could not get the data that should have been sent.
-            exit('Please fill both the email and password fields!');
-        }
-        $secret = '6Lfv_cEcAAAAAKAB_TEZdFFYrPqlUWMKy4dH25mr';
-        $gRecaptchaResponse = $_POST['g-recaptcha-response'];
-        $remoteIp = getClientIP();
-        $recaptcha = new \ReCaptcha\ReCaptcha($secret);
-        $resp = $recaptcha->setExpectedHostname('crypto-honeypot.forenzythreatlabs.com')->verify($gRecaptchaResponse, $remoteIp);
+  if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['login'])) {          
+    if (!isset($_POST['email'], $_POST['password'], $_POST['g-recaptcha-response']) ) {
+      echo('<script>alert("Please fill both the email and password fields!"); window.location = "login.php";</script>');
+      exit;
+    }
 
-        if ($resp->isSuccess()) {
-          // Verified!
-        } else {
-          $errors = $resp->getErrorCodes();
-          exit($errors);
-        }
+    if (empty($_POST['email']) || empty($_POST['password'])) {
+      echo('<script>alert("Please fill both the email and password fields!"); window.location = "login.php";</script>');
+      exit;
+    }
+    if (empty($_POST['g-recaptcha-response'])) {
+      echo('<script>alert("Please complete the captcha!"); window.location = "login.php";</script>');
+      exit;
+    }
+    $secret = '6Lfv_cEcAAAAAKAB_TEZdFFYrPqlUWMKy4dH25mr';
+    $gRecaptchaResponse = $_POST['g-recaptcha-response'];
+    $remoteIp = getClientIP();
+    $recaptcha = new \ReCaptcha\ReCaptcha($secret);
+    $resp = $recaptcha->setExpectedHostname('crypto-honeypot.forenzythreatlabs.com')->verify($gRecaptchaResponse, $remoteIp);
+    $email = $_POST['email'];
 
-        if ($stmt = $con->prepare('SELECT userid, password FROM userMaster WHERE email_id = ?')) {
-            $stmt->bind_param('s', $_POST['email']);
-            $stmt->execute();
-            // Store the result so we can check if the account exists in the database.
-            $stmt->store_result();
-    
-            if ($stmt->num_rows > 0) {
-              $stmt->bind_result($user_id, $password);
-              $stmt->fetch();
-              // Account exists, now we verify the password.
-              // Note: remember to use password_hash in your registration file to store the hashed passwords.
-              $password_hash = hash('sha256', $_POST['password']);
-              if ($password_hash == $password) {
-                // Verification success! User has logged-in!
-                // Create sessions, so we know the user is logged in, they basically act like cookies but remember the data on the server.
-                session_regenerate_id();
-                // $_SESSION['loggedin'] = TRUE;
-                $_SESSION['email'] = $_POST['email'];
-                $_SESSION['id'] = $user_id;
-                // echo 'Welcome ' . $_SESSION['name'] . '!';
-                if ($stmt_2 = $con->prepare('UPDATE userMaster SET lastLogin = ?, lastLogin_http_user_agent = ? WHERE email_id = ?')) {
-                  $lastLogin = date('Y/m/d H:i:s');
-                  $stmt_2->bind_param('sss', $lastLogin, $_SERVER['HTTP_USER_AGENT'], $_SESSION['email']);
-                  if(!$stmt_2->execute()){
-                    echo $stmt_2->error;
-                  } else {
-                    if ($stmt_3 = $con->prepare('INSERT INTO logMaster (userid, loginDatetime, loginIPv4, loginIPv6, login_http_user_agent) VALUES (?, ?, ?, ?, ?)')) {
-                      $ip = getClientIP();
-                      if(filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
-                        $ipv6 = '0:0:0:0:0:0:0:0';
-                        $stmt_3->bind_param('issss', $_SESSION['id'], $lastLogin, $ip, $ipv6, $_SERVER['HTTP_USER_AGENT']);
-                      } else {
-                        $ipv4 = '0.0.0.0';
-                        $stmt_3->bind_param('issss', $_SESSION['id'], $lastLogin, $ipv4, $ip, $_SERVER['HTTP_USER_AGENT']);
-                      }
-                      if (!$stmt_3->execute()){
-                        echo $stmt_3->error;
-                      } else {
-                        // header('Location: dashboard.php');
-                        echo('<script>window.location = "dashboard.php";</script>');
-                      }
-                    }
-                  }
-                } else {
-                  echo 'error prepraring statement';
-                }
-              } else {
-                  // Incorrect password
-                  echo 'Incorrect email and/or password!';
-              }
-            } else {
-                // Incorrect email
-                echo 'Incorrect email and/or password!';
-            }
-    
-            //$stmt->close();
-        }
-    
+    if ($resp->isSuccess()) {
+      // Verified!
     } else {
+      $errors = $resp->getErrorCodes();
+      echo('<script>alert("Please complete the captcha!"); window.location = "login.php";</script>');
+      exit;
+    }
+
+    if ($stmt = $con->prepare('SELECT userid, password FROM userMaster WHERE email_id = ?')) {
+      $stmt->bind_param('s', $email);
+      $stmt->execute();
+      // Store the result so we can check if the account exists in the database.
+      $stmt->store_result();
+  
+      if ($stmt->num_rows > 0) {
+        $stmt->bind_result($user_id, $password);
+        $stmt->fetch();
+        // Account exists, now we verify the password.
+        // Note: remember to use password_hash in your registration file to store the hashed passwords.
+        $password_hash = hash('sha256', $_POST['password']);
+        if ($password_hash == $password) {
+          // Verification success! User has logged-in!
+          // Create sessions, so we know the user is logged in, they basically act like cookies but remember the data on the server.
+          
+          // echo 'Welcome ' . $_SESSION['name'] . '!';
+          if ($stmt_2 = $con->prepare('UPDATE userMaster SET lastLogin = ?, lastLogin_http_user_agent = ? WHERE email_id = ?')) {
+            $lastLogin = date('Y/m/d H:i:s');
+            $stmt_2->bind_param('sss', $lastLogin, $_SERVER['HTTP_USER_AGENT'], $email);
+            if(!$stmt_2->execute()){
+              echo('<script>alert("Please try again"); window.location = "login.php";</script>');
+              exit;
+            } else {
+              if ($stmt_3 = $con->prepare('INSERT INTO logMaster (userid, loginDatetime, loginIPv4, loginIPv6, login_http_user_agent) VALUES (?, ?, ?, ?, ?)')) {
+                $ip = getClientIP();
+                if(filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+                  $ipv6 = '0:0:0:0:0:0:0:0';
+                  $stmt_3->bind_param('issss', $user_id, $lastLogin, $ip, $ipv6, $_SERVER['HTTP_USER_AGENT']);
+                } else {
+                  $ipv4 = '0.0.0.0';
+                  $stmt_3->bind_param('issss', $user_id, $lastLogin, $ipv4, $ip, $_SERVER['HTTP_USER_AGENT']);
+                }
+                if (!$stmt_3->execute()){
+                  echo('<script>alert("Please try again"); window.location = "login.php";</script>');
+                  exit;
+                } else {
+                  // header('Location: dashboard.php');
+                  session_regenerate_id();
+                  // $_SESSION['loggedin'] = TRUE;
+                  $_SESSION['email'] = $email;
+                  $_SESSION['id'] = $user_id;
+                  echo('<script>window.location = "dashboard.php";</script>');
+                }
+              }
+            }
+          } else {
+            echo('<script>alert("Please try again"); window.location = "login.php";</script>');
+            exit;
+          }
+        } else {
+            // Incorrect password
+            echo('<script>alert("Incorrect email and/or password"); window.location = "login.php";</script>');
+            exit;
+        }
+      } else {
+          // Incorrect email
+          echo('<script>alert("Incorrect email and/or password"); window.location = "login.php";</script>');
+          exit;
+      }
+
+        //$stmt->close();
+    }
+  
+  } else {
         echo '<!DOCTYPE html>
         <html lang="en">
         
@@ -205,9 +221,10 @@ if (!isset($_SESSION['email'])) {
                       <input type="password" class="input" name="password">
                     </div>
                   </div>
-                  <div class="div g-recaptcha" data-sitekey="6Lfv_cEcAAAAAHjezfbopIsXDtuGNMHzFTO1mbIE"></div>
+                  <div style="display: flex; justify-content: center;" class="div g-recaptcha" data-sitekey="6Lfv_cEcAAAAAHjezfbopIsXDtuGNMHzFTO1mbIE"></div>
                   <a href="#" id="forgotPwd" class="forgot">Forgot Password?</a>
                   <button id="login-btn" class="btn" value="Login" name="login" type="submit">LOGIN</button>
+                  <button type="button" class="btn" id="tol5">Login with SSO</button>
                   Not a member?&nbsp <a href="signup.php" class="sign-up">signup now</a>
                 </form>
         
@@ -269,8 +286,25 @@ if (!isset($_SESSION['email'])) {
                   <a href="#" id="backTol3" class="forgot">Go back</a>
                   <input id="passchanged" type="submit" class="btn" value="Change Password">
                 </form>
+
+                <form class="loginform l5 hidden" action="" method="">
+                  <img src="">
+                  <h3 class="title">Enter your email and we\'ll send a single sign-on link to you.</h3>
+                  <div class="input-div one">
+                    <div class="inc">
+                      <i class="usr"></i>
+                    </div>
+                    <div class="div">
+                      <h5>Email</h5>
+                      <input type="email" class="input" name="email">
+                    </div>
+                  </div>
         
-                <div class="toast" role="alert" aria-live="assertive" aria-atomic="true"
+                  <a href="#" id="backTol1Froml5" class="forgot">Go back</a>
+                  <button type="button" id="sso-btn" class="btn" value="SSO" onclick="sso_generate()">Login with SSO</button>
+                </form>
+        
+                <div class="toast t1" role="alert" aria-live="assertive" aria-atomic="true"
                   style="position: absolute; top: 0; right: 0;">
                   <div class="toast-header">
                     <strong class="me-auto">Password Change Successful</strong>
@@ -280,6 +314,19 @@ if (!isset($_SESSION['email'])) {
                   </div>
                   <div class="toast-body">
                     Your new password has been set, proceed to <a href="login.html">login</a> now
+                  </div>
+                </div>
+
+                <div class="toast t2" role="alert" aria-live="assertive" aria-atomic="true"
+                  style="position: absolute; top: 0; right: 0;">
+                  <div class="toast-header">
+                  <strong class="me-auto">Single Sign-On Link sent!</strong>
+                  <small>Just now</small>
+                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close">
+                    </button>
+                  </div>
+                  <div class="toast-body">
+                    Check your email for the login link.
                   </div>
                 </div>
         
@@ -366,10 +413,49 @@ if (!isset($_SESSION['email'])) {
         
               $(".l4").submit(function () {
                 console.log("nada");
-                $(".toast").toast()
-                $(".toast").toast("show")
+                $(".t1").toast()
+                $(".t1").toast("show")
               })
             });
+
+            $("#tol5").click(function () {
+              $(".l1").removeClass("show");
+              $(".l1").addClass("fadeout");
+              $(".l1").addClass("hidden");
+              $(".l5").removeClass("hidden");
+              $(".l5").addClass("fadeout");
+              $(".l5").addClass("show");
+            });
+
+            $("#backTol1Froml5").click(function () {
+              $(".l5").removeClass("show");
+              $(".l5").addClass("fadeout");
+              $(".l5").addClass("hidden");
+              $(".l1").removeClass("hidden");
+              $(".l1").addClass("fadeout");
+              $(".l1").addClass("show");
+            });
+
+            function sso_generate() {
+              $.ajax({
+                url: "sso.php",
+                type: "POST",
+                data: $(".l5").serialize(),
+                success: function (data) {
+                  if (data.trim() == "success") {
+                    $(".t2").toast();
+                    $(".t2").toast("show");
+                  }
+                  else if (data.trim() == "empty") {
+                    alert("Please enter your email.");
+                  }
+                  else if (data.trim() == "exists") {
+                    alert("You have already requested a SSO link. Please check your email for the link.");
+                  }
+                },
+              });
+            }
+
           </script>
         </body>
         

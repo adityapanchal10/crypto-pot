@@ -56,7 +56,7 @@ if (!isset($_SESSION['email']) || !isset($_SESSION['id'])) {
                     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" />
                     <!-- CSS Files -->
                     <link href="./assets/vendor/bootstrap_dash/bootstrap.min.css" rel="stylesheet" />
-                    <link href="./assets/css/light-bootstrap-dashboard.css" rel="stylesheet" />
+                    <link href="./assets/css/light-bootstrap-kyc.css" rel="stylesheet" />
                     <link rel="stylesheet" href="assets/css/kyc.css">
             
                 </head>
@@ -366,7 +366,7 @@ if (!isset($_SESSION['email']) || !isset($_SESSION['id'])) {
                     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" />
                     <!-- CSS Files -->
                     <link href="./assets/vendor/bootstrap_dash/bootstrap.min.css" rel="stylesheet" />
-                    <link href="./assets/css/light-bootstrap-dashboard.css" rel="stylesheet" />
+                    <link href="./assets/css/light-bootstrap-kyc.css" rel="stylesheet" />
                     <link rel="stylesheet" href="assets/css/kyc.css">
             
                 </head>
@@ -677,7 +677,7 @@ if (!isset($_SESSION['email']) || !isset($_SESSION['id'])) {
                     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css" />
                     <!-- CSS Files -->
                     <link href="./assets/vendor/bootstrap_dash/bootstrap.min.css" rel="stylesheet" />
-                    <link href="./assets/css/light-bootstrap-dashboard.css" rel="stylesheet" />
+                    <link href="./assets/css/light-bootstrap-kyc.css" rel="stylesheet" />
                     <link rel="stylesheet" href="assets/css/kyc.css">
             
                 </head>

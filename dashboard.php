@@ -12,25 +12,34 @@ if (!isset($_SESSION['email'])) {
     $notifications = 0;
     $notification = "";
     if (!isset($_SESSION['id'])) {
-        if ($stmt = $con->prepare('SELECT isVerified, is_KYC_request_sent FROM userMaster WHERE email_id = ?')) {
+        if ($stmt = $con->prepare('SELECT userid FROM userMaster WHERE email_id = ?')) {
             $stmt->bind_param('s', $_SESSION['email']);
             $stmt->execute();
-            $stmt->bind_result($isVerified, $is_KYC_request_sent);
+            $stmt->bind_result($userid);
             $stmt->fetch();
             $stmt->close();
-            if ($isVerified == 0) {
-                $notifications += 1;
-                $notification .= '<a class="dropdown-item" href="verify-email.php">Please verify your account</a>';
-            }
-            if ($is_KYC_request_sent == 0) {
-                $notifications += 1;
-                $notification .= '<a class="dropdown-item" href="kyc.php">Please upload your KYC documents</a>';
-            }
         } else {
             echo '<script>alert("Error!! Please try again."); window.location = "login.php";</script>';
         }
     } else {
         $userid = $_SESSION['id'];
+    }
+    if ($stmt = $con->prepare('SELECT isVerified, is_KYC_request_sent FROM userMaster WHERE email_id = ?')) {
+        $stmt->bind_param('s', $_SESSION['email']);
+        $stmt->execute();
+        $stmt->bind_result($isVerified, $is_KYC_request_sent);
+        $stmt->fetch();
+        $stmt->close();
+        if ($isVerified == 0) {
+            $notifications += 1;
+            $notification .= '<a class="dropdown-item" href="verify-email.php">Please verify your account</a>';
+        }
+        if ($is_KYC_request_sent == 0) {
+            $notifications += 1;
+            $notification .= '<a class="dropdown-item" href="kyc.php">Please upload your KYC documents</a>';
+        }
+    } else {
+        echo '<script>alert("Error!! Please try again."); window.location = "login.php";</script>';
     }
     if ($stmt = $con->prepare('SELECT wallet_id, wallet_balance, currency_id FROM walletMappingMaster WHERE userid = ?')) {
         $stmt->bind_param('s', $_SESSION['id']);
