@@ -105,43 +105,17 @@ if (!isset($_SESSION['email'])) {
                             </a>
                         </li>
                         <li>
-                            <a class="nav-link" href="profile.php">
+                            <a class="nav-link" href="trade.php">
                                 <i class="nc-icon nc-circle-09"></i>
-                                <p>User Profile</p>
+                                <p>Trade</p>
                             </a>
                         </li>
-                        <li class="nav-item active">
-                            <a class="nav-link" href="transactions.php">
+                        <li>
+                            <a class="nav-link active" href="transactions.php">
                                 <i class="nc-icon nc-notes"></i>
                                 <p>Transaction List</p>
                             </a>
                         </li>
-                        <li>
-                            <a class="nav-link" href="kyc.php">
-                                <i class="nc-icon nc-circle-09"></i>
-                                <p>Verify KYC</p>
-                            </a>
-                        </li>
-                        <li>
-                            <a class="nav-link" href="login-history.php">
-                                <i class="nc-icon nc-notes"></i>
-                                <p>Login History</p>
-                            </a>
-                        </li>
-                        <!-- 
-                        <li>
-                            <a class="nav-link" href="./maps.html">
-                                <i class="nc-icon nc-pin-3"></i>
-                                <p>Maps</p>
-                            </a>
-                        </li> -->
-                        <li>
-                            <a class="nav-link" href="./notifications.html">
-                                <i class="nc-icon nc-bell-55"></i>
-                                <p>Notifications</p>
-                            </a>
-                        </li>
-
                     </ul>
                 </div>
             </div>
@@ -149,7 +123,7 @@ if (!isset($_SESSION['email'])) {
                 <!-- Navbar -->
                 <nav class="navbar navbar-expand-lg " color-on-scroll="500">
                     <div class="container-fluid">
-                        <a class="navbar-brand" href="#pablo"> Dashboard </a>
+                        <a class="navbar-brand" href="#"> Transaction History </a>
                         <button href="" class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
                             aria-controls="navigation-index" aria-expanded="false" aria-label="Toggle navigation">
                             <span class="navbar-toggler-bar burger-lines"></span>
@@ -158,12 +132,6 @@ if (!isset($_SESSION['email'])) {
                         </button>
                         <div class="collapse navbar-collapse justify-content-end" id="navigation">
                             <ul class="nav navbar-nav mr-auto">
-                                <li class="nav-item">
-                                    <a href="#" class="nav-link" data-toggle="dropdown">
-                                        <i class="nc-icon nc-palette"></i>
-                                        <span class="d-lg-none">Dashboard</span>
-                                    </a>
-                                </li>
                                 <li class="dropdown nav-item">
                                     <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
                                         <i class="nc-icon nc-planet"></i>
@@ -182,23 +150,17 @@ if (!isset($_SESSION['email'])) {
                                 </li>
                             </ul>
                             <ul class="navbar-nav ml-auto">
-                                <li class="nav-item">
-                                    <a class="nav-link" href="#pablo">
-                                        <span class="no-icon">Account</span>
-                                    </a>
-                                </li>
                                 <li class="nav-item dropdown">
                                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink"
                                         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                        <span class="no-icon">Dropdown</span>
+                                        <span class="no-icon">Account</span>
                                     </a>
                                     <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                                        <a class="dropdown-item" href="#">Action</a>
-                                        <a class="dropdown-item" href="#">Another action</a>
-                                        <a class="dropdown-item" href="#">Something</a>
-                                        <a class="dropdown-item" href="#">Something else here</a>
+                                        <a class="dropdown-item" href="profile.php">Profile</a>
+                                        <a class="dropdown-item" href="change-password.php">Change Password</a>
+                                        <a class="dropdown-item" href="kyc.php">View KYC Status</a>
                                         <div class="divider"></div>
-                                        <a class="dropdown-item" href="#">Separated link</a>
+                                        <a class="dropdown-item" href="login-history.php">Login History</a>
                                     </div>
                                 </li>
                                 <li class="nav-item">

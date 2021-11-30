@@ -49,102 +49,93 @@ if (!isset($_SESSION['email'])) {
             
             <body>
                 <div class="wrapper">
-                    <div class="sidebar" data-image="./assets/img/sidebar-5.jpg">
-                        <!--
-                    Tip 1: You can change the color of the sidebar using: data-color="purple | blue | green | orange | red"
-            
-                    Tip 2: you can also add an image using data-image tag
-                -->
-                        <div class="sidebar-wrapper">
-            
-                            <ul class="nav">
-                                <li>
-                                    <a class="nav-link" href="dashboard.html">
-                                        <i class="nc-icon nc-chart-pie-35"></i>
-                                        <p>Dashboard</p>
-                                    </a>
-                                </li>
-                                <li class="nav-item active">
-                                    <a class="nav-link" href="./user.html">
-                                        <i class="nc-icon nc-circle-09"></i>
-                                        <p>User Profile</p>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="nav-link" href="./table.html">
-                                        <i class="nc-icon nc-notes"></i>
-                                        <p>Table List</p>
-                                    </a>
-                                </li>
-                            </ul>
+                <div class="sidebar" data-image="./assets/img/sidebar-5.jpg">
+                    <!--
+                Tip 1: You can change the color of the sidebar using: data-color="purple | blue | green | orange | red"
+
+                Tip 2: you can also add an image using data-image tag
+            -->
+                    <div class="sidebar-wrapper">
+                        <div class="logo">
+                            <a href="#" class="simple-text">
+                                Crypto
+                            </a>
                         </div>
+                        <ul class="nav">
+                            <li class="nav-item">
+                                <a class="nav-link" href="dashboard.php">
+                                    <i class="nc-icon nc-chart-pie-35"></i>
+                                    <p>Dashboard</p>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="nav-link" href="trade.php">
+                                    <i class="nc-icon nc-circle-09"></i>
+                                    <p>Trade</p>
+                                </a>
+                            </li>
+                            <li>
+                                <a class="nav-link" href="transactions.php">
+                                    <i class="nc-icon nc-notes"></i>
+                                    <p>Transaction List</p>
+                                </a>
+                            </li>
+                        </ul>
                     </div>
-                    <div class="main-panel">
-                        <!-- Navbar -->
-                        <nav class="navbar navbar-expand-lg " color-on-scroll="500">
-                            <div class="container-fluid">
-                                <a class="navbar-brand" href="#"> User </a>
-                                <button href="" class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
-                                    aria-controls="navigation-index" aria-expanded="false" aria-label="Toggle navigation">
-                                    <span class="navbar-toggler-bar burger-lines"></span>
-                                    <span class="navbar-toggler-bar burger-lines"></span>
-                                    <span class="navbar-toggler-bar burger-lines"></span>
-                                </button>
-                                <div class="collapse navbar-collapse justify-content-end" id="navigation">
-                                    <ul class="nav navbar-nav mr-auto">
-                                        <li class="nav-item">
-                                            <a href="#" class="nav-link" data-toggle="dropdown">
-                                                <i class="nc-icon nc-palette"></i>
-                                                <span class="d-lg-none">Dashboard</span>
-                                            </a>
-                                        </li>
-                                        <li class="dropdown nav-item">
-                                            <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
-                                                <i class="nc-icon nc-planet"></i>
-                                                <span class="notification">'.$notifications.'</span>
-                                                <span class="d-lg-none">Notification</span>
-                                            </a>
-                                            <ul class="dropdown-menu">
-                                                '.$notification.'
-                                            </ul>
-                                        </li>
-                                        <li class="nav-item">
-                                            <div class="form-group has-search">
-                                                <span class="fa fa-search form-control-feedback" onclick="search_func()"></span>
-                                                <input type="text" class="form-control" id="search" name="search" placeholder="Search..." onkeydown="key_down(event);">
-                                            </div>
-                                        </li>
-                                    </ul>
-                                    <ul class="navbar-nav ml-auto">
-                                        <li class="nav-item">
-                                            <a class="nav-link" href="#pablo">
-                                                <span class="no-icon">Account</span>
-                                            </a>
-                                        </li>
-                                        <li class="nav-item dropdown">
-                                            <a class="nav-link dropdown-toggle" href="http://example.com"
-                                                id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true"
-                                                aria-expanded="false">
-                                                <span class="no-icon">Dropdown</span>
-                                            </a>
-                                            <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                                                <a class="dropdown-item" href="#">Action</a>
-                                                <a class="dropdown-item" href="#">Another action</a>
-                                                <a class="dropdown-item" href="#">Something</a>
-                                                <a class="dropdown-item" href="#">Something else here</a>
-                                                <div class="divider"></div>
-                                                <a class="dropdown-item" href="#">Separated link</a>
-                                            </div>
-                                        </li>
-                                        <li class="nav-item">
-                                            <a class="nav-link" href="#pablo">
-                                                <span class="no-icon">Log out</span>
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
+                </div>
+                <div class="main-panel">
+                    <!-- Navbar -->
+                    <nav class="navbar navbar-expand-lg " color-on-scroll="500">
+                        <div class="container-fluid">
+                            <a class="navbar-brand" href="#"> Change Password </a>
+                            <button href="" class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+                                aria-controls="navigation-index" aria-expanded="false" aria-label="Toggle navigation">
+                                <span class="navbar-toggler-bar burger-lines"></span>
+                                <span class="navbar-toggler-bar burger-lines"></span>
+                                <span class="navbar-toggler-bar burger-lines"></span>
+                            </button>
+                            <div class="collapse navbar-collapse justify-content-end" id="navigation">
+                                <ul class="nav navbar-nav mr-auto">
+                                    <li class="dropdown nav-item">
+                                        <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
+                                            <i class="nc-icon nc-planet"></i>
+                                            <span class="notification">'.$notifications.'</span>
+                                            <span class="d-lg-none">Notification</span>
+                                        </a>
+                                        <ul class="dropdown-menu">
+                                            '.$notification.'
+                                        </ul>
+                                    </li>
+                                    <li class="nav-item">
+                                        <div class="form-group has-search">
+                                            <span class="fa fa-search form-control-feedback" onclick="search_func()"></span>
+                                            <input type="text" class="form-control" id="search" name="search" placeholder="Search..." onkeydown="key_down(event);">
+                                        </div>
+                                    </li>
+                                </ul>
+                                <ul class="navbar-nav ml-auto">
+                                    <li class="nav-item dropdown">
+                                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink"
+                                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <span class="no-icon">Account</span>
+                                        </a>
+                                        <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                                            <a class="dropdown-item" href="profile.php">Profile</a>
+                                            <a class="dropdown-item active" href="change-password.php">Change Password</a>
+                                            <a class="dropdown-item" href="kyc.php">View KYC Status</a>
+                                            <div class="divider"></div>
+                                            <a class="dropdown-item" href="login-history.php">Login History</a>
+                                        </div>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="logout.php">
+                                            <span class="no-icon">Log out</span>
+                                        </a>
+                                    </li>
+                                </ul>
                             </div>
-                        </nav>
+                        </div>
+                    </nav>
                         <!-- End Navbar -->
                         <div class="content">
                             <div class="container-fluid">

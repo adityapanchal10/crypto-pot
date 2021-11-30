@@ -1,7 +1,16 @@
-<?session_start();
+<?php
+// We need to use sessions, so you should always start sessions using the below code.
+session_start();
 
+include "db_connect.php";
 
-?>
+// If the user is not logged in redirect to the login page...
+if (!isset($_SESSION['email'])) {
+	$login = '<a href="login.php" class="login-btn scrollto">Login</a>';
+} else {
+  $login = '<a href="dashboard.php" class="login-btn scrollto">Dashboard</a>';
+}
+echo '
 <!DOCTYPE html>
 <html lang="en">
 
@@ -92,7 +101,7 @@
         <i class="bi bi-list mobile-nav-toggle"></i>
       </nav><!-- .navbar -->
 
-      <a href="login.php" class="login-btn scrollto">Login</a>
+      '.$login.'
 
     </div>
   </header>
@@ -175,7 +184,7 @@
 
         <div class="row">
 
-          <div class="col-lg-5 align-items-stretch video-box" style='background-image: url("assets/img/about.png");'>
+          <div class="col-lg-5 align-items-stretch video-box" style=\'background-image: url("assets/img/about.png");\'>
             <a href="https://www.youtube.com/watch?v=dQw4w9WgXcQ" class="venobox play-btn mb-4" data-vbtype="video"
               data-autoplay="true"></a>
           </div>
@@ -406,4 +415,6 @@
 
 </body>
 
-</html>
+</html>';
+
+?>
