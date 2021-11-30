@@ -32,19 +32,25 @@ if (!isset($_SESSION['email'])) {
                 $stmt->store_result();
                 $table = '<table class="rwd-table">
                 <tr>
-                    <th>Login Date</th>
-                    <th>Login IPv4</th>
-                    <th>Login IPv6</th>
-                    <th>Login User Agent</th>
+                    <th>Login Date/Time</th>
+                    <th>Login IP Address</th>
+                    <th>Login Location</th>
+                    <th>Browser</th>
                 </tr>';
                 if ($stmt->num_rows > 0) {
                     $stmt->bind_result($loginDatetime, $loginIPv4, $loginIPv6, $login_http_user_agent);
                     while ($stmt->fetch()) {
+                        if ($loginIPv4 == '0.0.0.0' and $loginIPv6 != '0:0:0:0:0:0:0:0') {
+                            $IP = $loginIPv6;
+                        } elseif ($loginIPv4 != '0.0.0.0' and $loginIPv6 == '0:0:0:0:0:0:0:0') {
+                            $IP = $loginIPv4;
+                        }
+                        $location = '';
                         $table .= '<tr>
                             <td data-th="Login Date">'.$loginDatetime.'</td>
-                            <td data-th="Login IPv4">'.$loginIPv4.'</td>
-                            <td data-th="Login IPv6">'.$loginIPv6.'</td>
-                            <td data-th="Login User Agent">'.$login_http_user_agent.'</td>
+                            <td data-th="Login IP">'.$IP.'</td>
+                            <td data-th="Login Location">'.$location.'</td>
+                            <td data-th="Login Browser">'.$login_http_user_agent.'</td>
                         </tr>';
                     }
                 }
@@ -70,7 +76,7 @@ if (!isset($_SESSION['email'])) {
                     <link href="./assets/vendor/bootstrap_dash/bootstrap.min.css" rel="stylesheet" />
                     <link href="./assets/css/light-bootstrap-dashboard.css" rel="stylesheet" />
                     <link href="assets/css/login-history.css" rel="stylesheet">
-            
+                    <link href="./assets/css/search.css" rel="stylesheet" />
             
                 </head>
             
@@ -166,10 +172,10 @@ if (!isset($_SESSION['email'])) {
                                                 </ul>
                                             </li>
                                             <li class="nav-item">
-                                                <a href="#" class="nav-link">
-                                                    <i class="nc-icon nc-zoom-split"></i>
-                                                    <span class="d-lg-block">&nbsp;Search</span>
-                                                </a>
+                                                <div class="form-group has-search">
+                                                    <span class="fa fa-search form-control-feedback" onclick="search_func()"></span>
+                                                    <input type="text" class="form-control" id="search" name="search" placeholder="Search..." onkeydown="key_down(event);">
+                                                </div>
                                             </li>
                                         </ul>
                                         <ul class="navbar-nav ml-auto">
@@ -205,7 +211,7 @@ if (!isset($_SESSION['email'])) {
                             <div class="content">
                               <div class="container-fluid">
                                 <div class="row d-flex align-items-center justify-content-between animate__animated animate__fadeInUp">
-                                  <div class="col-lg-8">
+                                  <div class="col-lg-12">
                                     '.$table.'
                                   </div>
                                 </div>
@@ -260,6 +266,7 @@ if (!isset($_SESSION['email'])) {
                 <script src="./assets/vendor/plugins/bootstrap-notify.js"></script>
                 <!-- Control Center for Light Bootstrap Dashboard: scripts for the example pages etc -->
                 <script src="./assets/js/light-bootstrap-dashboard.js" type="text/javascript"></script>
+                <script src="./assets/js/search.js"></script>
               </html>';
             }
         }

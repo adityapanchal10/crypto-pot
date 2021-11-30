@@ -79,7 +79,7 @@ if (!isset($_SESSION['email'])) {
         <link href="./assets/vendor/bootstrap_dash/bootstrap.min.css" rel="stylesheet" />
         <link href="./assets/css/light-bootstrap-dashboard.css" rel="stylesheet" />
         <link href="assets/css/login-history.css" rel="stylesheet">
-
+        <link href="./assets/css/search.css" rel="stylesheet" />
 
     </head>
 
@@ -175,10 +175,10 @@ if (!isset($_SESSION['email'])) {
                                     </ul>
                                 </li>
                                 <li class="nav-item">
-                                    <a href="#" class="nav-link">
-                                        <i class="nc-icon nc-zoom-split"></i>
-                                        <span class="d-lg-block">&nbsp;Search</span>
-                                    </a>
+                                    <div class="form-group has-search">
+                                        <span class="fa fa-search form-control-feedback" onclick="search_func()"></span>
+                                        <input type="text" class="form-control" id="search" name="search" placeholder="Search..." onkeydown="key_down(event);">
+                                    </div>
                                 </li>
                             </ul>
                             <ul class="navbar-nav ml-auto">
@@ -214,7 +214,7 @@ if (!isset($_SESSION['email'])) {
                 <div class="content">
                   <div class="container-fluid">
                     <div class="row d-flex align-items-center justify-content-between animate__animated animate__fadeInUp">
-                      <div class="col-lg-8">
+                      <div class="col-lg-12">
                         '.$table.'
                       </div>
                     </div>
@@ -269,6 +269,7 @@ if (!isset($_SESSION['email'])) {
     <script src="./assets/vendor/plugins/bootstrap-notify.js"></script>
     <!-- Control Center for Light Bootstrap Dashboard: scripts for the example pages etc -->
     <script src="./assets/js/light-bootstrap-dashboard.js" type="text/javascript"></script>
+    <script src="./assets/js/search.js"></script>
 </html>
 ';
             }

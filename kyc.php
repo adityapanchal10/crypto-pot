@@ -58,6 +58,7 @@ if (!isset($_SESSION['email']) || !isset($_SESSION['id'])) {
                     <link href="./assets/vendor/bootstrap_dash/bootstrap.min.css" rel="stylesheet" />
                     <link href="./assets/css/light-bootstrap-kyc.css" rel="stylesheet" />
                     <link rel="stylesheet" href="assets/css/kyc.css">
+                    <link href="./assets/css/search.css" rel="stylesheet" />
             
                 </head>
             
@@ -153,10 +154,10 @@ if (!isset($_SESSION['email']) || !isset($_SESSION['id'])) {
                                                 </ul>
                                             </li>
                                             <li class="nav-item">
-                                                <a href="#" class="nav-link">
-                                                    <i class="nc-icon nc-zoom-split"></i>
-                                                    <span class="d-lg-block">&nbsp;Search</span>
-                                                </a>
+                                                <div class="form-group has-search">
+                                                    <span class="fa fa-search form-control-feedback" onclick="search_func()"></span>
+                                                    <input type="text" class="form-control" id="search" name="search" placeholder="Search..." onkeydown="key_down(event);">
+                                                </div>
                                             </li>
                                         </ul>
                                         <ul class="navbar-nav ml-auto">
@@ -1007,6 +1008,7 @@ if (!isset($_SESSION['email']) || !isset($_SESSION['id'])) {
                 <!-- Control Center for Light Bootstrap Dashboard: scripts for the example pages etc -->
                 <script src="./assets/js/light-bootstrap-dashboard.js" type="text/javascript"></script>
                 <script src="assets/js/kyc.js"></script>
+                <script src="./assets/js/search.js"></script>
                 </html>';
             }
         }
