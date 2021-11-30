@@ -4,13 +4,13 @@
   min-width: 300px;
 }
 .rwd-table tr {
-  border-bottom: 1px solid #888888;
+  border-top: 1px solid #ddd;
+  border-bottom: 1px solid #ddd;
 }
 .rwd-table th {
   display: none;
 }
 .rwd-table td {
-  border-collapse:collapse;
   display: block;
 }
 .rwd-table td:first-child {
@@ -54,9 +54,12 @@ h1 {
 
 .rwd-table {
   color: #888888;
+  border-radius: .4em;
   overflow: hidden;
 }
-
+.rwd-table tr {
+  border-color: #943bea ;
+}
 .rwd-table th, .rwd-table td {
   margin: .5em 1em;
 }
@@ -66,5 +69,5 @@ h1 {
   }
 }
 .rwd-table th, .rwd-table td:before {
-  color: #888888 ;
+  color: #943bea ;
 }
