@@ -1,5 +1,7 @@
 <?php
-
+//$ip = $_SERVER['REMOTE_ADDR'];
+//$details = json_decode(file_get_contents("http://ipinfo.io/{$ip}/json"));
+//echo $details->city; // -> "Mountain View"
 session_start();
 
 include "db_connect.php";
@@ -13,6 +15,12 @@ function getClientIP() {
   }else if (array_key_exists('HTTP_CLIENT_IP', $_SERVER)) {
     return $_SERVER["HTTP_CLIENT_IP"]; 
   } 
+}
+
+function getClientLocation($ip) {
+  $details = json_decode(file_get_contents("http://ipinfo.io/{$ip}/json"));
+  $location = "{$details->city}, {$details->region}, {$details->country}";
+  return $location;
 }
 
 if (!isset($_SESSION['email'])) {
@@ -69,14 +77,15 @@ if (!isset($_SESSION['email'])) {
               echo('<script>alert("Please try again"); window.location = "login.php";</script>');
               exit;
             } else {
-              if ($stmt_3 = $con->prepare('INSERT INTO logMaster (userid, loginDatetime, loginIPv4, loginIPv6, login_http_user_agent) VALUES (?, ?, ?, ?, ?)')) {
+              if ($stmt_3 = $con->prepare('INSERT INTO logMaster (userid, loginDatetime, loginIPv4, loginIPv6, login_location, login_http_user_agent) VALUES (?, ?, ?, ?, ?, ?)')) {
                 $ip = getClientIP();
+                $location = getClientLocation($ip);
                 if(filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
                   $ipv6 = '0:0:0:0:0:0:0:0';
-                  $stmt_3->bind_param('issss', $user_id, $lastLogin, $ip, $ipv6, $_SERVER['HTTP_USER_AGENT']);
+                  $stmt_3->bind_param('isssss', $user_id, $lastLogin, $ip, $ipv6, $location, $_SERVER['HTTP_USER_AGENT']);
                 } else {
                   $ipv4 = '0.0.0.0';
-                  $stmt_3->bind_param('issss', $user_id, $lastLogin, $ipv4, $ip, $_SERVER['HTTP_USER_AGENT']);
+                  $stmt_3->bind_param('issss', $user_id, $lastLogin, $ipv4, $ip, $location, $_SERVER['HTTP_USER_AGENT']);
                 }
                 if (!$stmt_3->execute()){
                   echo('<script>alert("Please try again"); window.location = "login.php";</script>');

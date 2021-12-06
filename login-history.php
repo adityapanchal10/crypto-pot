@@ -7,7 +7,7 @@ include "db_connect.php";
 if (!isset($_SESSION['email'])) {
     header('Location: login.php');
 } else {
-    if ($stmt = $con->prepare('SELECT userid, isVerified, is_KYC_request_sent FROM userMaster WHERE email_id = ?')) {
+    if ($stmt = $con->prepare('SELECT userid, remaining_balance, isVerified, is_KYC_request_sent FROM userMaster WHERE email_id = ?')) {
       $notification = '';
       $notifications = 0;
         $stmt->bind_param('s', $_SESSION['email']);
@@ -16,7 +16,7 @@ if (!isset($_SESSION['email'])) {
         $stmt->store_result();
 
         if ($stmt->num_rows > 0) {
-            $stmt->bind_result($userid, $isVerified, $is_KYC_request_sent);
+            $stmt->bind_result($userid, $balance, $isVerified, $is_KYC_request_sent);
             $stmt->fetch();
             if ($isVerified == 0) {
               $notifications += 1;
@@ -26,7 +26,7 @@ if (!isset($_SESSION['email'])) {
                 $notifications += 1;
                 $notification .= '<a class="dropdown-item" href="kyc.php">Please upload your KYC documents</a>';
             }
-            if ($stmt = $con->prepare('SELECT loginDatetime, loginIPv4, loginIPv6, login_http_user_agent FROM logMaster WHERE userid = ?')) {
+            if ($stmt = $con->prepare('SELECT loginDatetime, loginIPv4, loginIPv6, login_location, login_http_user_agent FROM logMaster WHERE userid = ?')) {
                 $stmt->bind_param('i', $userid);
                 $stmt->execute();
                 $stmt->store_result();
@@ -38,14 +38,13 @@ if (!isset($_SESSION['email'])) {
                     <th>Browser</th>
                 </tr>';
                 if ($stmt->num_rows > 0) {
-                    $stmt->bind_result($loginDatetime, $loginIPv4, $loginIPv6, $login_http_user_agent);
+                    $stmt->bind_result($loginDatetime, $loginIPv4, $loginIPv6, $location, $login_http_user_agent);
                     while ($stmt->fetch()) {
                         if ($loginIPv4 == '0.0.0.0' and $loginIPv6 != '0:0:0:0:0:0:0:0') {
                             $IP = $loginIPv6;
                         } elseif ($loginIPv4 != '0.0.0.0' and $loginIPv6 == '0:0:0:0:0:0:0:0') {
                             $IP = $loginIPv4;
                         }
-                        $location = '';
                         $table .= '<tr>
                             <td data-th="Login Date">'.$loginDatetime.'</td>
                             <td data-th="Login IP">'.$IP.'</td>
@@ -94,7 +93,10 @@ if (!isset($_SESSION['email'])) {
                                     Crypto
                                 </a>
                             </div>
-                            <ul class="nav">
+                            <div class="logo">
+                                <span style="color: #FFFFFF; opacity: .86; border-radius: 4px; display: block; padding: 10px 15px;">USD Balance: '.$balance.'</span>
+                            </div>
+                            <ul class="nav" style="border-bottom: 1px solid rgba(255, 255, 255, 0.2);">
                                 <li class="nav-item">
                                     <a class="nav-link" href="dashboard.php">
                                         <i class="nc-icon nc-chart-pie-35"></i>
@@ -108,9 +110,23 @@ if (!isset($_SESSION['email'])) {
                                     </a>
                                 </li>
                                 <li>
+                                    <a class="nav-link" href="holdings.php">
+                                        <i class="nc-icon nc-circle-09"></i>
+                                        <p>Holdings</p>
+                                    </a>
+                                </li>
+                                <li>
                                     <a class="nav-link" href="transactions.php">
                                         <i class="nc-icon nc-notes"></i>
                                         <p>Transaction List</p>
+                                    </a>
+                                </li>
+                            </ul>
+                            <ul class="nav">
+                                <li class="nav-item">
+                                    <a class="nav-link" href="contact.php">
+                                        <i class="nc-icon nc-chart-pie-35"></i>
+                                        <p>Contact Us</p>
                                     </a>
                                 </li>
                             </ul>

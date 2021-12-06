@@ -7,7 +7,7 @@ include "db_connect.php";
 if (!isset($_SESSION['email'])) {
     header('Location: login.php');
 } else if ($_SERVER['REQUEST_METHOD'] == "GET") {
-    if ($stmt = $con->prepare('SELECT userid, first_name, last_name, email_id, country, mobile, timezone, isVerified, is_KYC_request_sent FROM userMaster WHERE email_id = ?')) {
+    if ($stmt = $con->prepare('SELECT userid, first_name, last_name, email_id, country, mobile, timezone, remaining_balance, isVerified, is_KYC_request_sent FROM userMaster WHERE email_id = ?')) {
         $stmt->bind_param('s', $_SESSION['email']);
         $stmt->execute();
         // Store the result so we can check if the account exists in the database.
@@ -15,7 +15,7 @@ if (!isset($_SESSION['email'])) {
         $notifications = 0;
         $notification = "";
         if ($stmt->num_rows > 0) {
-            $stmt->bind_result($userid, $first_name, $last_name, $email_id, $country, $mobile, $timezone, $isVerified, $is_KYC_request_sent);
+            $stmt->bind_result($userid, $first_name, $last_name, $email_id, $country, $mobile, $timezone, $balance, $isVerified, $is_KYC_request_sent);
             $stmt->fetch();
             if ($isVerified == 0) {
                 $notifications += 1;
@@ -61,7 +61,10 @@ if (!isset($_SESSION['email'])) {
                                 Crypto
                             </a>
                         </div>
-                        <ul class="nav">
+                        <div class="logo">
+                            <span style="color: #FFFFFF; opacity: .86; border-radius: 4px; display: block; padding: 10px 15px;">USD Balance: '.$balance.'</span>
+                        </div>
+                        <ul class="nav" style="border-bottom: 1px solid rgba(255, 255, 255, 0.2);">
                             <li class="nav-item">
                                 <a class="nav-link" href="dashboard.php">
                                     <i class="nc-icon nc-chart-pie-35"></i>
@@ -75,9 +78,23 @@ if (!isset($_SESSION['email'])) {
                                 </a>
                             </li>
                             <li>
+                                <a class="nav-link" href="holdings.php">
+                                    <i class="nc-icon nc-circle-09"></i>
+                                    <p>Holdings</p>
+                                </a>
+                            </li>
+                            <li>
                                 <a class="nav-link" href="transactions.php">
                                     <i class="nc-icon nc-notes"></i>
                                     <p>Transaction List</p>
+                                </a>
+                            </li>
+                        </ul>
+                        <ul class="nav">
+                            <li class="nav-item">
+                                <a class="nav-link" href="contact.php">
+                                    <i class="nc-icon nc-chart-pie-35"></i>
+                                    <p>Contact Us</p>
                                 </a>
                             </li>
                         </ul>
@@ -253,7 +270,7 @@ if (!isset($_SESSION['email'])) {
         }
     }
 } else if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['edit-profile'])) {
-    if ($stmt = $con->prepare('SELECT userid, first_name, last_name, email_id, country, mobile, timezone, isVerified, is_KYC_request_sent FROM userMaster WHERE email_id = ?')) {
+    if ($stmt = $con->prepare('SELECT userid, first_name, last_name, email_id, country, mobile, timezone, remaining_balance, isVerified, is_KYC_request_sent FROM userMaster WHERE email_id = ?')) {
         $stmt->bind_param('s', $_SESSION['email']);
         $stmt->execute();
         // Store the result so we can check if the account exists in the database.
@@ -261,7 +278,7 @@ if (!isset($_SESSION['email'])) {
         $notifications = 0;
         $notification = "";
         if ($stmt->num_rows > 0) {
-            $stmt->bind_result($userid, $first_name, $last_name, $email_id, $country, $mobile, $timezone, $isVerified, $is_KYC_request_sent);
+            $stmt->bind_result($userid, $first_name, $last_name, $email_id, $country, $mobile, $timezone, $balance, $isVerified, $is_KYC_request_sent);
             $stmt->fetch();
             if ($isVerified == 0) {
                 $notifications += 1;
@@ -307,7 +324,10 @@ if (!isset($_SESSION['email'])) {
                                 Crypto
                             </a>
                         </div>
-                        <ul class="nav">
+                        <div class="logo">
+                            <span style="color: #FFFFFF; opacity: .86; border-radius: 4px; display: block; padding: 10px 15px;">USD Balance: '.$balance.'</span>
+                        </div>
+                        <ul class="nav" style="border-bottom: 1px solid rgba(255, 255, 255, 0.2);">
                             <li class="nav-item">
                                 <a class="nav-link" href="dashboard.php">
                                     <i class="nc-icon nc-chart-pie-35"></i>
@@ -321,9 +341,23 @@ if (!isset($_SESSION['email'])) {
                                 </a>
                             </li>
                             <li>
+                                <a class="nav-link" href="holdings.php">
+                                    <i class="nc-icon nc-circle-09"></i>
+                                    <p>Holdings</p>
+                                </a>
+                            </li>
+                            <li>
                                 <a class="nav-link" href="transactions.php">
                                     <i class="nc-icon nc-notes"></i>
                                     <p>Transaction List</p>
+                                </a>
+                            </li>
+                        </ul>
+                        <ul class="nav">
+                            <li class="nav-item">
+                                <a class="nav-link" href="contact.php">
+                                    <i class="nc-icon nc-chart-pie-35"></i>
+                                    <p>Contact Us</p>
                                 </a>
                             </li>
                         </ul>

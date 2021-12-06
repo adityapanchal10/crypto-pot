@@ -9,7 +9,7 @@ if (!isset($_SESSION['email']) || !isset($_SESSION['id'])) {
     $email = $_SESSION['email'];
 
     include "db_connect.php";
-    if ($stmt = $con->prepare('SELECT isVerified, is_KYC_request_sent, isKYCverified FROM userMaster WHERE email_id = ?')) {
+    if ($stmt = $con->prepare('SELECT remaining_balance, isVerified, is_KYC_request_sent, isKYCverified FROM userMaster WHERE email_id = ?')) {
         $notification = '';
         $notifications = 0;
         $stmt->bind_param('s', $_SESSION['email']);
@@ -18,7 +18,7 @@ if (!isset($_SESSION['email']) || !isset($_SESSION['id'])) {
         $stmt->store_result();
 
         if ($stmt->num_rows > 0) {
-            $stmt->bind_result($isVerified, $kyc_request, $kyc_verified);
+            $stmt->bind_result($balance, $isVerified, $kyc_request, $kyc_verified);
             $stmt->fetch();
             $stmt->close();
             if ($isVerified == 0) {
@@ -76,7 +76,10 @@ if (!isset($_SESSION['email']) || !isset($_SESSION['id'])) {
                                 Crypto
                             </a>
                         </div>
-                        <ul class="nav">
+                        <div class="logo">
+                            <span style="color: #FFFFFF; opacity: .86; border-radius: 4px; display: block; padding: 10px 15px;">USD Balance: '.$balance.'</span>
+                        </div>
+                        <ul class="nav" style="border-bottom: 1px solid rgba(255, 255, 255, 0.2);">
                             <li class="nav-item">
                                 <a class="nav-link" href="dashboard.php">
                                     <i class="nc-icon nc-chart-pie-35"></i>
@@ -90,9 +93,23 @@ if (!isset($_SESSION['email']) || !isset($_SESSION['id'])) {
                                 </a>
                             </li>
                             <li>
+                                <a class="nav-link" href="holdings.php">
+                                    <i class="nc-icon nc-circle-09"></i>
+                                    <p>Holdings</p>
+                                </a>
+                            </li>
+                            <li>
                                 <a class="nav-link" href="transactions.php">
                                     <i class="nc-icon nc-notes"></i>
                                     <p>Transaction List</p>
+                                </a>
+                            </li>
+                        </ul>
+                        <ul class="nav">
+                            <li class="nav-item">
+                                <a class="nav-link" href="contact.php">
+                                    <i class="nc-icon nc-chart-pie-35"></i>
+                                    <p>Contact Us</p>
                                 </a>
                             </li>
                         </ul>
@@ -349,7 +366,10 @@ if (!isset($_SESSION['email']) || !isset($_SESSION['id'])) {
                                 Crypto
                             </a>
                         </div>
-                        <ul class="nav">
+                        <div class="logo">
+                            <span style="color: #FFFFFF; opacity: .86; border-radius: 4px; display: block; padding: 10px 15px;">USD Balance: '.$balance.'</span>
+                        </div>
+                        <ul class="nav" style="border-bottom: 1px solid rgba(255, 255, 255, 0.2);">
                             <li class="nav-item">
                                 <a class="nav-link" href="dashboard.php">
                                     <i class="nc-icon nc-chart-pie-35"></i>
@@ -363,9 +383,23 @@ if (!isset($_SESSION['email']) || !isset($_SESSION['id'])) {
                                 </a>
                             </li>
                             <li>
+                                <a class="nav-link" href="holdings.php">
+                                    <i class="nc-icon nc-circle-09"></i>
+                                    <p>Holdings</p>
+                                </a>
+                            </li>
+                            <li>
                                 <a class="nav-link" href="transactions.php">
                                     <i class="nc-icon nc-notes"></i>
                                     <p>Transaction List</p>
+                                </a>
+                            </li>
+                        </ul>
+                        <ul class="nav">
+                            <li class="nav-item">
+                                <a class="nav-link" href="contact.php">
+                                    <i class="nc-icon nc-chart-pie-35"></i>
+                                    <p>Contact Us</p>
                                 </a>
                             </li>
                         </ul>
@@ -623,7 +657,10 @@ if (!isset($_SESSION['email']) || !isset($_SESSION['id'])) {
                                 Crypto
                             </a>
                         </div>
-                        <ul class="nav">
+                        <div class="logo">
+                            <span style="color: #FFFFFF; opacity: .86; border-radius: 4px; display: block; padding: 10px 15px;">USD Balance: '.$balance.'</span>
+                        </div>
+                        <ul class="nav" style="border-bottom: 1px solid rgba(255, 255, 255, 0.2);">
                             <li class="nav-item">
                                 <a class="nav-link" href="dashboard.php">
                                     <i class="nc-icon nc-chart-pie-35"></i>
@@ -637,9 +674,23 @@ if (!isset($_SESSION['email']) || !isset($_SESSION['id'])) {
                                 </a>
                             </li>
                             <li>
+                                <a class="nav-link" href="holdings.php">
+                                    <i class="nc-icon nc-circle-09"></i>
+                                    <p>Holdings</p>
+                                </a>
+                            </li>
+                            <li>
                                 <a class="nav-link" href="transactions.php">
                                     <i class="nc-icon nc-notes"></i>
                                     <p>Transaction List</p>
+                                </a>
+                            </li>
+                        </ul>
+                        <ul class="nav">
+                            <li class="nav-item">
+                                <a class="nav-link" href="contact.php">
+                                    <i class="nc-icon nc-chart-pie-35"></i>
+                                    <p>Contact Us</p>
                                 </a>
                             </li>
                         </ul>

@@ -27,34 +27,39 @@ if (!isset($_SESSION['email'])) {
                 $notifications += 1;
                 $notification .= '<a class="dropdown-item" href="kyc.php">Please upload your KYC documents</a>';
             }
-            if ($stmt = $con->prepare('SELECT transaction_id, currency_id, currency_purchase_amount, fromWallet, toWallet, remaining_balance, transaction_amount, isTransactionApproved FROM transactionMaster WHERE userid = ?')) {
+            if ($stmt = $con->prepare('SELECT currency_id, wallet_balance FROM walletMappingMaster WHERE userid = ?')) {
                 $stmt->bind_param('i', $userid);
                 $stmt->execute();
                 $stmt->store_result();
                 $table = '<table class="rwd-table">
                 <tr>
-                    <th>Transaction Id</th>
-                    <th>Currency Id</th>
-                    <th>Currency Purchase Amount</th>
-                    <th>From Wallet</th>
-                    <th>To Wallet</th>
-                    <th>Remaining Balance</th>
-                    <th>Transaction Amount</th>
-                    <th>Transaction Approved</th>
+                    <th>Symbol</th>
+                    <th>Currency</th>
+                    <th>Balance</th>
+                    <th>Est. Value in USD</th>
+                    <th>24h Change</th>
                 </tr>';
                 if ($stmt->num_rows > 0) {
-                    $stmt->bind_result($transaction_id, $currency_id, $currency_purchase_amount, $fromWallet, $toWallet, $remaining_balance, $transaction_amount, $isTransactionApproved);
+                    $stmt->bind_result($currency_id, $wallet_balance);
                     while ($stmt->fetch()) {
-                        $table .= '<tr>
-                            <td data-th="Login Date">'.$transaction_id.'</td>
-                            <td data-th="Login IPv4">'.$currency_id.'</td>
-                            <td data-th="Login IPv6">'.$currency_purchase_amount.'</td>
-                            <td data-th="Login User Agent">'.$fromWallet.'</td>
-                            <td data-th="Login User Agent">'.$toWallet.'</td>
-                            <td data-th="Login User Agent">'.$remaining_balance.'</td>
-                            <td data-th="Login User Agent">'.$transaction_amount.'</td>
-                            <td data-th="Login User Agent">'.$isTransactionApproved.'</td>
-                        </tr>';
+                        //add currency symbol
+                        if ($stmt_2 = $con->prepare('SELECT currency_name, currency_price FROM priceMaster WHERE currency_id = ?')) {
+                            $stmt_2->bind_param('i', $currency_id);
+                            $stmt_2->execute();
+                            $stmt_2->store_result();
+                            $stmt_2->bind_result($currency_name, $currency_price);
+                            $stmt_2->fetch();
+                            $wallet_balance_usd = $wallet_balance * $currency_price;
+                            $change = 0;
+                            $table .= '<tr>
+                                <td data-th="Login Date">'.$currency_name.'</td>
+                                <td data-th="Login IPv4">'.$currency_name.'</td>
+                                <td data-th="Login IPv6">'.$wallet_balance.'</td>
+                                <td data-th="Login User Agent">'.$wallet_balance.'</td>
+                                <td data-th="Login User Agent">'.$change.'</td>
+                            </tr>';
+                        }
+                        
                     }
                 }
                 $table .= '
@@ -113,13 +118,13 @@ if (!isset($_SESSION['email'])) {
                                 <p>Trade</p>
                             </a>
                         </li>
-                        <li class="nav-item">
+                        <li class="nav-item active">
                             <a class="nav-link" href="holdings.php">
                                 <i class="nc-icon nc-circle-09"></i>
                                 <p>Holdings</p>
                             </a>
                         </li>
-                        <li class="nav-item active">
+                        <li class="nav-item">
                             <a class="nav-link" href="transactions.php">
                                 <i class="nc-icon nc-notes"></i>
                                 <p>Transaction List</p>

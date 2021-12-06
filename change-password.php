@@ -7,7 +7,7 @@ include "db_connect.php";
 if (!isset($_SESSION['email'])) {
     header('Location: login.php');
 } else if ($_SERVER['REQUEST_METHOD'] == "GET") {
-    if ($stmt = $con->prepare('SELECT userid, isVerified, is_KYC_request_sent FROM userMaster WHERE email_id = ?')) {
+    if ($stmt = $con->prepare('SELECT userid, remaining_balance, isVerified, is_KYC_request_sent FROM userMaster WHERE email_id = ?')) {
         $stmt->bind_param('s', $_SESSION['email']);
         $stmt->execute();
         // Store the result so we can check if the account exists in the database.
@@ -15,7 +15,7 @@ if (!isset($_SESSION['email'])) {
         $notifications = 0;
         $notification = "";
         if ($stmt->num_rows > 0) {
-            $stmt->bind_result($userid, $isVerified, $is_KYC_request_sent);
+            $stmt->bind_result($userid, $balance, $isVerified, $is_KYC_request_sent);
             $stmt->fetch();
             if ($isVerified == 0) {
                 $notifications += 1;
@@ -34,7 +34,7 @@ if (!isset($_SESSION['email'])) {
                 <link rel="apple-touch-icon" sizes="76x76" href="./assets/img/apple-icon.png">
                 <link rel="icon" type="image/png" href="./assets/img/favicon.ico">
                 <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-                <title>User Profile</title>
+                <title>Change Password</title>
                 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no"
                     name="viewport" />
                 <!--     Fonts and icons     -->
@@ -61,7 +61,10 @@ if (!isset($_SESSION['email'])) {
                                 Crypto
                             </a>
                         </div>
-                        <ul class="nav">
+                        <div class="logo">
+                            <span style="color: #FFFFFF; opacity: .86; border-radius: 4px; display: block; padding: 10px 15px;">USD Balance: '.$balance.'</span>
+                        </div>
+                        <ul class="nav" style="border-bottom: 1px solid rgba(255, 255, 255, 0.2);">
                             <li class="nav-item">
                                 <a class="nav-link" href="dashboard.php">
                                     <i class="nc-icon nc-chart-pie-35"></i>
@@ -75,9 +78,23 @@ if (!isset($_SESSION['email'])) {
                                 </a>
                             </li>
                             <li>
+                                <a class="nav-link" href="holdings.php">
+                                    <i class="nc-icon nc-circle-09"></i>
+                                    <p>Holdings</p>
+                                </a>
+                            </li>
+                            <li>
                                 <a class="nav-link" href="transactions.php">
                                     <i class="nc-icon nc-notes"></i>
                                     <p>Transaction List</p>
+                                </a>
+                            </li>
+                        </ul>
+                        <ul class="nav">
+                            <li class="nav-item">
+                                <a class="nav-link" href="contact.php">
+                                    <i class="nc-icon nc-chart-pie-35"></i>
+                                    <p>Contact Us</p>
                                 </a>
                             </li>
                         </ul>
@@ -143,7 +160,7 @@ if (!isset($_SESSION['email'])) {
                                     <div class="col-md-10">
                                         <div class="card">
                                             <div class="card-header">
-                                                <h4 class="card-title">Edit Profile</h4>
+                                                <h4 class="card-title">Change Password</h4>
                                             </div>
                                             <div class="card-body">
                                                 <form method="POST">
