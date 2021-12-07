@@ -24,10 +24,10 @@ if (!isset($_SESSION['email'])) {
     } else {
         $userid = $_SESSION['id'];
     }
-    if ($stmt = $con->prepare('SELECT isVerified, is_KYC_request_sent FROM userMaster WHERE email_id = ?')) {
+    if ($stmt = $con->prepare('SELECT remaining_balance, isVerified, is_KYC_request_sent FROM userMaster WHERE email_id = ?')) {
         $stmt->bind_param('s', $_SESSION['email']);
         $stmt->execute();
-        $stmt->bind_result($isVerified, $is_KYC_request_sent);
+        $stmt->bind_result($balance, $isVerified, $is_KYC_request_sent);
         $stmt->fetch();
         $stmt->close();
         if ($isVerified == 0) {
@@ -98,13 +98,34 @@ if (!isset($_SESSION['email'])) {
         $series .= ']';
         $labels .= ']';
     } else {
-        echo '<script>alert("Error!! Please try again."); window.location = "kyc.php";</script>';
+        echo '<script>alert("Error!! Please try again."); window.location = "dashboard.php";</script>';
     }
+    if ($stmt = $con->prepare('SELECT currency_purchase_amount, fromWallet, toWallet, transaction_amount FROM transactionMaster WHERE userid = ? ORDER BY transaction_id DESC LIMIT 5')) {
+        $stmt->bind_param('i', $userid);
+        $stmt->execute();
+        $stmt->store_result();
+        $transactions = '';
+        if ($stmt->num_rows > 0) {
+            $stmt->bind_result($currency_purchase_amount, $fromWallet, $toWallet, $transaction_amount);
+            while ($stmt->fetch()) {
+                $transactions .= '<li>
+                    <div class="row1">
+                        <img class="img-fluid logo" src="https://assets.coingecko.com/coins/images/1/large/bitcoin.png?1547033579" width="0" height="0">
+                        <div class="title">'.$fromWallet.'</div>
+                        <div class="symbol">'.$toWallet.'</div>
+                        <div class="amount">'.$transaction_amount.'</div>
+                        <div class="change">'.$currency_purchase_amount.'</div>
+                    </div>
+                </li>';
+            }
+        }
+    } else {
+        echo '<script>alert("Error!! Please try again."); window.location = "dashboard.php";</script>';
+    }
+    
     echo '
     <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
     <meta charset="utf-8" />
     <link rel="apple-touch-icon" sizes="76x76" href="./assets/img/apple-icon.png">
@@ -120,15 +141,12 @@ if (!isset($_SESSION['email'])) {
     <link href="./assets/vendor/bootstrap_dash/bootstrap.min.css" rel="stylesheet" />
     <link href="./assets/css/light-bootstrap-dashboard.css" rel="stylesheet" />
     <link href="./assets/css/search.css" rel="stylesheet" />
-
 </head>
-
 <body>
     <div class="wrapper">
         <div class="sidebar" data-image="./assets/img/sidebar-5.jpg">
             <!--
             Tip 1: You can change the color of the sidebar using: data-color="purple | blue | green | orange | red"
-
             Tip 2: you can also add an image using data-image tag
         -->
             <div class="sidebar-wrapper">
@@ -137,23 +155,40 @@ if (!isset($_SESSION['email'])) {
                         Crypto
                     </a>
                 </div>
-                <ul class="nav">
+                <div class="logo">
+                    <span style="color: #FFFFFF; opacity: .86; border-radius: 4px; display: block; padding: 10px 15px;">USD Balance: '.$balance.'</span>
+                </div>
+                <ul class="nav" style="border-bottom: 1px solid rgba(255, 255, 255, 0.2);">
                     <li class="nav-item active">
                         <a class="nav-link" href="dashboard.php">
                             <i class="nc-icon nc-chart-pie-35"></i>
                             <p>Dashboard</p>
                         </a>
                     </li>
-                    <li>
+                    <li class="nav-item">
                         <a class="nav-link" href="trade.php">
                             <i class="nc-icon nc-circle-09"></i>
                             <p>Trade</p>
                         </a>
                     </li>
-                    <li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="holdings.php">
+                            <i class="nc-icon nc-circle-09"></i>
+                            <p>Holdings</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="transactions.php">
                             <i class="nc-icon nc-notes"></i>
                             <p>Transaction List</p>
+                        </a>
+                    </li>
+                </ul>
+                <ul class="nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="contact.php">
+                            <i class="nc-icon nc-chart-pie-35"></i>
+                            <p>Contact Us</p>
                         </a>
                     </li>
                 </ul>
@@ -243,7 +278,7 @@ if (!isset($_SESSION['email'])) {
                                         <h4 class="card-title">Currency Behavior</h4>
 
                                         <div class="graph-input-wrapper">
-                                            <select id="graphs" class="form-control" onchange="location.reload()">
+                                            <select id="graphs" class="form-control" onchange="updateGraph()">
                                                 <option selected value="0">Bitcoin</option>
                                                 <option value="1">Ethereum</option>
                                                 <option value="2">Doge</option>
@@ -257,7 +292,7 @@ if (!isset($_SESSION['email'])) {
                                         <!-- <p class="card-category" id="weekly_perf">weekly</p>
                                         <p class="card-category" id="daily_perf">daily</p> -->
                                         <div class="graph-input-wrapper">
-                                            <select id="time-dur" class="form-control" onchange="location.reload()">
+                                            <select id="time-dur" class="form-control" onchange="updateGraph()">
                                                 <option selected value="6">weekly</option>
                                                 <option value="1">daily</option>
                                                 <option value="30">monthly</option>
@@ -316,81 +351,23 @@ if (!isset($_SESSION['email'])) {
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6" id="tansactionSection">
-                            <div class="card card-tasks">
-                                <div class="card-header h">
-                                    <h4 class="card-title show" id="transactionH">Transaction</h4>
-                                    <h4 class="card-title hidden" id="transferFH">Transfer To A Friend</h4>
+                        <div class="col-md-6">
+                            <div class="card" style="height: 420px;">
+                                <div class="card-header ">
+                                    <h4 class="card-title">Recent Transactions</h4>
+                                    <p class="card-category">Recent 5 transactions from your account.</p>
                                 </div>
-                                <div class="card-header">
-                                    <p class="card-category">Easy transactions on the go / <a href="#transactionSection"
-                                            id="transfer">Transfer</a> to a
-                                        friend.</p>
-                                </div>
-                                <div class="t">
-                                    <form class="dasht show" action="trade.php" method="POST" id="transaction">
-                                        <div class="input-wrapper">
-                                            <select id="inputFrom" class="form-control" name="from-wallet">
-                                                <option selected>Choose...</option>
-                                                '.$from_transfer_options.'
-                                            </select>
-                                            <label for="inputFrom">From</label>
-                                        </div>
-                                        <div class="input-wrapper">
-                                            <select id="inputTo" class="form-control" name="to-wallet">
-                                                <option selected>Choose...</option>
-                                                '.$to_transfer_options.'
-                                                <!-- <option>BTC</option>
-                                                <option>ETH</option>
-                                                <option>BNB</option>
-                                                <option>USDT</option>
-                                                <option>ADA</option>
-                                                <option>SOL</option>
-                                                <option>XRP</option>
-                                                <option>DOT</option>
-                                                <option>DOGE</option>
-                                                <option>SHIB</option>
-                                                <option>LUNA</option>
-                                                <option>AVAX</option>
-                                                <option>LINK</option>
-                                                <option>LTC</option>
-                                                <option>UNI</option>
-                                                <option>MATIC</option>
-                                                <option>XMR</option>
-                                                <option>EOS</option>-->
-                                            </select>
-                                            <label for="inputTo">To</label>
-                                        </div>
-                                        <div class="input-wrapper">
-                                            <input type="text" id="amount" class="transferTo" required name="amount">
-                                            <label for="transferTo">Enter amount</label>
-                                        </div>
-                                        <button class="submit-btn" type="submit" name="submit">Proceed</button>
-
-                                    </form>
-
-                                    <form class="dasht hidden" action="trade.php" method="POST" id="transferF">
-                                        <div class="input-wrapper">
-                                            <select id="inputFrom" class="form-control" name="">
-                                                <option selected>Choose...</option>
-                                                '.$from_transfer_options.'
-                                            </select>
-                                            <label for="inputFrom">From</label>
-                                        </div>
-                                        <div class="input-wrapper">
-                                            <input type="text" id="transferTo" class="transferTo" required>
-                                            <label for="transferTo">Enter friend\'s wallet address</label>
-                                        </div>
-                                        <a href="#transactionSection" id="backToTransaction">Go back</a>
-                                        <button class="submit-btn" type="submit" name="submit">Proceed</button>
-
-                                    </form>
-                                </div>
-                                <div class="card-footer ">
-                                    <hr>
-                                    <div class="stats">
-                                        <i class="now-ui-icons loader_refresh spin"></i> Secure
+                                <div class="scrollable-content">
+                                    <div class="row0">
+                                        <div class="logo0"></div>
+                                        <div class="title0" align="center">From</div>
+                                        <div class="symbol0" align="center">To</div>
+                                        <div class="amount0" align="center">From Volume</div>
+                                        <div class="change0" align="center">To Volume</div>
                                     </div>
+                                    <ul style="list-style-type:none;">
+                                        '.$transactions.'
+                                    </ul>
                                 </div>
                             </div>
                         </div>
@@ -496,97 +473,108 @@ if (!isset($_SESSION['email'])) {
             data.element.animate(animationDefinition, false);
         }
     });
-    coin_list = ["bitcoin", "ethereum", "dogecoin", "matic-network", "shiba-inu", "tether", "solana", "cardano"]
-    time_duration = $("#time-dur :selected").val();
-    if (time_duration == 1)
-        time_interval = "hourly"
-    else
-        time_interval = "daily"
+    function updateGraph() {
+        coin_list = ["bitcoin", "ethereum", "dogecoin", "matic-network", "shiba-inu", "tether", "solana", "cardano"]
+        time_duration = $("#time-dur :selected").val();
+        if (time_duration == 1)
+            time_interval = "hourly"
+        else
+            time_interval = "daily"
 
-    var coin_index = $("#graphs :selected").val();
+        var coin_index = $("#graphs :selected").val();
 
-    var weekly = {
-        url:
-            "https://api.coingecko.com/api/v3/coins/" + coin_list[coin_index] + "/market_chart?vs_currency=usd&days=" + time_duration + "&interval=" + time_interval,
-        method: "GET",
-        timeout: 0,
-    };
+        var weekly = {
+            url:
+                "https://api.coingecko.com/api/v3/coins/" + coin_list[coin_index] + "/market_chart?vs_currency=usd&days=" + time_duration + "&interval=" + time_interval,
+            method: "GET",
+            timeout: 0,
+        };
 
-    var price = [];
-    var time = [];
-    // portfolio_data[0] = "BTC";
-    // x[0] = "x";
+        var price = [];
+        var time = [];
+        // portfolio_data[0] = "BTC";
+        // x[0] = "x";
 
-    $.ajax(weekly).done(function (response) {
-        var dataObject = response.prices;
-        // console.log(dataObject);
-        var i = 0;
-        dataObject.forEach((item) => {
-            price[i] = parseFloat(item[1]);
-            var d = new Date(item[0]);
-            // x[i] = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
-            if (time_duration == 1)
-                time[i] = d.getHours();
-            else if (time_duration == 6)
-                time[i] = d.toDateString();
-            else if (time_duration == 30)
-                time[i] = d.getDate();
+        $.ajax(weekly).done(function (response) {
+            var dataObject = response.prices;
+            // console.log(dataObject);
+            var i = 0;
+            dataObject.forEach((item) => {
+                price[i] = parseFloat(item[1]);
+                var d = new Date(item[0]);
+                // x[i] = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
+                if (time_duration == 1)
+                    time[i] = d.getHours();
+                else if (time_duration == 6)
+                    time[i] = d.toDateString();
+                else if (time_duration == 30)
+                    time[i] = d.getDate();
 
+                // console.log("-----------------//----------");
+                // console.log(time[i]);
+                i++;
+            });
+            // console.log(x);
             // console.log("-----------------//----------");
-            // console.log(time[i]);
-            i++;
-        });
-        // console.log(x);
-        // console.log("-----------------//----------");
-        // console.log(portfolio_data);
+            // console.log(portfolio_data);
 
-        chart2 = new Chartist.Line(
-            "#chartHours",
-            {
-                labels: time,
-                series: [price],
-            },
-            {
-                height: "300px",
-                low: Math.min(...price) * 0.9,
-                showArea: true,
-                fullwidth: true,
-                /* axisY: {
-                    onlyInteger: true,
-                    scaleMinSpace: 50,
-                    offset: 20,
-                    labelInterpolationFnc: function (value) {
-                        return (value / 1000).toFixed(2) + "k";
-                    },
-                }, */
-                axisX: {
-                    showGrid: false,
-                    showLabel: true,
-                    labelInterpolationFnc: function (value, index) {
-                        //if (index === 0) 
-                        //    return null;
-                        if (time_duration == 1)
-                            return index % 3 == 0 ? value + ":00" : null;
-                        else if (time_duration == 6)
-                            return value;
-                        else if (time_duration == 30)
-                            return index % 3 == 0 ? value + "th" : null;
-                    },
+            chart2 = new Chartist.Line(
+                "#chartHours",
+                {
+                    labels: time,
+                    series: [price],
                 },
-                axisY: {
-                    showGrid: false,
-                    showLabel: true,
-                    offset: 60,
-                    // The label interpolation function enables you to modify the values
-                    // used for the labels on each axis. Here we are converting the
-                    // values into million pound.
-                    labelInterpolationFnc: function (value, index) {
-                        return index == 0 ? null : "$" + value;
+                {
+                    height: "300px",
+                    low: Math.min(...price) * 0.9,
+                    showArea: true,
+                    fullwidth: true,
+                    /* axisY: {
+                        onlyInteger: true,
+                        scaleMinSpace: 50,
+                        offset: 20,
+                        labelInterpolationFnc: function (value) {
+                            return (value / 1000).toFixed(2) + "k";
+                        },
+                    }, */
+                    axisX: {
+                        showGrid: false,
+                        showLabel: true,
+                        labelInterpolationFnc: function (value, index) {
+                            //if (index === 0) 
+                            //    return null;
+                            if (time_duration == 1)
+                                return index % 3 == 0 ? value + ":00" : null;
+                            else if (time_duration == 6)
+                                return value;
+                            else if (time_duration == 30)
+                                return index % 3 == 0 ? value + "th" : null;
+                        },
                     },
-                },
-            }
-        );
-    });
+                    axisY: {
+                        showGrid: false,
+                        showLabel: true,
+                        offset: 60,
+                        // The label interpolation function enables you to modify the values
+                        // used for the labels on each axis. Here we are converting the
+                        // values into million pound.
+                        labelInterpolationFnc: function (value, index) {
+                            return index == 0 ? null : "$" + value;
+                        },
+                    },
+                }
+            );
+            chart2.on("draw", function (data) {
+                if (data.type === "label" && data.axis === "X") {
+                    var textHtml = ["<p>", data.text, "</p>"].join("");
+                    var multilineText = Chartist.Svg("svg").foreignObject(textHtml, data.x, data.y - 80, data.space, 80, "ct-label");
+
+                    data.element.replace(multilineText);
+                }
+            });
+        });
+    }
+    updateGraph();
 </script>
 <script src="./assets/js/search.js"></script>
 

@@ -140,7 +140,7 @@
                                         <h4 class="card-title">Currency Behavior</h4>
 
                                         <div class="graph-input-wrapper">
-                                            <select id="graphs" class="form-control" onchange="location.reload()">
+                                            <select id="graphs" class="form-control" onchange="updateGraph()">
                                                 <option selected value="0">Bitcoin</option>
                                                 <option value="1">Ethereum</option>
                                                 <option value="2">Doge</option>
@@ -151,7 +151,7 @@
                                         <!-- <p class="card-category" id="weekly_perf">weekly</p>
                                         <p class="card-category" id="daily_perf">daily</p> -->
                                         <div class="graph-input-wrapper">
-                                            <select id="time-dur" class="form-control" onchange="location.reload()">
+                                            <select id="time-dur" class="form-control" onchange="updateGraph()">
                                                 <option selected value="6">weekly</option>
                                                 <option value="1">daily</option>
                                                 <option value="30">monthly</option>
@@ -389,105 +389,108 @@
             data.element.animate(animationDefinition, false);
         }
     });
-    coin_list = ["bitcoin", "ethereum", "dogecoin", "matic-network", "shiba-inu", "tether", "solana", "cardano"]
-    time_duration = $('#time-dur :selected').val();
-    if (time_duration == 1)
-        time_interval = "hourly"
-    else
-        time_interval = "daily"
+    function updateGraph() {
+        coin_list = ["bitcoin", "ethereum", "dogecoin", "matic-network", "shiba-inu", "tether", "solana", "cardano"]
+        time_duration = $('#time-dur :selected').val();
+        if (time_duration == 1)
+            time_interval = "hourly"
+        else
+            time_interval = "daily"
 
-    var coin_index = $('#graphs :selected').val();
+        var coin_index = $('#graphs :selected').val();
 
-    var weekly = {
-        url:
-            "https://api.coingecko.com/api/v3/coins/" + coin_list[coin_index] + "/market_chart?vs_currency=usd&days=" + time_duration + "&interval=" + time_interval,
-        method: "GET",
-        timeout: 0,
-    };
+        var weekly = {
+            url:
+                "https://api.coingecko.com/api/v3/coins/" + coin_list[coin_index] + "/market_chart?vs_currency=usd&days=" + time_duration + "&interval=" + time_interval,
+            method: "GET",
+            timeout: 0,
+        };
 
-    var price = [];
-    var time = [];
-    // portfolio_data[0] = "BTC";
-    // x[0] = "x";
+        var price = [];
+        var time = [];
+        // portfolio_data[0] = "BTC";
+        // x[0] = "x";
 
-    $.ajax(weekly).done(function (response) {
-        var dataObject = response.prices;
-        // console.log(dataObject);
-        var i = 0;
-        dataObject.forEach((item) => {
-            price[i] = parseFloat(item[1]);
-            var d = new Date(item[0]);
-            // x[i] = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
-            if (time_duration == 1)
-                time[i] = d.getHours();
-            else if (time_duration == 6)
-                time[i] = d.toDateString();
-            else if (time_duration == 30)
-                time[i] = d.getDate();
+        $.ajax(weekly).done(function (response) {
+            var dataObject = response.prices;
+            // console.log(dataObject);
+            var i = 0;
+            dataObject.forEach((item) => {
+                price[i] = parseFloat(item[1]);
+                var d = new Date(item[0]);
+                // x[i] = d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate();
+                if (time_duration == 1)
+                    time[i] = d.getHours();
+                else if (time_duration == 6)
+                    time[i] = d.toDateString();
+                else if (time_duration == 30)
+                    time[i] = d.getDate();
 
+                // console.log("-----------------//----------");
+                // console.log(time[i]);
+                i++;
+            });
+            // console.log(x);
             // console.log("-----------------//----------");
-            // console.log(time[i]);
-            i++;
-        });
-        // console.log(x);
-        // console.log("-----------------//----------");
-        // console.log(portfolio_data);
+            // console.log(portfolio_data);
 
-        chart2 = new Chartist.Line(
-            "#chartHours",
-            {
-                labels: time,
-                series: [price],
-            },
-            {
-                height: "300px",
-                low: Math.min(...price) * 0.9,
-                showArea: true,
-                fullwidth: true,
-                /* axisY: {
-                    onlyInteger: true,
-                    scaleMinSpace: 50,
-                    offset: 20,
-                    labelInterpolationFnc: function (value) {
-                        return (value / 1000).toFixed(2) + "k";
-                    },
-                }, */
-                axisX: {
-                    showGrid: false,
-                    showLabel: true,
-                    labelInterpolationFnc: function (value, index) {
-                        //if (index === 0) 
-                        //    return null;
-                        if (time_duration == 1)
-                            return index % 3 == 0 ? value + ":00" : null;
-                        else if (time_duration == 6)
-                            return value;
-                        else if (time_duration == 30)
-                            return index % 3 == 0 ? value + "th" : null;
-                    },
+            chart2 = new Chartist.Line(
+                "#chartHours",
+                {
+                    labels: time,
+                    series: [price],
                 },
-                axisY: {
-                    showGrid: false,
-                    showLabel: true,
-                    offset: 60,
-                    // The label interpolation function enables you to modify the values
-                    // used for the labels on each axis. Here we are converting the
-                    // values into million pound.
-                    labelInterpolationFnc: function (value, index) {
-                        return index == 0 ? null : "$" + value;
+                {
+                    height: "300px",
+                    low: Math.min(...price) * 0.9,
+                    showArea: true,
+                    fullwidth: true,
+                    /* axisY: {
+                        onlyInteger: true,
+                        scaleMinSpace: 50,
+                        offset: 20,
+                        labelInterpolationFnc: function (value) {
+                            return (value / 1000).toFixed(2) + "k";
+                        },
+                    }, */
+                    axisX: {
+                        showGrid: false,
+                        showLabel: true,
+                        labelInterpolationFnc: function (value, index) {
+                            //if (index === 0) 
+                            //    return null;
+                            if (time_duration == 1)
+                                return index % 3 == 0 ? value + ":00" : null;
+                            else if (time_duration == 6)
+                                return value;
+                            else if (time_duration == 30)
+                                return index % 3 == 0 ? value + "th" : null;
+                        },
                     },
-                },
-            }
-        );
-        chart2.on('draw', function (data) {
-            if (data.type === 'label' && data.axis === 'X') {
-                var textHtml = ['<p>', data.text, '</p>'].join('');
-                var multilineText = Chartist.Svg('svg').foreignObject(textHtml, data.x, data.y - 80, data.space, 80, 'ct-label');
+                    axisY: {
+                        showGrid: false,
+                        showLabel: true,
+                        offset: 60,
+                        // The label interpolation function enables you to modify the values
+                        // used for the labels on each axis. Here we are converting the
+                        // values into million pound.
+                        labelInterpolationFnc: function (value, index) {
+                            return index == 0 ? null : "$" + value;
+                        },
+                    },
+                }
+            );
+            chart2.on('draw', function (data) {
+                if (data.type === 'label' && data.axis === 'X') {
+                    var textHtml = ['<p>', data.text, '</p>'].join('');
+                    var multilineText = Chartist.Svg('svg').foreignObject(textHtml, data.x, data.y - 80, data.space, 80, 'ct-label');
 
-                data.element.replace(multilineText);
-            }
+                    data.element.replace(multilineText);
+                }
+            });
         });
-    });
+    }
+    updateGraph();
 </script>
 <script src="./assets/js/search.js"></script>
 

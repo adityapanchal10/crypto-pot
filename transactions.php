@@ -100,7 +100,7 @@ if (!isset($_SESSION['email'])) {
                     <div class="logo">
                         <span style="color: #FFFFFF; opacity: .86; border-radius: 4px; display: block; padding: 10px 15px;">USD Balance: '.$balance.'</span>
                     </div>
-                    <ul class="nav">
+                    <ul class="nav" style="border-bottom: 1px solid rgba(255, 255, 255, 0.2);">
                         <li class="nav-item">
                             <a class="nav-link" href="dashboard.php">
                                 <i class="nc-icon nc-chart-pie-35"></i>
