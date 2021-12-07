@@ -24,10 +24,10 @@ if (!isset($_SESSION['email'])) {
     } else {
         $userid = $_SESSION['id'];
     }
-    if ($stmt = $con->prepare('SELECT remaining_balance, isVerified, is_KYC_request_sent FROM userMaster WHERE email_id = ?')) {
+    if ($stmt = $con->prepare('SELECT isVerified, is_KYC_request_sent FROM userMaster WHERE email_id = ?')) {
         $stmt->bind_param('s', $_SESSION['email']);
         $stmt->execute();
-        $stmt->bind_result($balance, $isVerified, $is_KYC_request_sent);
+        $stmt->bind_result($isVerified, $is_KYC_request_sent);
         $stmt->fetch();
         $stmt->close();
         if ($isVerified == 0) {
@@ -98,31 +98,8 @@ if (!isset($_SESSION['email'])) {
         $series .= ']';
         $labels .= ']';
     } else {
-        echo '<script>alert("Error!! Please try again."); window.location = "dashboard.php";</script>';
+        echo '<script>alert("Error!! Please try again."); window.location = "kyc.php";</script>';
     }
-    if ($stmt = $con->prepare('SELECT currency_purchase_amount, fromWallet, toWallet, transaction_amount FROM transactionMaster WHERE userid = ? ORDER BY transaction_id DESC LIMIT 5')) {
-        $stmt->bind_param('i', $userid);
-        $stmt->execute();
-        $stmt->store_result();
-        $transactions = '';
-        if ($stmt->num_rows > 0) {
-            $stmt->bind_result($currency_purchase_amount, $fromWallet, $toWallet, $transaction_amount);
-            while ($stmt->fetch()) {
-                $transactions .= '<li>
-                    <div class="row1">
-                        <img class="img-fluid logo" src="https://assets.coingecko.com/coins/images/1/large/bitcoin.png?1547033579" width="0" height="0">
-                        <div class="title">'.$fromWallet.'</div>
-                        <div class="symbol">'.$toWallet.'</div>
-                        <div class="amount">'.$transaction_amount.'</div>
-                        <div class="change">'.$currency_purchase_amount.'</div>
-                    </div>
-                </li>';
-            }
-        }
-    } else {
-        echo '<script>alert("Error!! Please try again."); window.location = "dashboard.php";</script>';
-    }
-    
     echo '
     <!DOCTYPE html>
 
@@ -160,40 +137,23 @@ if (!isset($_SESSION['email'])) {
                         Crypto
                     </a>
                 </div>
-                <div class="logo">
-                    <span style="color: #FFFFFF; opacity: .86; border-radius: 4px; display: block; padding: 10px 15px;">USD Balance: '.$balance.'</span>
-                </div>
-                <ul class="nav" style="border-bottom: 1px solid rgba(255, 255, 255, 0.2);">
+                <ul class="nav">
                     <li class="nav-item active">
                         <a class="nav-link" href="dashboard.php">
                             <i class="nc-icon nc-chart-pie-35"></i>
                             <p>Dashboard</p>
                         </a>
                     </li>
-                    <li class="nav-item">
+                    <li>
                         <a class="nav-link" href="trade.php">
                             <i class="nc-icon nc-circle-09"></i>
                             <p>Trade</p>
                         </a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="holdings.php">
-                            <i class="nc-icon nc-circle-09"></i>
-                            <p>Holdings</p>
-                        </a>
-                    </li>
-                    <li class="nav-item">
+                    <li>
                         <a class="nav-link" href="transactions.php">
                             <i class="nc-icon nc-notes"></i>
                             <p>Transaction List</p>
-                        </a>
-                    </li>
-                </ul>
-                <ul class="nav">
-                    <li class="nav-item">
-                        <a class="nav-link" href="contact.php">
-                            <i class="nc-icon nc-chart-pie-35"></i>
-                            <p>Contact Us</p>
                         </a>
                     </li>
                 </ul>
@@ -356,23 +316,81 @@ if (!isset($_SESSION['email'])) {
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="card" style="height: 420px;">
-                                <div class="card-header ">
-                                    <h4 class="card-title">Recent Transactions</h4>
-                                    <p class="card-category">Recent 5 transactions from your account.</p>
+                        <div class="col-md-6" id="tansactionSection">
+                            <div class="card card-tasks">
+                                <div class="card-header h">
+                                    <h4 class="card-title show" id="transactionH">Transaction</h4>
+                                    <h4 class="card-title hidden" id="transferFH">Transfer To A Friend</h4>
                                 </div>
-                                <div class="scrollable-content">
-                                    <div class="row0">
-                                        <div class="logo0"></div>
-                                        <div class="title0" align="center">From</div>
-                                        <div class="symbol0" align="center">To</div>
-                                        <div class="amount0" align="center">From Volume</div>
-                                        <div class="change0" align="center">To Volume</div>
+                                <div class="card-header">
+                                    <p class="card-category">Easy transactions on the go / <a href="#transactionSection"
+                                            id="transfer">Transfer</a> to a
+                                        friend.</p>
+                                </div>
+                                <div class="t">
+                                    <form class="dasht show" action="trade.php" method="POST" id="transaction">
+                                        <div class="input-wrapper">
+                                            <select id="inputFrom" class="form-control" name="from-wallet">
+                                                <option selected>Choose...</option>
+                                                '.$from_transfer_options.'
+                                            </select>
+                                            <label for="inputFrom">From</label>
+                                        </div>
+                                        <div class="input-wrapper">
+                                            <select id="inputTo" class="form-control" name="to-wallet">
+                                                <option selected>Choose...</option>
+                                                '.$to_transfer_options.'
+                                                <!-- <option>BTC</option>
+                                                <option>ETH</option>
+                                                <option>BNB</option>
+                                                <option>USDT</option>
+                                                <option>ADA</option>
+                                                <option>SOL</option>
+                                                <option>XRP</option>
+                                                <option>DOT</option>
+                                                <option>DOGE</option>
+                                                <option>SHIB</option>
+                                                <option>LUNA</option>
+                                                <option>AVAX</option>
+                                                <option>LINK</option>
+                                                <option>LTC</option>
+                                                <option>UNI</option>
+                                                <option>MATIC</option>
+                                                <option>XMR</option>
+                                                <option>EOS</option>-->
+                                            </select>
+                                            <label for="inputTo">To</label>
+                                        </div>
+                                        <div class="input-wrapper">
+                                            <input type="text" id="amount" class="transferTo" required name="amount">
+                                            <label for="transferTo">Enter amount</label>
+                                        </div>
+                                        <button class="submit-btn" type="submit" name="submit">Proceed</button>
+
+                                    </form>
+
+                                    <form class="dasht hidden" action="trade.php" method="POST" id="transferF">
+                                        <div class="input-wrapper">
+                                            <select id="inputFrom" class="form-control" name="">
+                                                <option selected>Choose...</option>
+                                                '.$from_transfer_options.'
+                                            </select>
+                                            <label for="inputFrom">From</label>
+                                        </div>
+                                        <div class="input-wrapper">
+                                            <input type="text" id="transferTo" class="transferTo" required>
+                                            <label for="transferTo">Enter friend\'s wallet address</label>
+                                        </div>
+                                        <a href="#transactionSection" id="backToTransaction">Go back</a>
+                                        <button class="submit-btn" type="submit" name="submit">Proceed</button>
+
+                                    </form>
+                                </div>
+                                <div class="card-footer ">
+                                    <hr>
+                                    <div class="stats">
+                                        <i class="now-ui-icons loader_refresh spin"></i> Secure
                                     </div>
-                                    <ul style="list-style-type:none;">
-                                        '.$transactions.'
-                                    </ul>
                                 </div>
                             </div>
                         </div>
@@ -400,7 +418,7 @@ if (!isset($_SESSION['email'])) {
                             </li>
                         </ul>
                         <p class="copyright text-center">
-                            Ã‚Â©
+                            Â©
                             <script>
                                 document.write(new Date().getFullYear());
                             </script>
@@ -418,10 +436,7 @@ if (!isset($_SESSION['email'])) {
 <script src="./assets/vendor/core/jquery.3.2.1.min.js" type="text/javascript"></script>
 <script src="./assets/vendor/core/popper.min.js" type="text/javascript"></script>
 <script src="./assets/vendor/bootstrap_dash/bootstrap.min.js" type="text/javascript"></script>
-<!--  Plugin for Switches, full documentation here: http://www.jque.re/plugins/version3/bootstrap.switch/ -->
-<script src="./assets/vendor/plugins/bootstrap-switch.js"></script>
-<!--  Google Maps Plugin    -->
-<!-- <script type="text/javascript" src="https://maps.googleapis.com/maps/api/js?key=YOUR_KEY_HERE"></script> -->
+
 <!--  Chartist Plugin  -->
 <script src="./assets/vendor/plugins/chartist.min.js"></script>
 <!--  Notifications Plugin    -->
@@ -565,8 +580,8 @@ if (!isset($_SESSION['email'])) {
                     // The label interpolation function enables you to modify the values
                     // used for the labels on each axis. Here we are converting the
                     // values into million pound.
-                    labelInterpolationFnc: function (value) {
-                        return "$" + value;
+                    labelInterpolationFnc: function (value, index) {
+                        return index == 0 ? null : "$" + value;
                     },
                 },
             }

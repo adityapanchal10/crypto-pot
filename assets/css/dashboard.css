@@ -2,16 +2,6 @@
  Light Bootstrap Dashboard - v2.0.1
 =========================================================
 
- Product Page: https://www.creative-tim.com/product/light-bootstrap-dashboard
- Copyright 2019 Creative Tim (https://www.creative-tim.com)
- Licensed under MIT (https://github.com/creativetimofficial/light-bootstrap-dashboard/blob/master/LICENSE)
-
- Coded by Creative Tim
-
-=========================================================
-
- The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.*/
-
 /*      light colors         */
 
 @keyframes spin {
@@ -5580,6 +5570,7 @@ svg {
     text-align: center !important;
     display: inline-block !important;
     transform: translate(-50%, 0);
+    min-width: 50px;
 }
 
 /* Dashboard Transaction */
@@ -5598,6 +5589,24 @@ svg {
     margin: 20px;
     display: inline-block;
 }
+
+.graph-input-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+#graphs, #time-dur {
+    border: none;
+    /* outline:0px; */
+}
+
+#graphs-header {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+
 
 label {
     color: #bbb;
@@ -5703,4 +5712,59 @@ input:focus+label {
     100% {
         width: 100%;
     }
+}
+
+/*Transfer to a friend*/
+
+.hidden {
+    visibility: hidden;
+    opacity: 0;
+}
+
+.show {
+    visibility: visible;
+    opacity: 1;
+}
+
+.fadeout {
+    transition: visibility 0s linear 0ms, opacity 300ms;
+}
+
+.fadein {
+    transition: visibility 0s linear 300ms, opacity 300ms;
+}
+
+.h {
+    position: relative;
+    height: 30px;
+}
+
+.h h4 {
+    position: absolute;
+}
+
+.t {
+    position: relative;
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.t form {
+    position: absolute;
+    max-height: 250px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.transferTo {
+    width: 270px;
+    height: 60px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    outline: none;
 }
