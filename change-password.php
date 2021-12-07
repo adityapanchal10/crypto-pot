@@ -44,6 +44,7 @@ if (!isset($_SESSION['email'])) {
                 <link href="./assets/vendor/bootstrap_dash/bootstrap.min.css" rel="stylesheet" />
                 <link href="./assets/css/light-bootstrap-dashboard.css" rel="stylesheet" />
                 <link href="./assets/css/search.css" rel="stylesheet" />
+                <script src="assets/js/validator.js"></script>
 
             </head>
             
@@ -163,12 +164,12 @@ if (!isset($_SESSION['email'])) {
                                                 <h4 class="card-title">Change Password</h4>
                                             </div>
                                             <div class="card-body">
-                                                <form method="POST">
+                                                <form id="change-pass" method="POST" onsubmit="return changePasswordValidator()">
                                                     <div class="row">
                                                         <div class="col-md-6 pr-1">
                                                             <div class="form-group">
                                                                 <label>Old Password</label>
-                                                                <input type="password" class="form-control" placeholder="Old Password" name="oldPassword">
+                                                                <input type="password" class="form-control" placeholder="Old Password" name="oldPassword" id="old-password">
                                                             </div>
                                                         </div>
                                                     </div>
@@ -177,7 +178,7 @@ if (!isset($_SESSION['email'])) {
                                                         <div class="col-md-6 pr-1">
                                                             <div class="form-group">
                                                                 <label>New Password</label>
-                                                                <input type="password" class="form-control" placeholder="New Password" name="newPassword">
+                                                                <input type="password" class="form-control" placeholder="New Password" name="newPassword" id="new-password">
                                                             </div>
                                                         </div>
                                                     </div>
@@ -186,7 +187,7 @@ if (!isset($_SESSION['email'])) {
                                                         <div class="col-md-6 pr-1">
                                                             <div class="form-group">
                                                                 <label>Confirm New Password</label>
-                                                                <input type="password" class="form-control" placeholder="Confirm New Password" name="confirmPassword">
+                                                                <input type="password" class="form-control" placeholder="Confirm New Password" name="confirmPassword" id="password-verify">
                                                             </div>
                                                         </div>
                                                     </div>

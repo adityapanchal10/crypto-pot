@@ -76,6 +76,33 @@ function signupValidator() {
     }
 }
 
-function changePassword() {
-
+function changePasswordValidator() {
+    var passwordregex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,}$/;
+    var old_password = document.getElementById("old-password").value;
+    var new_password = document.getElementById("new-password").value;
+    var verify_password = document.getElementById("password-verify").value;
+    if (old_password == '') {
+        document.getElementById("old-password").style.borderColor = "red";
+        $( "<style>.pass.input-div.focus::before, .pass.input-div.focus:after{ background-color: #ff0000; }</style>" ).appendTo( "head" );
+        return false;
+    }
+    else if (new_password == '') {
+        document.getElementById("new-password").style.borderColor = "red";
+        return false;
+    }
+    else if (verify_password == '') {
+        document.getElementById("password-verify").style.borderColor = "red";
+        return false;
+    }
+    if (!passwordregex.test(new_password)) {
+        document.getElementById("new-password").style.borderColor = "red";
+        document.getElementById("password-message").style.color = "red";
+        return false;
+    }
+    else if (new_password != verify_password) {
+        document.getElementById("new-password").style.borderColor = "red";
+        document.getElementById("password-verify").style.borderColor = "red";
+        document.getElementById("password-message").innerHTML = "Passwords do not match.";
+        return false;
+    }
 }
