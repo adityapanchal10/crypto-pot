@@ -537,7 +537,7 @@ if (!isset($_SESSION['email'])) {
     if (empty($_POST['fname']) || empty($_POST['lname']) || empty($_POST['email']) || empty($_POST['mobile']) || empty($_POST['country']) || empty($_POST['timezone'])) {
         exit('<script>alert("Please fill in all the fields");  window.location = "profile.php"</script>');
     }
-    if ($stmt = $con->prepare('UPDATE usermaster SET first_name = ?, last_name = ?, email_id = ?, country = ?, mobile = ?, timezone = ? WHERE email_id = ?')) {
+    if ($stmt = $con->prepare('UPDATE userMaster SET first_name = ?, last_name = ?, email_id = ?, country = ?, mobile = ?, timezone = ? WHERE email_id = ?')) {
         $stmt->bind_param('sssssss', $_POST['fname'], $_POST['lname'], $_POST['email'], $_POST['country'], $_POST['mobile'], $_POST['timezone'], $_SESSION['email']);
         if(!$stmt->execute()){
             echo('<script>alert("Please try again.");  window.location = "profile.php"</script>');
@@ -547,7 +547,7 @@ if (!isset($_SESSION['email'])) {
 
     }
 } else if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['delete-account'])) {
-    if ($stmt = $con->prepare('UPDATE usermaster SET isDeleted = 1 WHERE email_id = ?')) {
+    if ($stmt = $con->prepare('UPDATE userMaster SET isDeleted = 1 WHERE email_id = ?')) {
         $stmt->bind_param('s', $_SESSION['email']);
         if(!$stmt->execute()){
             echo('<script>alert("Please try again.");  window.location = "profile.php"</script>');

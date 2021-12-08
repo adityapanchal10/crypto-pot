@@ -100,7 +100,7 @@ if (!isset($_SESSION['email'])) {
     } else {
         echo '<script>alert("Error!! Please try again."); window.location = "dashboard.php";</script>';
     }
-    if ($stmt = $con->prepare('SELECT currency_purchase_amount, fromWallet, toWallet, transaction_amount FROM transactionMaster WHERE userid = ? ORDER BY transaction_id DESC LIMIT 5')) {
+    if ($stmt = $con->prepare('SELECT currency_purchase_amount, fromWallet, toWallet, transaction_amount FROM transactionMaster WHERE userid = ? AND isTransactionApproved = 1 ORDER BY transaction_id DESC LIMIT 5')) {
         $stmt->bind_param('i', $userid);
         $stmt->execute();
         $stmt->store_result();

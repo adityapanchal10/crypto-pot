@@ -27,7 +27,7 @@ if (!isset($_SESSION['email'])) {
                 $notifications += 1;
                 $notification .= '<a class="dropdown-item" href="kyc.php">Please upload your KYC documents</a>';
             }
-            if ($stmt = $con->prepare('SELECT transaction_id, currency_id, currency_purchase_amount, fromWallet, toWallet, remaining_balance, transaction_amount, isTransactionApproved FROM transactionMaster WHERE userid = ?')) {
+            if ($stmt = $con->prepare('SELECT transaction_id, currency_id, currency_purchase_amount, fromWallet, toWallet, remaining_balance, transaction_amount, isTransactionApproved, isTransactionBlocked FROM transactionMaster WHERE userid = ?  ORDER BY transaction_id DESC')) {
                 $stmt->bind_param('i', $userid);
                 $stmt->execute();
                 $stmt->store_result();
@@ -43,7 +43,7 @@ if (!isset($_SESSION['email'])) {
                     <th>Transaction Approved</th>
                 </tr>';
                 if ($stmt->num_rows > 0) {
-                    $stmt->bind_result($transaction_id, $currency_id, $currency_purchase_amount, $fromWallet, $toWallet, $remaining_balance, $transaction_amount, $isTransactionApproved);
+                    $stmt->bind_result($transaction_id, $currency_id, $currency_purchase_amount, $fromWallet, $toWallet, $remaining_balance, $transaction_amount, $isTransactionApproved, $isTransactionBlocked);
                     while ($stmt->fetch()) {
                         $table .= '<tr>
                             <td data-th="Login Date">'.$transaction_id.'</td>
@@ -52,9 +52,15 @@ if (!isset($_SESSION['email'])) {
                             <td data-th="Login User Agent">'.$fromWallet.'</td>
                             <td data-th="Login User Agent">'.$toWallet.'</td>
                             <td data-th="Login User Agent">'.$remaining_balance.'</td>
-                            <td data-th="Login User Agent">'.$transaction_amount.'</td>
-                            <td data-th="Login User Agent">'.$isTransactionApproved.'</td>
-                        </tr>';
+                            <td data-th="Login User Agent">'.$transaction_amount.'</td>';
+                        if ($isTransactionApproved == 0) {
+                            $table .= '<td data-th="Login User Agent">Pending</td>';
+                        } else if ($isTransactionBlocked == 1) {
+                            $table .= '<td data-th="Login User Agent">Blocked</td>';
+                        } else {
+                            $table .= '<td data-th="Login User Agent">Approved</td>';
+                        }
+                        $table .= '</tr>';
                     }
                 }
                 $table .= '
