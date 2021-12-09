@@ -105,4 +105,41 @@ function changePasswordValidator() {
         document.getElementById("password-message").innerHTML = "Passwords do not match.";
         return false;
     }
+    else {
+        return true;
+    }
+}
+
+function forgotPasswordValidator() {
+    var passwordregex = /^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,}$/;
+    var new_password = document.getElementById("new-password").value;
+    var verify_password = document.getElementById("password-verify").value;
+    if (new_password == '') {
+        document.getElementById("new-password").parentElement.parentElement.classList.add("focus");
+        $( "<style>.pass.input-div.focus::before, .pass.input-div.focus:after{ background-color: #ff0000; }</style>" ).appendTo( "head" );
+        $( "<style>.conf-pass.input-div.focus::before, .conf-pass.input-div.focus:after{ background-color: #ff0000; }</style>" ).appendTo( "head" );
+        return false;
+    }
+    else if (verify_password == '') {
+        document.getElementById("password-verify").parentElement.parentElement.classList.add("focus");
+        $( "<style>.pass.input-div.focus::before, .pass.input-div.focus:after{ background-color: #ff0000; }</style>" ).appendTo( "head" );
+        $( "<style>.conf-pass.input-div.focus::before, .conf-pass.input-div.focus:after{ background-color: #ff0000; }</style>" ).appendTo( "head" );
+        return false;
+    }
+    if (!passwordregex.test(new_password)) {
+        $( "<style>.pass.input-div.focus::before, .pass.input-div.focus:after{ background-color: #ff0000; }</style>" ).appendTo( "head" );
+        $( "<style>.conf-pass.input-div.focus::before, .conf-pass.input-div.focus:after{ background-color: #ff0000; }</style>" ).appendTo( "head" );
+        document.getElementById("password-message").style.color = "red";
+        return false;
+    }
+    else if (new_password != verify_password) {
+        $( "<style>.pass.input-div.focus::before, .pass.input-div.focus:after{ background-color: #ff0000; }</style>" ).appendTo( "head" );
+        $( "<style>.conf-pass.input-div.focus::before, .conf-pass.input-div.focus:after{ background-color: #ff0000; }</style>" ).appendTo( "head" );
+        document.getElementById("password-message").style.color = "red";
+        document.getElementById("password-message").innerHTML = "Passwords do not match.";
+        return false;
+    }
+    else {
+        return true;
+    }
 }

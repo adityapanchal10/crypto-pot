@@ -50,7 +50,8 @@ if (!isset($_GET['email'])) {
                             
                             <script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk="
                                 crossorigin="anonymous"></script>
-                            
+                            <script src="assets/js/validator.js"></script>
+
                             </head>
                             
                             <body>
@@ -101,29 +102,31 @@ if (!isset($_GET['email'])) {
                             
                                 <div class="login-content">
                             
-                                    <form class="loginform l4" action="forgot-password.php?email='.$_GET['email'].'" method="POST">
-                                    <img src="">
-                                    <h2 class="title">Change your password here.</h2>
-                                    <div class="input-div pass">
-                                        <div class="inc">
-                                        <i class="pass"></i>
+                                    <form class="loginform l4" action="forgot-password.php?email='.$_GET['email'].'" method="POST" onsubmit="return forgotPasswordValidator()">
+                                        <img src="">
+                                        <h2 class="title">Change your password here.</h2>
+                                        <div class="input-div pass">
+                                            <div class="inc">
+                                            <i class="pass"></i>
+                                            </div>
+                                            <div class="div">
+                                            <h5>New Password</h5>
+                                            <input type="password" class="input" name="password" id="new-password">
+                                            </div>
                                         </div>
-                                        <div class="div">
-                                        <h5>New Password</h5>
-                                        <input type="password" class="input" name="password">
+                                        <p id="password-message" style="font-size:75% ; color:#999"> Must have at least 8 characters, 1 uppercase, 1 lowercase and 1 number
+                                        or special character</p>
+                                        <div class="input-div pass">
+                                            <div class="inc">
+                                            <i class="pass"></i>
+                                            </div>
+                                            <div class="div">
+                                            <h5>Confirm Password</h5>
+                                            <input type="password" class="input" name="password" id="password-verify">
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div class="input-div pass">
-                                        <div class="inc">
-                                        <i class="pass"></i>
-                                        </div>
-                                        <div class="div">
-                                        <h5>Confirm Password</h5>
-                                        <input type="password" class="input" name="password">
-                                        </div>
-                                    </div>
-                                    <a href="#" id="backTol3" class="forgot">Go back</a>
-                                    <input id="passchanged" type="submit" class="btn" value="Change Password" name="change-pass">
+                                        <a href="#" id="backTol3" class="forgot">Go back</a>
+                                        <input id="passchanged" type="submit" class="btn" value="Change Password" name="change-pass">
                                     </form>
                             
                                     <div class="toast" role="alert" aria-live="assertive" aria-atomic="true"
@@ -245,13 +248,23 @@ if (!isset($_GET['email'])) {
 
         }
     } elseif ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['change-pass'])) {
+        $password = $_POST['password'];
+        $password_verify = $_POST['password-verify'];
+        if ($password != $password_verify) {
+            echo '<script>alert("Passwords do not match!"); window.location="forgot-password.php"</script>';
+            exit();
+        }
+        if (preg_match('/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,}$/', $_POST['password']) == 0) {
+            echo '<script>alert("Invalid password"); window.location = "forgot-password.php"</script>';
+            exit;
+            // header('Location: signup.php');
+        }
         if ($stmt = $con->prepare('UPDATE userMaster SET password = ? WHERE email_id = ?')) {
             $password_hash = hash('sha256', $_POST['password']);
             $stmt->bind_param('ss', $password_hash, $_GET['email']);                        
             if($stmt->execute()){
                 //header('Refresh:5; url=dashboard.php');
-                header('Location: dashboard.php');
-                exit('<script>alert("Password Changed successfully!")</script>');
+                exit('<script>alert("Password Changed successfully!"); window.location="login.php"</script>');
             }
         }
     } else {
@@ -296,7 +309,7 @@ if (!isset($_GET['email'])) {
                         $mail->addCustomHeader('X-SES-CONFIGURATION-SET','X-FNZ-THREATLABS-HDR');
                         $mail->Subject  =  'Reset your password';
                         $mail->IsHTML(true);
-                        $mail->Body    = 'Your email verification code is '.$code.'';
+                        $mail->Body    = 'Your password reset code is '.$code.'';
                         if($mail->Send()) {
                             // echo "Check Your Email box and Click on the email verification link.";
                             echo '<!DOCTYPE html>
