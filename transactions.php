@@ -31,10 +31,38 @@ if (!isset($_SESSION['email'])) {
                 $stmt->bind_param('i', $userid);
                 $stmt->execute();
                 $stmt->store_result();
-                $table = '<table class="rwd-table">
+                $buy_table = '<table class="rwd-table" id="buy">
                 <tr>
                     <th>Transaction Id</th>
-                    <th>Currency Id</th>
+                    <th>Cryptocurrency Amount Received</th>
+                    <th>Purchased Cryptocurrency</th>
+                    <th>Remaining Balance</th>
+                    <th>Amount Used</th>
+                    <th>Transaction Approved</th>
+                </tr>';
+                $sell_table = '<table class="rwd-table" id="sell">
+                <tr>
+                    <th>Transaction Id</th>
+                    <th>Amount Received(USD)</th>
+                    <th>Sold Cryptocurrency</th>
+                    <th>Remaining Cryptocurrency</th>
+                    <th>Amount Used</th>
+                    <th>Transaction Approved</th>
+                </tr>';
+                $trade_table = '<table class="rwd-table" id="trade">
+                <tr>
+                    <th>Transaction Id</th>
+                    <th>Amount Received</th>
+                    <th>From Wallet</th>
+                    <th>To Wallet</th>
+                    <th>Remaining Balance</th>
+                    <th>Amount Used</th>
+                    <th>Transaction Approved</th>
+                </tr>';
+                $table = '<table class="rwd-table" id="all">
+                <tr>
+                    <th>Transaction Id</th>
+                    <th>Transaction Type</th>
                     <th>Currency Purchase Amount</th>
                     <th>From Wallet</th>
                     <th>To Wallet</th>
@@ -45,25 +73,85 @@ if (!isset($_SESSION['email'])) {
                 if ($stmt->num_rows > 0) {
                     $stmt->bind_result($transaction_id, $currency_id, $currency_purchase_amount, $fromWallet, $toWallet, $remaining_balance, $transaction_amount, $isTransactionApproved, $isTransactionBlocked);
                     while ($stmt->fetch()) {
+                        if ($fromWallet == 'USD') {
+                            $transaction_type = 'Buy';
+                        } else if ($toWallet == 'USD') {
+                            $transaction_type = 'Sell';
+                        } else {
+                            $transaction_type = 'Trade';
+                        }
                         $table .= '<tr>
                             <td data-th="Login Date">'.$transaction_id.'</td>
-                            <td data-th="Login IPv4">'.$currency_id.'</td>
+                            <td data-th="Transaction Type">'.$transaction_type.'</td>
                             <td data-th="Login IPv6">'.$currency_purchase_amount.'</td>
                             <td data-th="Login User Agent">'.$fromWallet.'</td>
                             <td data-th="Login User Agent">'.$toWallet.'</td>
                             <td data-th="Login User Agent">'.$remaining_balance.'</td>
                             <td data-th="Login User Agent">'.$transaction_amount.'</td>';
-                        if ($isTransactionApproved == 0) {
-                            $table .= '<td data-th="Login User Agent">Pending</td>';
-                        } else if ($isTransactionBlocked == 1) {
-                            $table .= '<td data-th="Login User Agent">Blocked</td>';
+                            if ($isTransactionApproved == 0) {
+                                $table .= '<td data-th="Login User Agent">Pending</td>';
+                            } else if ($isTransactionBlocked == 1) {
+                                $table .= '<td data-th="Login User Agent">Blocked</td>';
+                            } else {
+                                $table .= '<td data-th="Login User Agent">Approved</td>';
+                            }
+                        if ($fromWallet == 'USD') {
+                            $buy_table .= '<tr>
+                            <td data-th="Login Date">'.$transaction_id.'</td>
+                            <td>'.$currency_purchase_amount.'</td>
+                            <td>'.$toWallet.'</td>
+                            <td>'.$remaining_balance.'</td>
+                            <td>'.$transaction_amount.'</td>';
+                            if ($isTransactionApproved == 0) {
+                                $buy_table .= '<td data-th="Login User Agent">Pending</td>';
+                            } else if ($isTransactionBlocked == 1) {
+                                $buy_table .= '<td data-th="Login User Agent">Blocked</td>';
+                            } else {
+                                $buy_table .= '<td data-th="Login User Agent">Approved</td>';
+                            }
+                            $buy_table .= '</tr>';
+                        }else if ($toWallet == 'USD') {
+                            $sell_table .= '<tr>
+                            <td data-th="Login Date">'.$transaction_id.'</td>
+                            <td>'.$currency_purchase_amount.'</td>
+                            <td>'.$fromWallet.'</td>
+                            <td>'.$remaining_balance.'</td>
+                            <td>'.$transaction_amount.'</td>';
+                            if ($isTransactionApproved == 0) {
+                                $sell_table .= '<td data-th="Login User Agent">Pending</td>';
+                            } else if ($isTransactionBlocked == 1) {
+                                $sell_table .= '<td data-th="Login User Agent">Blocked</td>';
+                            } else {
+                                $sell_table .= '<td data-th="Login User Agent">Approved</td>';
+                            }
+                            $sell_table .= '</tr>';
                         } else {
-                            $table .= '<td data-th="Login User Agent">Approved</td>';
+                            $trade_table .= '<tr>
+                            <td data-th="Login Date">'.$transaction_id.'</td>
+                            <td data-th="Login IPv6">'.$currency_purchase_amount.'</td>
+                            <td data-th="Login User Agent">'.$fromWallet.'</td>
+                            <td data-th="Login User Agent">'.$toWallet.'</td>
+                            <td data-th="Login User Agent">'.$remaining_balance.'</td>
+                            <td data-th="Login User Agent">'.$transaction_amount.'</td>';
+                            if ($isTransactionApproved == 0) {
+                                $trade_table .= '<td data-th="Login User Agent">Pending</td>';
+                            } else if ($isTransactionBlocked == 1) {
+                                $trade_table .= '<td data-th="Login User Agent">Blocked</td>';
+                            } else {
+                                $trade_table .= '<td data-th="Login User Agent">Approved</td>';
+                            }
+                            $trade_table .= '</tr>';
                         }
                         $table .= '</tr>';
                     }
                 }
                 $table .= '
+                </table>';
+                $trade_table .= '
+                </table>';
+                $buy_table .= '
+                </table>';
+                $sell_table .= '
                 </table>';
                 echo '
 <!DOCTYPE html>
@@ -86,6 +174,11 @@ if (!isset($_SESSION['email'])) {
         <link href="./assets/css/light-bootstrap-dashboard.css" rel="stylesheet" />
         <link href="assets/css/login-history.css" rel="stylesheet">
         <link href="./assets/css/search.css" rel="stylesheet" />
+        <style>
+            #trade, #sell, #buy {
+                display: none;
+            }
+        </style>
 
     </head>
 
@@ -198,9 +291,20 @@ if (!isset($_SESSION['email'])) {
                 <!-- End Navbar -->
                 <div class="content">
                   <div class="container-fluid">
+                    <div class="col-lg-3">
+                        <select id="tables" class="form-control" onchange="updateTable()">
+                            <option selected="" value="0">All</option>
+                            <option value="1">Buy</option>
+                            <option value="2">Sell</option>
+                            <option value="3">Trade</option>
+                        </select>
+                    </div>
                     <div class="row d-flex align-items-center justify-content-between animate__animated animate__fadeInUp">
                       <div class="col-lg-12">
                         '.$table.'
+                        '.$buy_table.'
+                        '.$sell_table.'
+                        '.$trade_table.'
                       </div>
                     </div>
                   </div>
@@ -255,6 +359,32 @@ if (!isset($_SESSION['email'])) {
     <!-- Control Center for Light Bootstrap Dashboard: scripts for the example pages etc -->
     <script src="./assets/js/light-bootstrap-dashboard.js" type="text/javascript"></script>
     <script src="./assets/js/search.js"></script>
+    <script>
+        function updateTable() {
+            var table_index = $("#tables :selected").val();
+            if (table_index == 0) {
+                $("#all").show();
+                $("#buy").hide();
+                $("#sell").hide();
+                $("#trade").hide();
+            } else if (table_index == 1) {
+                $("#all").hide();
+                $("#buy").show();
+                $("#sell").hide();
+                $("#trade").hide();
+            } else if (table_index == 2) {
+                $("#all").hide();
+                $("#buy").hide();
+                $("#sell").show();
+                $("#trade").hide();
+            } else {
+                $("#all").hide();
+                $("#buy").hide();
+                $("#sell").hide();
+                $("#trade").show();
+            }
+        }
+    </script>
 </html>
 ';
             }
