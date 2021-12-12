@@ -26,8 +26,64 @@ if (!isset($_SESSION['email'])) {
                 $notifications += 1;
                 $notification .= '<a class="dropdown-item" href="kyc.php">Please upload your KYC documents</a>';
             }
-            if ($stmt = $con->prepare('SELECT loginDatetime, loginIPv4, loginIPv6, login_location, login_http_user_agent FROM logMaster WHERE userid = ?')) {
+            // if (isset($_GET['page-no'])) {
+            //     $page_no = $_GET['page-no'];
+            //     $next_page_no = $page_no + 1;
+            //     $prev_page_no = $page_no - 1;
+            //     if ($page_no == 1) {
+            //         $nav = '<a href="login-history.php?page-no='.$next_page_no.'">Next</a>';
+            //     } else {
+            //         $nav = '<a href="login-history.php?page-no='.$prev_page_no.'">Previous</a>
+            //         <a href="login-history.php?page-no='.$next_page_no.'">Next</a>';
+            //     }
+            // } else {
+            //     $page_no = 1;
+            //     $nav = '<a href="login-history.php?page-no=2">Next</a>';
+            // }
+            if (isset($_GET['page-no'])) {
+                $page_no = $_GET['page-no'];
+            } else {
+                $page_no = 1;
+            }
+            if ($stmt = $con->prepare('SELECT loginDatetime, loginIPv4, loginIPv6, login_location, login_http_user_agent FROM logMaster WHERE userid = ?;')) {
                 $stmt->bind_param('i', $userid);
+                $stmt->execute();
+                $stmt->store_result();
+                if ($stmt->num_rows > 20) {
+                    $i = 0;
+                    $limit = $stmt->num_rows / 20;
+                    $limit = ceil($limit);
+                    $page_nav = '<nav aria-label="...">
+                        <ul class="pagination">';
+                    
+                    $next_page_no = $page_no + 1;
+                    $prev_page_no = $page_no - 1;
+                    if ($page_no == 1) {
+                        $page_nav .= '<li class="page-item disabled"><a class="page-link" href="#" tabindex="-1">Previous</a></li>';
+                    } else {
+                        $page_nav .= '<li class="page-item"><a class="page-link" href="login-history.php?page-no='.($prev_page_no).'" tabindex="-1">Previous</a></li>';
+                    }
+                    while ($i < $limit) {
+                        if ($page_no == $i + 1) {
+                            $page_nav .= '<li class="page-item active"><a class="page-link" href="login-history.php?page-no='.($i + 1).'">'.($i + 1).'  <span class="sr-only">(current)</span></a></li>';
+                        } else {
+                            $page_nav .= '<li class="page-item"><a class="page-link" href="login-history.php?page-no='.($i + 1).'">'.($i + 1).'</a></li>';
+                        }
+                        ++$i;
+                    }
+                    if ($page_no == $limit) {
+                        $page_nav .= '<li class="page-item disabled"><a class="page-link" href="#">Next</a></li>';
+                    } else {
+                        $page_nav .= '<li class="page-item"><a class="page-link" href="login-history.php?page-no='.($next_page_no).'">Next</a></li>';
+                    }
+                    $page_nav .= '
+                        </ul>
+                    </nav>';
+                }
+            }
+            $offset = ($page_no - 1) * 20;
+            if ($stmt = $con->prepare('SELECT loginDatetime, loginIPv4, loginIPv6, login_location, login_http_user_agent FROM logMaster WHERE userid = ? ORDER BY loginDatetime DESC LIMIT ?, 20;')) {
+                $stmt->bind_param('ii', $userid, $offset);
                 $stmt->execute();
                 $stmt->store_result();
                 $table = '<table class="rwd-table">
@@ -38,6 +94,7 @@ if (!isset($_SESSION['email'])) {
                     <th>Browser</th>
                 </tr>';
                 if ($stmt->num_rows > 0) {
+                    
                     $stmt->bind_result($loginDatetime, $loginIPv4, $loginIPv6, $location, $login_http_user_agent);
                     while ($stmt->fetch()) {
                         if ($loginIPv4 == '0.0.0.0' and $loginIPv6 != '0:0:0:0:0:0:0:0') {
@@ -194,6 +251,7 @@ if (!isset($_SESSION['email'])) {
                                   </div>
                                 </div>
                               </div>
+                              '.$page_nav.'
                             </div>
                             <footer class="footer">
                                 <div class="container-fluid">
