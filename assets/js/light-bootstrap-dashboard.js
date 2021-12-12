@@ -51,9 +51,7 @@ $(document).ready(function () {
 
 // activate collapse right menu when the windows is resized
 $(window).resize(function () {
-	if ($(window).width() <= 991) {
-		lbd.initRightMenu();
-	}
+	lbd.initRightMenu();
 });
 
 lbd = {
@@ -72,7 +70,6 @@ lbd = {
 			$sidebar.append(sidebar_container);
 		} else if (mobile_menu_initialized == true) {
 			// reset all the additions that we made for the sidebar wrapper only if the screen is bigger than 991px
-			$sidebar_wrapper.find(".navbar-form").remove();
 			$sidebar_wrapper.find(".nav-mobile-menu").remove();
 
 			mobile_menu_initialized = false;
@@ -96,14 +93,11 @@ lbd = {
 
 			nav_content = '<ul class="nav nav-mobile-menu">' + nav_content + "</ul>";
 
-			$navbar_form = $("nav").find(".navbar-form").clone(true);
-
-			$sidebar_nav = $sidebar_wrapper.find(" > .nav");
+			$sidebar_nav = $sidebar_wrapper.find(" > .nav").first();
 
 			// insert the navbar form before the sidebar list
 			$nav_content = $(nav_content);
 			$nav_content.insertBefore($sidebar_nav);
-			$navbar_form.insertBefore($nav_content);
 
 			$(".sidebar-wrapper .dropdown .dropdown-menu > li > a").click(function (
 				event
@@ -114,9 +108,9 @@ lbd = {
 			mobile_menu_initialized = true;
 		} else {
 			console.log("window with:" + $(window).width());
-			if ($(window).width() > 991) {
+			window_width = $(window).width()
+			if (window_width > 991) {
 				// reset all the additions that we made for the sidebar wrapper only if the screen is bigger than 991px
-				$sidebar_wrapper.find(".navbar-form").remove();
 				$sidebar_wrapper.find(".nav-mobile-menu").remove();
 
 				mobile_menu_initialized = false;
