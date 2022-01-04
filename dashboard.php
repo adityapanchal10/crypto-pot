@@ -110,7 +110,6 @@ if (!isset($_SESSION['email'])) {
             while ($stmt->fetch()) {
                 $transactions .= '<li>
                     <div class="row1">
-                        <img class="img-fluid logo" src="https://assets.coingecko.com/coins/images/1/large/bitcoin.png?1547033579" width="0" height="0">
                         <div class="title">'.$fromWallet.'</div>
                         <div class="symbol">'.$toWallet.'</div>
                         <div class="amount">'.$transaction_amount.'</div>
@@ -413,7 +412,7 @@ if (!isset($_SESSION['email'])) {
 <script src="./assets/vendor/core/jquery.3.2.1.min.js" type="text/javascript"></script>
 <script src="./assets/vendor/core/popper.min.js" type="text/javascript"></script>
 <script src="./assets/vendor/bootstrap_dash/bootstrap.min.js" type="text/javascript"></script>
-
+<script src="./assets/vendor/plugins/bootstrap-switch.js"></script>
 <!--  Chartist Plugin  -->
 <script src="./assets/vendor/plugins/chartist.min.js"></script>
 <!--  Notifications Plugin    -->

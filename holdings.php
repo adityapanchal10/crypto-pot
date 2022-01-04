@@ -43,20 +43,19 @@ if (!isset($_SESSION['email'])) {
                     $stmt->bind_result($currency_id, $wallet_balance);
                     while ($stmt->fetch()) {
                         //add currency symbol
-                        if ($stmt_2 = $con->prepare('SELECT currency_name, currency_price FROM priceMaster WHERE currency_id = ?')) {
+                        if ($stmt_2 = $con->prepare('SELECT currency_name, currency_price, change_24hr FROM priceMaster WHERE currency_id = ?')) {
                             $stmt_2->bind_param('i', $currency_id);
                             $stmt_2->execute();
                             $stmt_2->store_result();
-                            $stmt_2->bind_result($currency_name, $currency_price);
+                            $stmt_2->bind_result($currency_name, $currency_price, $change_24hr);
                             $stmt_2->fetch();
                             $wallet_balance_usd = $wallet_balance * $currency_price;
-                            $change = 0;
                             $table .= '<tr>
                                 <td data-th="Login Date">'.$currency_name.'</td>
                                 <td data-th="Login IPv4">'.$currency_name.'</td>
                                 <td data-th="Login IPv6">'.$wallet_balance.'</td>
-                                <td data-th="Login User Agent">'.$wallet_balance.'</td>
-                                <td data-th="Login User Agent">'.$change.'</td>
+                                <td data-th="Login User Agent">'.$wallet_balance_usd.'</td>
+                                <td data-th="Login User Agent">'.$change_24hr.'</td>
                             </tr>';
                         }
                         

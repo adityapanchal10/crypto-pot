@@ -27,6 +27,231 @@ if (!isset($_SESSION['email'])) {
                 $notifications += 1;
                 $notification .= '<a class="dropdown-item" href="kyc.php">Please upload your KYC documents</a>';
             }
+            if (!isset($_GET['page'])) {
+                $page = 1;
+            } else {
+                $page = $_GET['page'];
+            }
+            $page_nav = '';
+            $buy_page_nav = '';
+            $sell_page_nav = '';
+            $trade_page_nav = '';
+            if (!isset($_GET['type']) || $_GET['type'] == 'all') {
+                if ($stmt = $con->prepare('SELECT transaction_id, currency_id, currency_purchase_amount, fromWallet, toWallet, remaining_balance, transaction_amount, isTransactionApproved, isTransactionBlocked FROM transactionMaster WHERE userid = ?  ORDER BY transaction_id DESC')) {
+                    $stmt->bind_param('i', $userid);
+                    $stmt->execute();
+                    $stmt->store_result();
+                    if ($stmt->num_rows > 20) {
+                        $i = 0;
+                        $limit = $stmt->num_rows / 20;
+                        $limit = ceil($limit);
+                        if ($page_no > $limit) {
+                            $page_no = $limit;
+                        }
+                        $page_nav .= '<nav aria-label="...">
+                        <ul class="pagination">';
+                    
+                        $next_page_no = $page_no + 1;
+                        $prev_page_no = $page_no - 1;
+                        if ($page_no == 1) {
+                            $page_nav .= '<li class="page-item disabled"><a class="page-link" href="#" tabindex="-1">Previous</a></li>';
+                        } else {
+                            $page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page='.($prev_page_no).'" tabindex="-1">Previous</a></li>';
+                        }
+                        while ($i < $limit) {
+                            if ($page_no == $i + 1) {
+                                $page_nav .= '<li class="page-item active"><a class="page-link" href="transactions.php?page='.($i + 1).'">'.($i + 1).'  <span class="sr-only">(current)</span></a></li>';
+                            } else {
+                                $page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page='.($i + 1).'">'.($i + 1).'</a></li>';
+                            }
+                            ++$i;
+                        }
+                        if ($page_no == $limit) {
+                            $page_nav .= '<li class="page-item disabled"><a class="page-link" href="#">Next</a></li>';
+                        } else {
+                            $page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page='.($next_page_no).'">Next</a></li>';
+                        }
+                        $page_nav .= '
+                            </ul>
+                        </nav>';
+                    }
+                }
+                $type_css = '#trade, #sell, #buy {
+                    display: none;
+                }';
+            } else if ($_GET['type'] == 'buy') {
+                if ($stmt = $con->prepare('SELECT transaction_id, currency_id, currency_purchase_amount, fromWallet, toWallet, remaining_balance, transaction_amount, isTransactionApproved, isTransactionBlocked FROM transactionMaster WHERE userid = ? AND fromWallet = \'USD\' ORDER BY transaction_id DESC')) {
+                    $stmt->bind_param('i', $userid);
+                    $stmt->execute();
+                    $stmt->store_result();
+                    if ($stmt->num_rows > 20) {
+                        $i = 0;
+                        $limit = $stmt->num_rows / 20;
+                        $limit = ceil($limit);
+                        if ($page_no > $limit) {
+                            $page_no = $limit;
+                        }
+                        $buy_page_nav .= '<nav aria-label="...">
+                        <ul class="pagination">';
+                    
+                        $next_page_no = $page_no + 1;
+                        $prev_page_no = $page_no - 1;
+                        if ($page_no == 1) {
+                            $buy_page_nav .= '<li class="page-item disabled"><a class="page-link" href="#" tabindex="-1">Previous</a></li>';
+                        } else {
+                            $buy_page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page='.($prev_page_no).'" tabindex="-1">Previous</a></li>';
+                        }
+                        while ($i < $limit) {
+                            if ($page_no == $i + 1) {
+                                $buy_page_nav .= '<li class="page-item active"><a class="page-link" href="transactions.php?page='.($i + 1).'">'.($i + 1).'  <span class="sr-only">(current)</span></a></li>';
+                            } else {
+                                $buy_page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page='.($i + 1).'">'.($i + 1).'</a></li>';
+                            }
+                            ++$i;
+                        }
+                        if ($page_no == $limit) {
+                            $buy_page_nav .= '<li class="page-item disabled"><a class="page-link" href="#">Next</a></li>';
+                        } else {
+                            $buy_page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page='.($next_page_no).'">Next</a></li>';
+                        }
+                        $buy_page_nav .= '
+                            </ul>
+                        </nav>';
+                    }
+                }
+                $type_css = '#all, #sell, #trade {
+                    display: none;
+                }';
+            } else if ($_GET['type'] == 'sell') {
+                if ($stmt = $con->prepare('SELECT transaction_id, currency_id, currency_purchase_amount, fromWallet, toWallet, remaining_balance, transaction_amount, isTransactionApproved, isTransactionBlocked FROM transactionMaster WHERE userid = ? AND toWallet = \'USD\' ORDER BY transaction_id DESC')) {
+                    $stmt->bind_param('i', $userid);
+                    $stmt->execute();
+                    $stmt->store_result();
+                    if ($stmt->num_rows > 20) {
+                        $i = 0;
+                        $limit = $stmt->num_rows / 20;
+                        $limit = ceil($limit);
+                        if ($page_no > $limit) {
+                            $page_no = $limit;
+                        }
+                        $sell_page_nav .= '<nav aria-label="...">
+                        <ul class="pagination">';
+                    
+                        $next_page_no = $page_no + 1;
+                        $prev_page_no = $page_no - 1;
+                        if ($page_no == 1) {
+                            $sell_page_nav .= '<li class="page-item disabled"><a class="page-link" href="#" tabindex="-1">Previous</a></li>';
+                        } else {
+                            $sell_page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page='.($prev_page_no).'" tabindex="-1">Previous</a></li>';
+                        }
+                        while ($i < $limit) {
+                            if ($page_no == $i + 1) {
+                                $sell_page_nav .= '<li class="page-item active"><a class="page-link" href="transactions.php?page='.($i + 1).'">'.($i + 1).'  <span class="sr-only">(current)</span></a></li>';
+                            } else {
+                                $sell_page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page='.($i + 1).'">'.($i + 1).'</a></li>';
+                            }
+                            ++$i;
+                        }
+                        if ($page_no == $limit) {
+                            $sell_page_nav .= '<li class="page-item disabled"><a class="page-link" href="#">Next</a></li>';
+                        } else {
+                            $sell_page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page='.($next_page_no).'">Next</a></li>';
+                        }
+                        $sell_page_nav .= '
+                            </ul>
+                        </nav>';
+                    }
+                }
+                $type_css = '#all, #buy, #trade {
+                    display: none;
+                }';
+            } else if ($_GET['type'] == 'trade') {
+                if ($stmt = $con->prepare('SELECT transaction_id, currency_id, currency_purchase_amount, fromWallet, toWallet, remaining_balance, transaction_amount, isTransactionApproved, isTransactionBlocked FROM transactionMaster WHERE userid = ? AND fromWallet <> \'USD\' AND toWallet <> \'USD\' ORDER BY transaction_id DESC')) {
+                    $stmt->bind_param('i', $userid);
+                    $stmt->execute();
+                    $stmt->store_result();
+                    if ($stmt->num_rows > 20) {
+                        $i = 0;
+                        $limit = $stmt->num_rows / 20;
+                        $limit = ceil($limit);
+                        if ($page_no > $limit) {
+                            $page_no = $limit;
+                        }
+                        $trade_page_nav .= '<nav aria-label="...">
+                        <ul class="pagination">';
+                    
+                        $next_page_no = $page_no + 1;
+                        $prev_page_no = $page_no - 1;
+                        if ($page_no == 1) {
+                            $trade_page_nav .= '<li class="page-item disabled"><a class="page-link" href="#" tabindex="-1">Previous</a></li>';
+                        } else {
+                            $trade_page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page='.($prev_page_no).'" tabindex="-1">Previous</a></li>';
+                        }
+                        while ($i < $limit) {
+                            if ($page_no == $i + 1) {
+                                $trade_page_nav .= '<li class="page-item active"><a class="page-link" href="transactions.php?page='.($i + 1).'">'.($i + 1).'  <span class="sr-only">(current)</span></a></li>';
+                            } else {
+                                $trade_page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page='.($i + 1).'">'.($i + 1).'</a></li>';
+                            }
+                            ++$i;
+                        }
+                        if ($page_no == $limit) {
+                            $trade_page_nav .= '<li class="page-item disabled"><a class="page-link" href="#">Next</a></li>';
+                        } else {
+                            $trade_page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page='.($next_page_no).'">Next</a></li>';
+                        }
+                        $trade_page_nav .= '
+                            </ul>
+                        </nav>';
+                    }
+                }
+                $type_css = '#all, #buy, #sell {
+                    display: none;
+                }';
+            } else {
+                if ($stmt = $con->prepare('SELECT transaction_id, currency_id, currency_purchase_amount, fromWallet, toWallet, remaining_balance, transaction_amount, isTransactionApproved, isTransactionBlocked FROM transactionMaster WHERE userid = ?  ORDER BY transaction_id DESC')) {
+                    $stmt->bind_param('i', $userid);
+                    $stmt->execute();
+                    $stmt->store_result();
+                    if ($stmt->num_rows > 20) {
+                        $i = 0;
+                        $limit = $stmt->num_rows / 20;
+                        $limit = ceil($limit);
+                        if ($page_no > $limit) {
+                            $page_no = $limit;
+                        }
+                        $page_nav .= '<nav aria-label="...">
+                        <ul class="pagination">';
+                    
+                        $next_page_no = $page_no + 1;
+                        $prev_page_no = $page_no - 1;
+                        if ($page_no == 1) {
+                            $page_nav .= '<li class="page-item disabled"><a class="page-link" href="#" tabindex="-1">Previous</a></li>';
+                        } else {
+                            $page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page='.($prev_page_no).'" tabindex="-1">Previous</a></li>';
+                        }
+                        while ($i < $limit) {
+                            if ($page_no == $i + 1) {
+                                $page_nav .= '<li class="page-item active"><a class="page-link" href="transactions.php?page='.($i + 1).'">'.($i + 1).'  <span class="sr-only">(current)</span></a></li>';
+                            } else {
+                                $page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page='.($i + 1).'">'.($i + 1).'</a></li>';
+                            }
+                            ++$i;
+                        }
+                        if ($page_no == $limit) {
+                            $page_nav .= '<li class="page-item disabled"><a class="page-link" href="#">Next</a></li>';
+                        } else {
+                            $page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page='.($next_page_no).'">Next</a></li>';
+                        }
+                        $page_nav .= '
+                            </ul>
+                        </nav>';
+                    }
+                }
+                $type_css = '#buy, #sell, #trade {
+                    display: none;
+                }';
+            }
             if ($stmt = $con->prepare('SELECT transaction_id, currency_id, currency_purchase_amount, fromWallet, toWallet, remaining_balance, transaction_amount, isTransactionApproved, isTransactionBlocked FROM transactionMaster WHERE userid = ?  ORDER BY transaction_id DESC')) {
                 $stmt->bind_param('i', $userid);
                 $stmt->execute();
@@ -88,10 +313,10 @@ if (!isset($_SESSION['email'])) {
                             <td data-th="Login User Agent">'.$toWallet.'</td>
                             <td data-th="Login User Agent">'.$remaining_balance.'</td>
                             <td data-th="Login User Agent">'.$transaction_amount.'</td>';
-                            if ($isTransactionApproved == 0) {
-                                $table .= '<td data-th="Login User Agent">Pending</td>';
-                            } else if ($isTransactionBlocked == 1) {
+                            if ($isTransactionBlocked == 1) {
                                 $table .= '<td data-th="Login User Agent">Blocked</td>';
+                            } else if ($isTransactionApproved == 0) {
+                                $table .= '<td data-th="Login User Agent">Pending</td>';
                             } else {
                                 $table .= '<td data-th="Login User Agent">Approved</td>';
                             }
@@ -175,9 +400,7 @@ if (!isset($_SESSION['email'])) {
         <link href="assets/css/login-history.css" rel="stylesheet">
         <link href="./assets/css/search.css" rel="stylesheet" />
         <style>
-            #trade, #sell, #buy {
-                display: none;
-            }
+            '.$type_css.'
         </style>
 
     </head>
@@ -308,6 +531,10 @@ if (!isset($_SESSION['email'])) {
                       </div>
                     </div>
                   </div>
+                  <!--'.$page_nav.'
+                  '.$buy_page_nav.'
+                  '.$sell_page_nav.'
+                  '.$trade_page_nav.'-->
                 </div>
                 <footer class="footer">
                     <div class="container-fluid">

@@ -79,11 +79,14 @@ if (!isset($_SESSION['email'])) {
                         $from_wallet_balance = $from_wallet_balance - $amount;
                         $purchase_amount = $amount * ($from_currency_price / $to_currency_price);
                         $to_wallet_balance = $to_wallet_balance + $purchase_amount;
-                        if ($stmt = $con->prepare('INSERT INTO transactionMaster (userid, currency_id, currency_purchase_amount, fromWallet, toWallet, remaining_balance, transaction_amount) VALUES (?, ?, ?, ?, ?, ?, ?)')) {
+                        if ($stmt = $con->prepare('INSERT INTO transactionMaster (userid, currency_id, currency_purchase_amount, fromWallet, toWallet, remaining_balance, transaction_amount, transaction_time) VALUES (?, ?, ?, ?, ?, ?, ?, CURDATE())')) {
                             $stmt->bind_param('iiissii', $_SESSION['id'], $to_currency_id, $purchase_amount, $from_wallet, $to_wallet, $from_wallet_balance, $amount);
-                            $stmt->execute();
+                            if ($stmt->execute()) {
+                                echo '<script>alert("Transaction queued"); window.location="transactions.php"</script>';
+                            } else {
+                                echo '<script>alert("Error in transaction"); window.location="dashboard.php"</script>';
+                            }
                             $stmt->close();
-                            echo '<script>alert("Transaction queued"); window.location="transactions.php"</script>';
                             exit();
                         } else {
                             echo '<script>alert("Please try again."); window.location="transactions.php"</script>';
@@ -170,16 +173,18 @@ if (!isset($_SESSION['email'])) {
         $wallet_names = array();
         $wallet_prices = array();
         $wallet_values = array();
+        $wallet_types = array();
         while($row = $result->fetch_assoc()){ 
             array_push($wallet_ids, $row['wallet_id']);
             array_push($wallet_balances, $row['wallet_balance']);
-            if ($stmt_2 = $con->prepare('SELECT wallet_name FROM walletMaster WHERE wallet_id = ?')) {
+            if ($stmt_2 = $con->prepare('SELECT wallet_type, wallet_name FROM walletMaster WHERE wallet_id = ?')) {
                 $stmt_2->bind_param('i', $row['wallet_id']);
                 $stmt_2->execute();
-                $stmt_2->bind_result($wallet_name);
+                $stmt_2->bind_result($wallet_type, $wallet_name);
                 $stmt_2->fetch();
                 $stmt_2->close();
                 array_push($wallet_names, $wallet_name);
+                array_push($wallet_types, $wallet_type);
             }
             if ($stmt_3 = $con->prepare('SELECT currency_price FROM priceMaster WHERE currency_id = ?')) {
                 $stmt_3->bind_param('i', $row['currency_id']);
@@ -202,7 +207,9 @@ if (!isset($_SESSION['email'])) {
         $legends = '';
         $prices = '{';
         $from_transfer_options = '';
+        //$from_transfer_options .= '<option value="">USD</option>';
         $to_transfer_options = '';
+        //$to_transfer_options .= '<option value="">USD</option>';
         for ($i=0; $i < count($wallet_ids); $i++) {
             if ($wallet_balances[$i] !=0) {
                 $series .= '{
@@ -211,10 +218,10 @@ if (!isset($_SESSION['email'])) {
                 },';
                 $labels .= '"'.$wallet_names[$i].'",';
                 $legends .= '<i class="fa fa-circle pie'.($i+1).'"></i>'.$wallet_names[$i].'      ';
-                $from_transfer_options .= '<option>'.$wallet_names[$i].'</option>';
-                $prices .= '"'.$wallet_names[$i].'": "'.$wallet_prices[$i].'",';
+                $from_transfer_options .= '<option value='.$wallet_names[$i].'>'.$wallet_types[$i].' ('.$wallet_names[$i].')</option>';
             }
-            $to_transfer_options .= '<option>'.$wallet_names[$i].'</option>';
+            $to_transfer_options .= '<option value='.$wallet_names[$i].'>'.$wallet_types[$i].' ('.$wallet_names[$i].')</option>';
+            $prices .= '"'.$wallet_names[$i].'": "'.$wallet_prices[$i].'",';
         }
         $series .= ']';
         $labels .= ']';
@@ -242,7 +249,11 @@ if (!isset($_SESSION['email'])) {
     <link href="./assets/vendor/bootstrap_dash/bootstrap.min.css" rel="stylesheet" />
     <link href="./assets/css/light-bootstrap-dashboard.css" rel="stylesheet" />
     <link href="./assets/css/search.css" rel="stylesheet" />
-
+    <style>
+        .transactionSection {
+            height: 450px;
+        }
+    </style>
 </head>
 
 <body>
@@ -356,43 +367,58 @@ if (!isset($_SESSION['email'])) {
             <div class="content">
                 <div class="container-fluid">
                     <div class="row">
-                        <div class="col-md-6" id="tansactionSection">
+                        <div class="col-md-6" class="transactionSection">
                             <div class="card card-tasks">
                                 <div class="card-header h">
                                     <h4 class="card-title show" id="transactionH">Transaction</h4>
-                                    <h4 class="card-title hidden" id="transferFH">Transfer To A Friend</h4>
                                 </div>
                                 <div class="card-header">
-                                    <p class="card-category">Easy transactions on the go / <a href="#transactionSection"
-                                            id="transfer">Transfer</a> to a
-                                        friend.</p>
+                                    <p class="card-category">Easy transactions on the go.</p>
                                 </div>
-                                <div class="t">
+                                <div class="trade t">
                                     <form class="dasht show" action="trade.php" method="POST" id="transaction">
                                         <div class="input-wrapper">
-                                            <select id="inputFrom" class="form-control" name="from-wallet" onchange="updateAmount();">
+                                            <select id="inputFrom" style="height: 60px;" class="form-control" name="from-wallet" onchange="updateAmount();">
                                                 '.$from_transfer_options.'
                                             </select>
                                             <label for="inputFrom">From</label>
                                         </div>
                                         <div class="input-wrapper">
-                                            <select id="inputTo" class="form-control" name="to-wallet" onchange="updateAmount();">
+                                            <select id="inputTo" style="height: 60px;" class="form-control" name="to-wallet" onchange="updateAmount();">
                                                 '.$to_transfer_options.'
                                             </select>
                                             <label for="inputTo">To</label>
                                         </div>
                                         <div class="input-wrapper">
-                                            <input type="number" id="amount" class="transferTo" required name="amount" onchange="updateAmount();" value="0">
+                                            <input type="number" id="amount" min="0" class="transferTo" required name="amount" onchange="updateAmount();" value="0">
                                             <label for="transferTo">Enter amount</label>
                                         </div>
                                         <p class="card-category">You\'ll receive approximately <span id="rec-amount" style="text-decoration-line: underline; text-decoration-style: dotted;">0.0</span> units.<p>
                                         <button class="submit-btn" type="submit" name="submit">Proceed</button>
 
                                     </form>
+                                </div>
+                                <div class="card-footer ">
+                                    <hr>
+                                    <div class="stats">
+                                        <i class="now-ui-icons loader_refresh spin"></i> Secure
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                                    <form class="dasht hidden" action="trade.php" method="POST" id="transferF">
+                        <div class="col-md-6" class="transactionSection">
+                            <div class="card card-tasks">
+                                <div class="card-header h">
+                                    <h4 class="card-title show" id="transactionH">Transfer To A Friend</h4>
+                                </div>
+                                <div class="card-header">
+                                    <p class="card-category">Transfer to any wallet using its wallet address.</p>
+                                </div>
+                                <div class="trade t">
+                                    <form class="dasht" action="trade.php" method="POST" id="transferF">
                                         <div class="input-wrapper">
-                                            <select id="inputFrom" class="form-control" name="">
+                                            <select id="inputFrom" style="height: 60px;" class="form-control" name="">
                                                 <option selected>Choose...</option>
                                                 '.$from_transfer_options.'
                                             </select>
@@ -402,7 +428,10 @@ if (!isset($_SESSION['email'])) {
                                             <input type="text" id="transferTo" class="transferTo" required>
                                             <label for="transferTo">Enter friend\'s wallet address</label>
                                         </div>
-                                        <a href="#transactionSection" id="backToTransaction">Go back</a>
+                                        <div class="input-wrapper">
+                                            <input type="number" id="amount" min="0" class="transferTo" required name="amount" onchange="updateAmount();" value="0">
+                                            <label for="transferTo">Enter amount</label>
+                                        </div>
                                         <button class="submit-btn" type="submit" name="submit">Proceed</button>
 
                                     </form>
@@ -439,7 +468,7 @@ if (!isset($_SESSION['email'])) {
                             </li>
                         </ul>
                         <p class="copyright text-center">
-                            Ã‚Â©
+                            ©
                             <script>
                                 document.write(new Date().getFullYear());
                             </script>

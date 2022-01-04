@@ -5785,7 +5785,7 @@ input:focus+label {
 
 .t {
     position: relative;
-    height: 350px;
+    height: 300px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -5800,6 +5800,22 @@ input:focus+label {
     justify-content: center;
 }
 
+.trade.t {
+    position: relative;
+    height: 420px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.trade.t form {
+    position: absolute;
+    height: 400px;
+    display: flex;
+    flex-direction: column;    
+    align-items: center;
+    justify-content: center;
+}
 .transferTo {
     width: 270px;
     height: 60px;

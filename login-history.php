@@ -45,6 +45,7 @@ if (!isset($_SESSION['email'])) {
             } else {
                 $page_no = 1;
             }
+            $page_nav = '';
             if ($stmt = $con->prepare('SELECT loginDatetime, loginIPv4, loginIPv6, login_location, login_http_user_agent FROM logMaster WHERE userid = ?;')) {
                 $stmt->bind_param('i', $userid);
                 $stmt->execute();
@@ -53,7 +54,10 @@ if (!isset($_SESSION['email'])) {
                     $i = 0;
                     $limit = $stmt->num_rows / 20;
                     $limit = ceil($limit);
-                    $page_nav = '<nav aria-label="...">
+                    if ($page_no > $limit) {
+                        $page_no = $limit;
+                    }
+                    $page_nav .= '<nav aria-label="...">
                         <ul class="pagination">';
                     
                     $next_page_no = $page_no + 1;
