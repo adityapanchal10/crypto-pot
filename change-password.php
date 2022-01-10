@@ -4,9 +4,24 @@ session_start();
 
 include "db_connect.php";
 
+function generate_token() {
+    if( isset( $_SESSION[ 'csrf_token' ] ) ) {
+		destroySessionToken();
+	}
+	$_SESSION[ 'csrf_token' ] = md5( uniqid() );
+}
+
+function check_token() {
+    if( !isset( $_SESSION[ 'csrf_token' ] ) || !isset( $_POST[ 'csrf_token' ] ) || $_SESSION[ 'csrf_token' ] !== $_POST[ 'csrf_token' ] ) {
+        return false;
+    }
+    return true;
+}
+
 if (!isset($_SESSION['email'])) {
     header('Location: login.php');
 } else if ($_SERVER['REQUEST_METHOD'] == "GET") {
+    generate_token();
     if ($stmt = $con->prepare('SELECT userid, remaining_balance, isVerified, is_KYC_request_sent FROM userMaster WHERE email_id = ?')) {
         $stmt->bind_param('s', $_SESSION['email']);
         $stmt->execute();
@@ -191,6 +206,7 @@ if (!isset($_SESSION['email'])) {
                                                             </div>
                                                         </div>
                                                     </div>
+                                                    <input type="hidden" id="csrf-token" min="0" class="form-control" required name="csrf_token" value="'.$_SESSION['csrf_token'].'">
                                                     <button type="submit" class="btn btn-info btn-fill pull-right" name="submit">Change password</button>
                                                     <a href="dashboard.php">Back to Dashboard</a>
                                                     <div class="clearfix"></div>
@@ -259,6 +275,18 @@ if (!isset($_SESSION['email'])) {
     if ($_POST['newPassword'] != $_POST['confirmPassword']) {
         exit('<script>alert("New password and confirm password do not match");  window.location = "change-password.php"</script>');
     }
+    if (!isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '') {
+        setcookie('fnz_cookie_val', 'no', time() + (86400 * 30), "/");
+    }
+    if ($_COOKIE['fnz_cookie_val'] == 'no' || !isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '') {
+        if (!check_token()) {
+            exit('<script>alert("Invalid token");  window.location = "change-password.php"</script>');
+        }
+        if (preg_match('/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,}$/', $_POST['password']) == 0) {
+            echo '<script>alert("Password must have at least 8 characters, 1 uppercase, 1 lowercase and 1 number or special character"); window.location = "change-password.php"</script>';
+            exit;
+        }
+    }    
     if ($stmt = $con->prepare('SELECT password FROM userMaster WHERE email_id = ?')) {
         $stmt->bind_param('s', $_SESSION['email']);
         $stmt->execute();
