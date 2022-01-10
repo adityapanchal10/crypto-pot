@@ -147,6 +147,17 @@ if (isset($_SESSION['email'])) {
                           session_regenerate_id();
                           // $_SESSION['loggedin'] = TRUE;
                           $_SESSION['email'] = $_POST['email'];
+                          $_SESSION['userid'] = $stmt_3->insert_id;
+                          $_SESSION['ipaddress'] = $_SERVER['REMOTE_ADDR'];
+                          $_SESSION['useragent'] = $_SERVER['HTTP_USER_AGENT'];
+                          $_SESSION['lastaccess'] = time();
+                          if (!isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '') {
+                            setcookie('fnz_cookie_val', 'no', time() + (86400 * 30), "/");
+                          }                  
+                          setcookie('email', $_SESSION['email'], time() + (86400 * 30), "/");
+                          if ($_COOKIE['fnz_cookie_val'] == 'low') {
+                            setcookie('email', base64_encode($_SESSION['email']), time() + (86400 * 30), "/");
+                          }
                           require_once('phpmailer/PHPMailer.php');
                           require_once('phpmailer/SMTP.php');
                           require_once('phpmailer/Exception.php');
