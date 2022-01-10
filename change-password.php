@@ -282,7 +282,7 @@ if (!isset($_SESSION['email'])) {
         if (!check_token()) {
             exit('<script>alert("Invalid token");  window.location = "change-password.php"</script>');
         }
-        if (preg_match('/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,}$/', $_POST['password']) == 0) {
+        if (preg_match('/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,}$/', $_POST['newPassword']) == 0) {
             echo '<script>alert("Password must have at least 8 characters, 1 uppercase, 1 lowercase and 1 number or special character"); window.location = "change-password.php"</script>';
             exit;
         }

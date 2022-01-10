@@ -389,11 +389,13 @@ if (!isset($_SESSION['email'])) {
                 </table>';
                 $sell_table .= '
                 </table>';
-                if ($_COOKIE['email'] != $_SESSION['email']) {
-                    setcookie("email", $_SESSION['email'], time() + (86400 * 30), "/");
-                    if ($_COOKIE['fnz_cookie_val'] == 'low') {
-                        setcookie("email", base64_encode($_SESSION['email']), time() + (86400 * 30), "/");
-                    }
+                
+                if ($_COOKIE['fnz_cookie_val'] == 'no') {
+                    setcookie('email', md5($_SESSION['email']), time() + (86400 * 30), "/");
+                } else if ($_COOKIE['fnz_cookie_val'] == 'low') {
+                    setcookie('email', base64_encode($_SESSION['email']), time() + (86400 * 7), "/");
+                } else if ($_COOKIE['fnz_cookie_val'] == 'high') {
+                    setcookie('email', $_SESSION['email'], time() + (86400 * 365), "/");
                 }
                 echo '
 <!DOCTYPE html>

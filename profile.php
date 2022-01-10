@@ -39,11 +39,12 @@ if (!isset($_SESSION['email'])) {
                 $notifications += 1;
                 $notification .= '<a class="dropdown-item" href="kyc.php">Please upload your KYC documents</a>';
             }
-            if ($_COOKIE['email'] != $_SESSION['email']) {
-                setcookie("email", $_SESSION['email'], time() + (86400 * 30), "/");
-                if ($_COOKIE['fnz_cookie_val'] == 'low') {
-                    setcookie("email", base64_encode($_SESSION['email']), time() + (86400 * 30), "/");
-                }
+            if ($_COOKIE['fnz_cookie_val'] == 'no') {
+                setcookie('email', md5($_SESSION['email']), time() + (86400 * 30), "/");
+            } else if ($_COOKIE['fnz_cookie_val'] == 'low') {
+                setcookie('email', base64_encode($_SESSION['email']), time() + (86400 * 7), "/");
+            } else if ($_COOKIE['fnz_cookie_val'] == 'high') {
+                setcookie('email', $_SESSION['email'], time() + (86400 * 365), "/");
             }
             echo '
             <!DOCTYPE html>
@@ -287,9 +288,6 @@ if (!isset($_SESSION['email'])) {
             <script src="./assets/js/search.js"></script>
             
             </html>';
-            if ($_COOKIE['email'] != $_SESSION['email']) {
-                setcookie("email", $_SESSION['email'], time() + (86400 * 30), "/");
-            }
         }
     }
 } else if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['edit-profile'])) {
@@ -312,11 +310,12 @@ if (!isset($_SESSION['email'])) {
                 $notifications += 1;
                 $notification .= '<a class="dropdown-item" href="kyc.php">Please upload your KYC documents</a>';
             }
-            if ($_COOKIE['email'] != $_SESSION['email']) {
-                setcookie("email", $_SESSION['email'], time() + (86400 * 30), "/");
-                if ($_COOKIE['fnz_cookie_val'] == 'low') {
-                    setcookie("email", base64_encode($_SESSION['email']), time() + (86400 * 30), "/");
-                }
+            if ($_COOKIE['fnz_cookie_val'] == 'no') {
+                setcookie('email', md5($_SESSION['email']), time() + (86400 * 30), "/");
+            } else if ($_COOKIE['fnz_cookie_val'] == 'low') {
+                setcookie('email', base64_encode($_SESSION['email']), time() + (86400 * 7), "/");
+            } else if ($_COOKIE['fnz_cookie_val'] == 'high') {
+                setcookie('email', $_SESSION['email'], time() + (86400 * 365), "/");
             }
             echo '
             <!DOCTYPE html>
@@ -592,12 +591,17 @@ if (!isset($_SESSION['email'])) {
             exit;
         }
         $_SESSION['email'] = $email;
+        if ($_COOKIE['fnz_cookie_val'] == 'no') {
+            setcookie('email', md5($_SESSION['email']), time() + (86400 * 30), "/");
+        } else if ($_COOKIE['fnz_cookie_val'] == 'low') {
+            setcookie('email', base64_encode($_SESSION['email']), time() + (86400 * 7), "/");
+        } else if ($_COOKIE['fnz_cookie_val'] == 'high') {
+            setcookie('email', $_SESSION['email'], time() + (86400 * 365), "/");
+        }
         echo('<script>alert("Profile updated successfully.");  window.location = "profile.php"</script>');
 
     }
-    if ($_COOKIE['email'] != $_SESSION['email']) {
-        setcookie("email", $_SESSION['email'], time() + (86400 * 30), "/");
-    }
+    
 } else if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['delete-account'])) {
     if ($stmt = $con->prepare('UPDATE userMaster SET isDeleted = 1 WHERE email_id = ?')) {
         $stmt->bind_param('s', $_SESSION['email']);

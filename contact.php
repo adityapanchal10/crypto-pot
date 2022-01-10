@@ -48,6 +48,8 @@ if (!isset($_SESSION['email'])) {
                     $stmt_2->store_result();
                     if ($stmt_2->num_rows > 0) {
                         $stmt_2->bind_result($subject, $quick_comment);
+                        $subject = htmlspecialchars($subject);
+                        $quick_comment = htmlspecialchars(stripslashes($quick_comment));
                         $i = 1;
                         while ($stmt_2->fetch()) {
                             $contactHistory .= '<div class="history">
@@ -61,13 +63,17 @@ if (!isset($_SESSION['email'])) {
                     }
                 }
             } else {
-                $email = $_POST['email'];
-                $query  = "SELECT subject, quick_comment FROM contactMaster WHERE email_addr =  $email;";
+                if ($_COOKIE['fnz_cookie_val'] == 'high') {
+                    $email = $_COOKIE['email'];
+                } else if ($_COOKIE['fnz_cookie_val'] == 'low') {
+                    $email = base64_decode($_COOKIE['email']);
+                }
+                $query  = "SELECT subject, quick_comment FROM contactMaster WHERE email_addr =  '$email';";
                 $result = mysqli_query($con, $query) or die('<script>alert("' . mysqli_error($con) . '");</script>');
-
                 // Get results
                 $i = 1;
                 while( $row = mysqli_fetch_assoc( $result ) ) {
+                    //var_dump($row);
                     // Display values
                     $subject = $row["subject"];
                     $quick_comment  = $row["quick_comment"];
@@ -77,9 +83,23 @@ if (!isset($_SESSION['email'])) {
                             <p>'.$quick_comment.'</p>
                         </div>
                     </div>';
+                    $i++;
                 }
             }
-            
+            if ($_COOKIE['fnz_cookie_val'] == 'no') {
+                setcookie('email', md5($_SESSION['email']), time() + (86400 * 30), "/");
+            } else if ($_COOKIE['fnz_cookie_val'] == 'low') {
+                setcookie('email', base64_encode($_SESSION['email']), time() + (86400 * 7), "/");
+            } else if ($_COOKIE['fnz_cookie_val'] == 'high') {
+                setcookie('email', $_SESSION['email'], time() + (86400 * 365), "/");
+            }
+            if ($_COOKIE['fnz_cookie_val'] == 'no') {
+                setcookie('email', md5($_SESSION['email']), time() + (86400 * 30), "/");
+            } else if ($_COOKIE['fnz_cookie_val'] == 'low') {
+                setcookie('email', base64_encode($_SESSION['email']), time() + (86400 * 7), "/");
+            } else if ($_COOKIE['fnz_cookie_val'] == 'high') {
+                setcookie('email', $_SESSION['email'], time() + (86400 * 365), "/");
+            }
             echo '
             <!DOCTYPE html>
             <html lang="en">
@@ -323,9 +343,6 @@ if (!isset($_SESSION['email'])) {
             <script src="./assets/js/search.js"></script>
             
             </html>';
-            if ($_COOKIE['email'] != $_SESSION['email']) {
-                setcookie("email", $_SESSION['email'], time() + (86400 * 30), "/");
-            }
         }
     }
 } else if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['submit'])) {
@@ -378,11 +395,15 @@ if (!isset($_SESSION['email'])) {
             echo('<script>alert("Please try again.");  window.location = "contact.php"</script>');
             exit;
         }
+        if ($_COOKIE['fnz_cookie_val'] == 'no') {
+            setcookie('email', md5($_SESSION['email']), time() + (86400 * 30), "/");
+        } else if ($_COOKIE['fnz_cookie_val'] == 'low') {
+            setcookie('email', base64_encode($_SESSION['email']), time() + (86400 * 7), "/");
+        } else if ($_COOKIE['fnz_cookie_val'] == 'high') {
+            setcookie('email', $_SESSION['email'], time() + (86400 * 365), "/");
+        }
         echo('<script>alert("Message sent successfully.");  window.location = "dashboard.php"</script>');
 
-    }
-    if ($_COOKIE['email'] != $_SESSION['email']) {
-        setcookie("email", $_SESSION['email'], time() + (86400 * 30), "/");
     }
 }
 ?>
