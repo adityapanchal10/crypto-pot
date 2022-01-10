@@ -8,7 +8,17 @@ include "db_connect.php";
 if (!isset($_SESSION['email'])) {
 	header('Location: login.php');
 	exit();
+} else if ($_SERVER['REMOTE_ADDR'] != $_SESSION['ipaddress']) {
+    session_unset();
+    session_destroy();
+} else if ($_SERVER['HTTP_USER_AGENT'] != $_SESSION['useragent']) {
+    session_unset();
+    session_destroy();
+} else if (time() > ($_SESSION['lastaccess'] + 3600)) {
+    session_unset();
+    session_destroy();
 } else {
+    $_SESSION['lastaccess'] = time();
     $notifications = 0;
     $notification = "";
     if (!isset($_SESSION['id'])) {
