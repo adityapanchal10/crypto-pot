@@ -23,6 +23,10 @@ function getClientLocation($ip) {
   return $location;
 }
 
+if (!isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '') {
+  setcookie('fnz_cookie_val', 'no', time() + (86400 * 30), "/");
+}
+
 if (!isset($_SESSION['email'])) {
   if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['login'])) {          
     if (!isset($_POST['email'], $_POST['password'], $_POST['g-recaptcha-response']) ) {
@@ -52,19 +56,135 @@ if (!isset($_SESSION['email'])) {
       echo('<script>alert("Please complete the captcha!"); window.location = "login.php";</script>');
       exit;
     }
-
-    if ($stmt = $con->prepare('SELECT userid, password FROM userMaster WHERE email_id = ?')) {
-      $stmt->bind_param('s', $email);
-      $stmt->execute();
-      // Store the result so we can check if the account exists in the database.
-      $stmt->store_result();
+    if ($_COOKIE['fnz_cookie_val'] == 'no') {
+      if ($stmt = $con->prepare('SELECT userid, password FROM userMaster WHERE email_id = ?')) {
+        $stmt->bind_param('s', $email);
+        if (!$stmt->execute()) {
+          if ($_COOKIE['fnz_cookie_val'] == 'no') {
+            echo('<script>alert('.$stmt->error.'); window.location = "login.php";</script>');
+            exit;
+          }
+          echo('<script>alert("Error in executing query!"); window.location = "login.php";</script>');
+          exit;
+        }
+        // Store the result so we can check if the account exists in the database.
+        $stmt->store_result();
+    
+        if ($stmt->num_rows > 0) {
+          $stmt->bind_result($user_id, $password);
+          $stmt->fetch();
+          // Account exists, now we verify the password.
+          // Note: remember to use password_hash in your registration file to store the hashed passwords.
+          $password_hash = hash('sha256', $_POST['password']);
+          if ($password_hash == $password) {
+            // Verification success! User has logged-in!
+            // Create sessions, so we know the user is logged in, they basically act like cookies but remember the data on the server.
+            
+            // echo 'Welcome ' . $_SESSION['name'] . '!';
+            if ($stmt_2 = $con->prepare('UPDATE userMaster SET lastLogin = ?, lastLogin_http_user_agent = ? WHERE email_id = ?')) {
+              $lastLogin = date('Y/m/d H:i:s');
+              $stmt_2->bind_param('sss', $lastLogin, $_SERVER['HTTP_USER_AGENT'], $email);
+              if(!$stmt_2->execute()){
+                if ($_COOKIE['fnz_cookie_val'] == 'no') {
+                  echo('<script>alert('.$stmt_2->error.'); window.location = "login.php";</script>');
+                  exit;
+                }
+                echo('<script>alert("Please try again"); window.location = "login.php";</script>');
+                exit;
+              } else {
+                if ($stmt_3 = $con->prepare('INSERT INTO logMaster (userid, loginDatetime, loginIPv4, loginIPv6, login_location, login_http_user_agent) VALUES (?, ?, ?, ?, ?, ?)')) {
+                  $ip = getClientIP();
+                  $location = getClientLocation($ip);
+                  if(filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
+                    $ipv6 = '0:0:0:0:0:0:0:0';
+                    $stmt_3->bind_param('isssss', $user_id, $lastLogin, $ip, $ipv6, $location, $_SERVER['HTTP_USER_AGENT']);
+                  } else {
+                    $ipv4 = '0.0.0.0';
+                    $stmt_3->bind_param('issss', $user_id, $lastLogin, $ipv4, $ip, $location, $_SERVER['HTTP_USER_AGENT']);
+                  }
+                  if (!$stmt_3->execute()){
+                    if ($_COOKIE['fnz_cookie_val'] == 'no') {
+                      echo('<script>alert('.$stmt_3->error.'); window.location = "login.php";</script>');
+                      exit;
+                    }
+                    echo('<script>alert("Please try again"); window.location = "login.php";</script>');
+                    exit;
+                  } else {
+                    // header('Location: dashboard.php');
+                    session_regenerate_id();
+                    // $_SESSION['loggedin'] = TRUE;
+                    $_SESSION['email'] = $email;
+                    $_SESSION['id'] = $user_id;
+                    $_SESSION['ipaddress'] = $_SERVER['REMOTE_ADDR'];
+                    $_SESSION['useragent'] = $_SERVER['HTTP_USER_AGENT'];
+                    $_SESSION['lastaccess'] = time();
+                    if (!isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '') {
+                      setcookie('fnz_cookie_val', 'no', time() + (86400 * 30), "/");
+                    }                  
+                    setcookie('email', $email, time() + (86400 * 30), "/");
+                    if ($_COOKIE['fnz_cookie_val'] == 'low') {
+                      setcookie('email', base64_encode($email), time() + (86400 * 30), "/");
+                    }
+                    echo('<script>window.location = "dashboard.php";</script>');
+                  }
+                } else {
+                  if ($_COOKIE['fnz_cookie_val'] == 'no') {
+                    echo('<script>alert("Please try again"); window.location = "login.php";</script>');
+                    exit;
+                  }
+                  echo('<script>alert('.$stmt_3->error.'); window.location = "login.php";</script>');
+                  exit;
+                }
+              }
+            } else {
+              if ($_COOKIE['fnz_cookie_val'] == 'no') {
+                echo('<script>alert("An error occured. Please try again"); window.location = "login.php";</script>');
+                exit;
+              }
+              echo('<script>alert('.$stmt_2->error.'); window.location = "login.php";</script>');
+              exit;
+            }
+          } else {
+              // Incorrect password
+              if ($_COOKIE['fnz_cookie_val'] == 'no') {
+                echo('<script>alert("Incorrect email and/or password"); window.location = "login.php";</script>');
+                exit;
+              }
+              echo('<script>alert("The password you\'ve entered is incorrect. Please try again."); window.location = "login.php";</script>');
+              exit;
+          }
+        } else {
+            // Incorrect email
+            if ($_COOKIE['fnz_cookie_val'] == 'no') {
+              echo('<script>alert("Incorrect email and/or password"); window.location = "login.php";</script>');
+              exit;
+            }
+            echo('<script>alert("The email you\'ve entered does not match our records. Please try again."); window.location = "login.php";</script>');
+            exit;
+        }
   
-      if ($stmt->num_rows > 0) {
-        $stmt->bind_result($user_id, $password);
-        $stmt->fetch();
-        // Account exists, now we verify the password.
-        // Note: remember to use password_hash in your registration file to store the hashed passwords.
-        $password_hash = hash('sha256', $_POST['password']);
+          //$stmt->close();
+      } else {
+        if ($_COOKIE['fnz_cookie_val'] == 'no') {
+          echo('<script>alert("An error occured. Please try again"); window.location = "login.php";</script>');
+          exit;
+        }
+        echo('<script>alert('.$stmt->error.'); window.location = "login.php";</script>');
+        exit;
+      }
+    } else {
+      $email = $_POST['email'];
+      $query  = "SELECT userid, password FROM userMaster WHERE email_id = '$email';";
+			$result = mysqli_query($con, $query) or die('<script>alert("' . mysqli_error($con) . '");window.location=login.php</script>');
+
+			// Get results
+			while( $row = mysqli_fetch_assoc( $result ) ) {
+				// Display values
+				$user_id = $row["userid"];
+				$password  = $row["password"];
+
+				// Feedback for end user
+				$password_hash = hash('sha256', $_POST['password']);
         if ($password_hash == $password) {
           // Verification success! User has logged-in!
           // Create sessions, so we know the user is logged in, they basically act like cookies but remember the data on the server.
@@ -72,8 +192,20 @@ if (!isset($_SESSION['email'])) {
           // echo 'Welcome ' . $_SESSION['name'] . '!';
           if ($stmt_2 = $con->prepare('UPDATE userMaster SET lastLogin = ?, lastLogin_http_user_agent = ? WHERE email_id = ?')) {
             $lastLogin = date('Y/m/d H:i:s');
-            $stmt_2->bind_param('sss', $lastLogin, $_SERVER['HTTP_USER_AGENT'], $email);
+            if (!isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '') {
+              setcookie('fnz_cookie_val', 'no', time() + (86400 * 30), "/");
+            }
+            if ($_COOKIE['fnz_cookie_val'] == 'no' || !isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '') {
+                $user_agent = htmlspecialchars($_SERVER['HTTP_USER_AGENT'], ENT_QUOTES, 'UTF-8');
+            } else {
+                $user_agent = $_SERVER['HTTP_USER_AGENT'];
+            }
+            $stmt_2->bind_param('sss', $lastLogin, $user_agent, $email);
             if(!$stmt_2->execute()){
+              if ($_COOKIE['fnz_cookie_val'] == 'no') {
+                echo('<script>alert('.$stmt_2->error.'); window.location = "login.php";</script>');
+                exit;
+              }
               echo('<script>alert("Please try again"); window.location = "login.php";</script>');
               exit;
             } else {
@@ -88,6 +220,10 @@ if (!isset($_SESSION['email'])) {
                   $stmt_3->bind_param('issss', $user_id, $lastLogin, $ipv4, $ip, $location, $_SERVER['HTTP_USER_AGENT']);
                 }
                 if (!$stmt_3->execute()){
+                  if ($_COOKIE['fnz_cookie_val'] == 'no') {
+                    echo('<script>alert('.$stmt_3->error.'); window.location = "login.php";</script>');
+                    exit;
+                  }
                   echo('<script>alert("Please try again"); window.location = "login.php";</script>');
                   exit;
                 } else {
@@ -96,27 +232,49 @@ if (!isset($_SESSION['email'])) {
                   // $_SESSION['loggedin'] = TRUE;
                   $_SESSION['email'] = $email;
                   $_SESSION['id'] = $user_id;
+                  $_SESSION['ipaddress'] = $_SERVER['REMOTE_ADDR'];
+                  $_SESSION['useragent'] = $_SERVER['HTTP_USER_AGENT'];
+                  $_SESSION['lastaccess'] = time();
+                  if (!isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '') {
+                    setcookie('fnz_cookie_val', 'no', time() + (86400 * 30), "/");
+                  }                  
+                  setcookie('email', $email, time() + (86400 * 30), "/");
+                  if ($_COOKIE['fnz_cookie_val'] == 'low') {
+                    setcookie('email', base64_encode($email), time() + (86400 * 30), "/");
+                  }
+                  
                   echo('<script>window.location = "dashboard.php";</script>');
                 }
+              } else {
+                if ($_COOKIE['fnz_cookie_val'] == 'no') {
+                  echo('<script>alert("Please try again"); window.location = "login.php";</script>');
+                  exit;
+                }
+                echo('<script>alert('.$stmt_3->error.'); window.location = "login.php";</script>');
+                exit;
               }
             }
           } else {
-            echo('<script>alert("Please try again"); window.location = "login.php";</script>');
+            if ($_COOKIE['fnz_cookie_val'] == 'no') {
+              echo('<script>alert("An error occured. Please try again"); window.location = "login.php";</script>');
+              exit;
+            }
+            echo('<script>alert('.$stmt_2->error.'); window.location = "login.php";</script>');
             exit;
           }
         } else {
             // Incorrect password
-            echo('<script>alert("Incorrect email and/or password"); window.location = "login.php";</script>');
+            if ($_COOKIE['fnz_cookie_val'] == 'no') {
+              echo('<script>alert("Incorrect email and/or password"); window.location = "login.php";</script>');
+              exit;
+            }
+            echo('<script>alert("The password you\'ve entered is incorrect. Please try again."); window.location = "login.php";</script>');
             exit;
         }
-      } else {
-          // Incorrect email
-          echo('<script>alert("Incorrect email and/or password"); window.location = "login.php";</script>');
-          exit;
-      }
-
-        //$stmt->close();
+			}
     }
+
+    
   
   } else {
         echo '<!DOCTYPE html>
