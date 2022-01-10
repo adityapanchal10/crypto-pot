@@ -577,12 +577,6 @@ if (!isset($_SESSION['email'])) {
                 $(".l3").addClass("fadeout");
                 $(".l3").addClass("show");
               });
-        
-              $(".l4").submit(function () {
-                console.log("nada");
-                $(".t1").toast()
-                $(".t1").toast("show")
-              })
             });
 
             $("#tol5").click(function () {

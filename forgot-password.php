@@ -212,15 +212,6 @@ if (!isset($_GET['email'])) {
                                     $(".l3").addClass("show");
                                 });
                             
-                                $("#backTol2").click(function () {
-                                    $(".l3").removeClass("show");
-                                    $(".l3").addClass("fadeout");
-                                    $(".l3").addClass("hidden");
-                                    $(".l2").removeClass("hidden");
-                                    $(".l2").addClass("fadeout");
-                                    $(".l2").addClass("show");
-                                });
-                            
                                 $("#tol4").click(function () {
                                     $(".l3").removeClass("show");
                                     $(".l3").addClass("fadeout");
@@ -414,7 +405,7 @@ if (!isset($_GET['email'])) {
                                         <input type="text" class="input" name="email-verification-code">
                                         </div>
                                     </div>
-                                    <a href="#" id="backTol2" class="forgot">Go back</a>
+                                    <a href="login.php" id="backTol2" class="forgot">Go back</a>
                                     <input type="submit" id="submit" class="btn" value="Submit" name="submit">
                                     </form>
                             
@@ -483,15 +474,6 @@ if (!isset($_GET['email'])) {
                                     $(".l3").removeClass("hidden");
                                     $(".l3").addClass("fadeout");
                                     $(".l3").addClass("show");
-                                });
-                            
-                                $("#backTol2").click(function () {
-                                    $(".l3").removeClass("show");
-                                    $(".l3").addClass("fadeout");
-                                    $(".l3").addClass("hidden");
-                                    $(".l2").removeClass("hidden");
-                                    $(".l2").addClass("fadeout");
-                                    $(".l2").addClass("show");
                                 });
                             
                                 $("#tol4").click(function () {
