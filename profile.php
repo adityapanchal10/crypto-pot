@@ -1,6 +1,20 @@
 <?php
 
-session_start();
+session_start(); // ip + machine fingerprinting IP + Machine Fingerprint screensize, canvas etc. screensize, canvas etc.
+
+function generate_token() {
+    if( isset( $_SESSION[ 'csrf_token' ] ) ) {
+		destroySessionToken();
+	}
+	$_SESSION[ 'csrf_token' ] = md5( uniqid() );
+}
+
+function check_token() {
+    if( !isset( $_SESSION[ 'csrf_token' ] ) || !isset( $_POST[ 'csrf_token' ] ) || $_SESSION[ 'csrf_token' ] !== $_POST[ 'csrf_token' ] ) {
+        return false;
+    }
+    return true;
+}
 
 include "db_connect.php";
 
@@ -24,6 +38,12 @@ if (!isset($_SESSION['email'])) {
             if ($is_KYC_request_sent == 0) {
                 $notifications += 1;
                 $notification .= '<a class="dropdown-item" href="kyc.php">Please upload your KYC documents</a>';
+            }
+            if ($_COOKIE['email'] != $_SESSION['email']) {
+                setcookie("email", $_SESSION['email'], time() + (86400 * 30), "/");
+                if ($_COOKIE['fnz_cookie_val'] == 'low') {
+                    setcookie("email", base64_encode($_SESSION['email']), time() + (86400 * 30), "/");
+                }
             }
             echo '
             <!DOCTYPE html>
@@ -267,9 +287,13 @@ if (!isset($_SESSION['email'])) {
             <script src="./assets/js/search.js"></script>
             
             </html>';
+            if ($_COOKIE['email'] != $_SESSION['email']) {
+                setcookie("email", $_SESSION['email'], time() + (86400 * 30), "/");
+            }
         }
     }
 } else if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['edit-profile'])) {
+    generate_token();
     if ($stmt = $con->prepare('SELECT userid, first_name, last_name, email_id, country, mobile, timezone, remaining_balance, isVerified, is_KYC_request_sent FROM userMaster WHERE email_id = ?')) {
         $stmt->bind_param('s', $_SESSION['email']);
         $stmt->execute();
@@ -287,6 +311,12 @@ if (!isset($_SESSION['email'])) {
             if ($is_KYC_request_sent == 0) {
                 $notifications += 1;
                 $notification .= '<a class="dropdown-item" href="kyc.php">Please upload your KYC documents</a>';
+            }
+            if ($_COOKIE['email'] != $_SESSION['email']) {
+                setcookie("email", $_SESSION['email'], time() + (86400 * 30), "/");
+                if ($_COOKIE['fnz_cookie_val'] == 'low') {
+                    setcookie("email", base64_encode($_SESSION['email']), time() + (86400 * 30), "/");
+                }
             }
             echo '
             <!DOCTYPE html>
@@ -471,6 +501,7 @@ if (!isset($_SESSION['email'])) {
                                                             </div>
                                                         </div>
                                                     </div>
+                                                    <input type="hidden" id="csrf-token" min="0" class="form-control" required name="csrf_token" value="'.$_SESSION['csrf_token'].'">
                                                     <button type="submit" class="btn btn-info btn-fill pull-right" name="submit">Update Profile</button>
                                                     <button type="submit" class="btn btn-danger btn-fill pull-right" style="margin-right:10px" name="delete-account">Delete Account</button>
                                                     <a href="dashboard.php">Back to Dashboard</a>
@@ -537,14 +568,35 @@ if (!isset($_SESSION['email'])) {
     if (empty($_POST['fname']) || empty($_POST['lname']) || empty($_POST['email']) || empty($_POST['mobile']) || empty($_POST['country']) || empty($_POST['timezone'])) {
         exit('<script>alert("Please fill in all the fields");  window.location = "profile.php"</script>');
     }
+    
+    if (!isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '') {
+        setcookie('fnz_cookie_val', 'no', time() + (86400 * 30), "/");
+    }
+
+    if ($_COOKIE['fnz_cookie_val'] == 'no' || !isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '' || !isset($_COOKIE['email'])) {
+        $email = $_SESSION['email'];
+    } else if ($_COOKIE['fnz_cookie_val'] == 'low') {
+        $email = base64_decode($_COOKIE['email']);
+    } else if ($_COOKIE['fnz_cookie_val'] == 'high') {
+        $email = $_COOKIE['email'];
+    }
+    if ($_COOKIE['fnz_cookie_val'] == 'no' || !isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '') {
+        if (!check_token()) {
+            exit('<script>alert("Invalid token");  window.location = "change-password.php"</script>');
+        }
+    }    
     if ($stmt = $con->prepare('UPDATE userMaster SET first_name = ?, last_name = ?, email_id = ?, country = ?, mobile = ?, timezone = ? WHERE email_id = ?')) {
-        $stmt->bind_param('sssssss', $_POST['fname'], $_POST['lname'], $_POST['email'], $_POST['country'], $_POST['mobile'], $_POST['timezone'], $_SESSION['email']);
+        $stmt->bind_param('sssssss', $_POST['fname'], $_POST['lname'], $_POST['email'], $_POST['country'], $_POST['mobile'], $_POST['timezone'], $email);
         if(!$stmt->execute()){
             echo('<script>alert("Please try again.");  window.location = "profile.php"</script>');
             exit;
         }
+        $_SESSION['email'] = $email;
         echo('<script>alert("Profile updated successfully.");  window.location = "profile.php"</script>');
 
+    }
+    if ($_COOKIE['email'] != $_SESSION['email']) {
+        setcookie("email", $_SESSION['email'], time() + (86400 * 30), "/");
     }
 } else if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['delete-account'])) {
     if ($stmt = $con->prepare('UPDATE userMaster SET isDeleted = 1 WHERE email_id = ?')) {
@@ -554,6 +606,9 @@ if (!isset($_SESSION['email'])) {
             exit;
         }
         echo('<script>alert("Account deleted successfully.");  window.location = "index.php"</script>');
+    }
+    if ($_COOKIE['email'] != $_SESSION['email']) {
+        setcookie("email", $_SESSION['email'], time() + (86400 * 30), "/");
     }
 }
 ?>
