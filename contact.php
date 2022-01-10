@@ -25,6 +25,61 @@ if (!isset($_SESSION['email'])) {
                 $notifications += 1;
                 $notification .= '<a class="dropdown-item" href="kyc.php">Please upload your KYC documents</a>';
             }
+
+            if (!isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '') {
+                setcookie('fnz_cookie_val', 'no', time() + (86400 * 30), "/");
+            }
+        
+            if ($_COOKIE['fnz_cookie_val'] == 'no' || !isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '' || !isset($_COOKIE['email'])) {
+                $email = $_SESSION['email'];
+            } else if ($_COOKIE['fnz_cookie_val'] == 'low') {
+                $email = base64_decode($_COOKIE['email']);
+            } else if ($_COOKIE['fnz_cookie_val'] == 'high') {
+                $email = $_COOKIE['email'];
+            }
+            $contactHistory = '';
+            if (!isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '') {
+                setcookie('fnz_cookie_val', 'no', time() + (86400 * 30), "/");
+            }
+            if ($_COOKIE['fnz_cookie_val'] == 'no' || !isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '' || !isset($_COOKIE['email'])) {
+                if ($stmt_2 = $con->prepare('SELECT subject, quick_comment FROM contactMaster WHERE email_addr = ?')) {
+                    $stmt_2->bind_param('s', $email);
+                    $stmt_2->execute();
+                    $stmt_2->store_result();
+                    if ($stmt_2->num_rows > 0) {
+                        $stmt_2->bind_result($subject, $quick_comment);
+                        $i = 1;
+                        while ($stmt_2->fetch()) {
+                            $contactHistory .= '<div class="history">
+                                <a href="#contact'.$i.'" data-toggle="collapse">'.$subject.'</a>
+                                <div id="contact'.$i.'" class="collapse">
+                                    <p>'.$quick_comment.'</p>
+                                </div>
+                            </div>';
+                            $i++;
+                        }
+                    }
+                }
+            } else {
+                $email = $_POST['email'];
+                $query  = "SELECT subject, quick_comment FROM contactMaster WHERE email_addr =  $email;";
+                $result = mysqli_query($con, $query) or die('<script>alert("' . mysqli_error($con) . '");</script>');
+
+                // Get results
+                $i = 1;
+                while( $row = mysqli_fetch_assoc( $result ) ) {
+                    // Display values
+                    $subject = $row["subject"];
+                    $quick_comment  = $row["quick_comment"];
+                    $contactHistory .= '<div class="history">
+                        <a href="#contact'.$i.'" data-toggle="collapse">'.$subject.'</a>
+                        <div id="contact'.$i.'" class="collapse">
+                            <p>'.$quick_comment.'</p>
+                        </div>
+                    </div>';
+                }
+            }
+            
             echo '
             <!DOCTYPE html>
             <html lang="en">
@@ -173,14 +228,14 @@ if (!isset($_SESSION['email'])) {
                                                         </div>
                                                     </div>
             
-                                                    <div class="row">
+                                                    <!-- <div class="row">
                                                         <div class="col-md-6 pr-1">
                                                             <div class="form-group">
                                                                 <label for="exampleInputEmail1">Email address</label>
                                                                 <input type="email" class="form-control" placeholder="Email" value="'.$email_id.'" name="email">
                                                             </div>
                                                         </div>
-                                                    </div>
+                                                    </div> -->
             
                                                     <div class="row">
                                                         <div class="col-md-6 pr-1">
@@ -204,6 +259,15 @@ if (!isset($_SESSION['email'])) {
                                                     <a href="dashboard.php">Back to Dashboard</a>
                                                     <div class="clearfix"></div>
                                                 </form>
+                                            </div>
+                                        </div>
+                                        <div class="contactHistory">
+                                            <br />
+                                            <a href="#contactHistory" data-toggle="collapse">
+                                                <h4>Previous Contact History.</h4>
+                                            </a>
+                                            <div id="contactHistory" class="collapse">
+                                                '.$contactHistory.'
                                             </div>
                                         </div>
                                     </div>
@@ -259,29 +323,66 @@ if (!isset($_SESSION['email'])) {
             <script src="./assets/js/search.js"></script>
             
             </html>';
+            if ($_COOKIE['email'] != $_SESSION['email']) {
+                setcookie("email", $_SESSION['email'], time() + (86400 * 30), "/");
+            }
         }
     }
 } else if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['submit'])) {
-    if (empty($_POST['uname'])) {
-        exit("Please enter your name");
-    } else if (empty($_POST['email'])) {
-        exit("Please enter your email");
-    } else if (empty($_POST['subject'])) {
-        exit("Please enter your subject");
-    } else if (empty($_POST['message'])) {
-        exit("Please enter your message");
+
+    if (!isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '') {
+        setcookie('fnz_cookie_val', 'no', time() + (86400 * 30), "/");
     }
-    if (empty($_POST['uname']) || empty($_POST['email']) || empty($_POST['subject']) || empty($_POST['message'])) {
+
+    // if (empty($_POST['uname'])) {
+    //     exit("Please enter your name");
+    // } else if (empty($_POST['email'])) {
+    //     exit("Please enter your email");
+    // } else if (empty($_POST['subject'])) {
+    //     exit("Please enter your subject");
+    // } else if (empty($_POST['message'])) {
+    //     exit("Please enter your message");
+    // }
+    if (empty($_POST['uname']) || empty($_POST['subject']) || empty($_POST['message'])) {
         exit('<script>alert("Please fill in all the fields");  window.location = "contact.php"</script>');
     }
+    if ($_COOKIE['fnz_cookie_val'] == 'high') {
+        $message = $_POST['message'];       
+    } else if ($_COOKIE['fnz_cookie_val'] == 'low') {
+        $message = $_POST['message'];        
+        $message = stripslashes( $message );
+    } 
+    else {
+        $message = $_POST['message'];        
+        $message = stripslashes( $message );
+        // $message = filter_var($message, FILTER_SANITIZE_STRING);;
+        $message = htmlspecialchars( $message );
+    }
+    if ($_COOKIE['fnz_cookie_val'] == 'no' || !isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '' || !isset($_COOKIE['email'])) {
+        $email_id = $_SESSION['email'];
+    } else if ($_COOKIE['fnz_cookie_val'] == 'low') {
+        $email_id = base64_decode($_COOKIE['email']);
+    } else if ($_COOKIE['fnz_cookie_val'] == 'high') {
+        $email_id = $_COOKIE['email'];
+    }
+    // $email_id = $_POST['email'];
+    // $email_id = filter_var($email_id, FILTER_SANITIZE_EMAIL);
+    $uname = $_POST['uname'];
+    $uname = filter_var($uname, FILTER_SANITIZE_STRING);
+    $subject = $_POST['subject'];
+    $subject = filter_var($subject, FILTER_SANITIZE_STRING);
+    
     if ($stmt = $con->prepare('INSERT INTO contactMaster (first_name, email_addr, subject, quick_comment) VALUES (?, ?, ?, ?)')) {
-        $stmt->bind_param('ssss', $_POST['uname'], $_POST['email'], $_POST['subject'], $_POST['message']);
+        $stmt->bind_param('ssss', $uname, $email_id, $subject, $message);
         if(!$stmt->execute()){
             echo('<script>alert("Please try again.");  window.location = "contact.php"</script>');
             exit;
         }
         echo('<script>alert("Message sent successfully.");  window.location = "dashboard.php"</script>');
 
+    }
+    if ($_COOKIE['email'] != $_SESSION['email']) {
+        setcookie("email", $_SESSION['email'], time() + (86400 * 30), "/");
     }
 }
 ?>
