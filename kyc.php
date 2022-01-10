@@ -2,13 +2,51 @@
 
 session_start();
 
+function generate_token() {
+    if( isset( $_SESSION[ 'csrf_token' ] ) ) {
+		destroySessionToken();
+	}
+	$_SESSION[ 'csrf_token' ] = md5( uniqid() );
+}
+
+function check_token() {
+    if( !isset( $_SESSION[ 'csrf_token' ] ) || !isset( $_POST[ 'csrf_token' ] ) || $_SESSION[ 'csrf_token' ] !== $_POST[ 'csrf_token' ] ) {
+        return false;
+    }
+    return true;
+}
+
 if (!isset($_SESSION['email']) || !isset($_SESSION['id'])) {
 	header('Location: login.php');
 	exit();
-} else if ($_SERVER['REQUEST_METHOD'] == "GET") {
-    $email = $_SESSION['email'];
+} else if ($_SERVER['REQUEST_METHOD'] == "GET" && isset($_GET['type'])) {
+    if (!isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '') {
+        setcookie('fnz_cookie_val', 'no', time() + (86400 * 30), "/");
+    }
+
+    if ($_COOKIE['fnz_cookie_val'] == 'no' || !isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '' || !isset($_COOKIE['email'])) {
+        $email = $_SESSION['email'];
+    } else if ($_COOKIE['fnz_cookie_val'] == 'low') {
+        $email = base64_decode($_COOKIE['email']);
+    } else if ($_COOKIE['fnz_cookie_val'] == 'high') {
+        $email = $_COOKIE['email'];
+    }
+    if ($_COOKIE['fnz_cookie_val'] == 'no' || !isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '' || !isset($_GET['type'])) {
+        $type = 'view.php';
+    } else {
+        $type = $_GET['type'];
+    }
+
+    if ($type != 'view.php') {
+        $type = 'kyc/'.$_GET['type'];
+        readfile($type);
+        exit;
+    }
+
+    // $email = $_SESSION['email'];
 
     include "db_connect.php";
+
     if ($stmt = $con->prepare('SELECT remaining_balance, isVerified, is_KYC_request_sent, isKYCverified FROM userMaster WHERE email_id = ?')) {
         $notification = '';
         $notifications = 0;
@@ -619,6 +657,47 @@ if (!isset($_SESSION['email']) || !isset($_SESSION['id'])) {
                 <script src="./assets/js/search.js"></script>
                 </html>';
             } else {
+                header('Location: kyc.php');
+            }
+        }
+    }
+} else if ($_SERVER['REQUEST_METHOD'] == "GET" && !isset($_GET['type'])) {
+    $email = $_SESSION['email'];
+    generate_token();
+    include "db_connect.php";
+    if ($stmt = $con->prepare('SELECT remaining_balance, isVerified, is_KYC_request_sent, isKYCverified FROM userMaster WHERE email_id = ?')) {
+        $notification = '';
+        $notifications = 0;
+        $stmt->bind_param('s', $_SESSION['email']);
+        $stmt->execute();
+        // Store the result so we can check if the account exists in the database.
+        $stmt->store_result();
+
+        if ($stmt->num_rows > 0) {
+            $stmt->bind_result($balance, $isVerified, $kyc_request, $kyc_verified);
+            $stmt->fetch();
+            $stmt->close();
+            if ($isVerified == 0) {
+              $notifications += 1;
+              $notification .= '<a class="dropdown-item" href="verify-email.php">Please verify your account</a>';
+            }
+            if ($kyc_request == 0) {
+                $notifications += 1;
+                $notification .= '<a class="dropdown-item" href="kyc.php">Please upload your KYC documents</a>';
+            }
+            if ($stmt = $con->prepare('SELECT fname, mname, lname, email, gender, addressLine1, addressLine2, city, state, zipCode, documentType, document FROM kycMaster WHERE userid = ?')) {
+                $stmt->bind_param('i', $_SESSION['id']);
+                $stmt->execute();
+                $stmt->bind_result($fname, $mname, $lname, $email, $gender, $addressLine1, $addressLine2, $city, $state, $zipCode, $documentType, $document);
+                $stmt->fetch();
+                $document = base64_encode($document);
+                $stmt->close();
+            }
+            if ($kyc_verified == 1) {
+                header('Location: kyc.php?type=view.php');
+            } else if ($kyc_request == 1) {
+                header('Location: kyc.php?type=view.php');
+            } else {
                 echo '
                 <!DOCTYPE html>
 
@@ -844,6 +923,7 @@ if (!isset($_SESSION['email']) || !isset($_SESSION['id'])) {
                                     </label>
                                 </div>
                             </div>
+                            <input type="hidden" id="csrf-token" min="0" class="form-control" required name="csrf_token" value="'.$_SESSION['csrf_token'].'">
                             <button type="submit" class="btn btn-primary gokyc"name="kyc-submit">Submit</button>
                         </div>
                 
@@ -954,6 +1034,15 @@ if (!isset($_SESSION['email']) || !isset($_SESSION['id'])) {
 } else if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['kyc-submit'])) {
     $email = $_SESSION['email'];
     $userid = $_SESSION['id'];
+
+    if (!isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '') {
+        setcookie('fnz_cookie_val', 'no', time() + (86400 * 30), "/");
+    }
+    if ($_COOKIE['fnz_cookie_val'] == 'no' || !isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '') {
+        if (!check_token()) {
+            exit('<script>alert("Invalid token");  window.location = "change-password.php"</script>');
+        }
+    }    
 
     include "db_connect.php";
     if ($stmt = $con->prepare('SELECT is_KYC_request_sent, isKYCverified FROM userMaster WHERE email_id = ?')) {
