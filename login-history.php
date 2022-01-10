@@ -7,10 +7,22 @@ include "db_connect.php";
 if (!isset($_SESSION['email'])) {
     header('Location: login.php');
 } else {
+    if (!isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '') {
+        setcookie('fnz_cookie_val', 'no', time() + (86400 * 30), "/");
+    }
+
+    if ($_COOKIE['fnz_cookie_val'] == 'no' || !isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '' || !isset($_COOKIE['email'])) {
+        $email = $_SESSION['email'];
+    } else if ($_COOKIE['fnz_cookie_val'] == 'low') {
+        $email = base64_decode($_COOKIE['email']);
+    } else if ($_COOKIE['fnz_cookie_val'] == 'high') {
+        $email = $_COOKIE['email'];
+    }
+
     if ($stmt = $con->prepare('SELECT userid, remaining_balance, isVerified, is_KYC_request_sent FROM userMaster WHERE email_id = ?')) {
       $notification = '';
       $notifications = 0;
-        $stmt->bind_param('s', $_SESSION['email']);
+        $stmt->bind_param('s', $email);
         $stmt->execute();
         // Store the result so we can check if the account exists in the database.
         $stmt->store_result();
@@ -116,6 +128,12 @@ if (!isset($_SESSION['email'])) {
                 }
                 $table .= '
                 </table>';
+                if ($_COOKIE['email'] != $_SESSION['email']) {
+                    setcookie("email", $_SESSION['email'], time() + (86400 * 30), "/");
+                    if ($_COOKIE['fnz_cookie_val'] == 'low') {
+                        setcookie("email", base64_encode($_SESSION['email']), time() + (86400 * 30), "/");
+                    }
+                }
                 echo '
                 <!DOCTYPE html>
 
