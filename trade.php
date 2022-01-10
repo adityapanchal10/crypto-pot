@@ -7,9 +7,31 @@ include "db_connect.php";
 if (!isset($_SESSION['email'])) {
 	header('Location: login.php');
 	exit();
+} else if ($_SERVER['REMOTE_ADDR'] != $_SESSION['ipaddress']) {
+    session_unset();
+    session_destroy();
+} else if ($_SERVER['HTTP_USER_AGENT'] != $_SESSION['useragent']) {
+    session_unset();
+    session_destroy();
+} else if (time() > ($_SESSION['lastaccess'] + 3600)) {
+    session_unset();
+    session_destroy();
 } else if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['submit'])) {
+    if (!isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '') {
+        setcookie('fnz_cookie_val', 'no', time() + (86400 * 30), "/");
+    }
+    if ($_COOKIE['fnz_cookie_val'] == 'no' || !isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '' || !isset($_COOKIE['email']) || !isset($_COOKIE['id'])) {
+        $email = $_SESSION['email'];
+        $id = $_SESSION['id'];
+    } else if ($_COOKIE['fnz_cookie_val'] == 'low') {
+        $email = base64_decode($_COOKIE['email']);
+        $id = base64_decode($_COOKIE['id']);
+    } else if ($_COOKIE['fnz_cookie_val'] == 'high') {
+        $email = $_COOKIE['email'];
+        $id = $_COOKIE['id'];
+    }
     if ($stmt = $con->prepare('SELECT remaining_balance, isKYCverified FROM userMaster WHERE email_id = ?')) {
-        $stmt->bind_param('s', $_SESSION['email']);
+        $stmt->bind_param('s', $email);
         $stmt->execute();
         // Store the result so we can check if the account exists in the database.
         $stmt->store_result();
@@ -34,7 +56,7 @@ if (!isset($_SESSION['email'])) {
                         $stmt->fetch();
                         $stmt->close();
                         if ($stmt = $con->prepare('SELECT wallet_id, wallet_balance FROM walletMappingMaster WHERE currency_id = ? AND userid = ?')) {
-                          $stmt->bind_param('ii', $from_currency_id, $_SESSION['id']);
+                          $stmt->bind_param('ii', $from_currency_id, $id);
                           $stmt->execute();
                           $stmt->store_result();
                           $stmt->bind_result($from_wallet_id, $from_wallet_balance);
@@ -57,7 +79,7 @@ if (!isset($_SESSION['email'])) {
                         $stmt->fetch();
                         $stmt->close();
                         if ($stmt = $con->prepare('SELECT wallet_id, wallet_balance FROM walletMappingMaster WHERE currency_id = ? AND userid = ?')) {
-                            $stmt->bind_param('ii', $to_currency_id, $_SESSION['id']);
+                            $stmt->bind_param('ii', $to_currency_id, $id);
                             $stmt->execute();
                             $stmt->store_result();
                             $stmt->bind_result($to_wallet_id, $to_wallet_balance);
@@ -77,10 +99,17 @@ if (!isset($_SESSION['email'])) {
                         exit();
                     } else {
                         $from_wallet_balance = $from_wallet_balance - $amount;
-                        $purchase_amount = $amount * ($from_currency_price / $to_currency_price);
+                        if (!isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '') {
+                            setcookie('fnz_cookie_val', 'no', time() + (86400 * 30), "/");
+                        }
+                        if ($_COOKIE['fnz_cookie_val'] == 'no' || !isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '' || !isset($_COOKIE['email'])) {
+                            $purchase_amount = $amount * ($from_currency_price / $to_currency_price);
+                        } else {
+                            $purchase_amount = $_POST['buy-amount'];
+                        }
                         $to_wallet_balance = $to_wallet_balance + $purchase_amount;
                         if ($stmt = $con->prepare('INSERT INTO transactionMaster (userid, currency_id, currency_purchase_amount, fromWallet, toWallet, remaining_balance, transaction_amount, transaction_time) VALUES (?, ?, ?, ?, ?, ?, ?, CURDATE())')) {
-                            $stmt->bind_param('iiissii', $_SESSION['id'], $to_currency_id, $purchase_amount, $from_wallet, $to_wallet, $from_wallet_balance, $amount);
+                            $stmt->bind_param('iiissii', $id, $to_currency_id, $purchase_amount, $from_wallet, $to_wallet, $from_wallet_balance, $amount);
                             if ($stmt->execute()) {
                                 echo '<script>alert("Transaction queued"); window.location="transactions.php"</script>';
                             } else {
@@ -393,6 +422,7 @@ if (!isset($_SESSION['email'])) {
                                             <input type="number" id="amount" min="0" class="transferTo" required name="amount" onchange="updateAmount();" value="0">
                                             <label for="transferTo">Enter amount</label>
                                         </div>
+                                        <input type="hidden" id="buy-amount" min="0" class="transferTo" required name="buy-amount" value="0">
                                         <p class="card-category">You\'ll receive approximately <span id="rec-amount" style="text-decoration-line: underline; text-decoration-style: dotted;">0.0</span> units.<p>
                                         <button class="submit-btn" type="submit" name="submit">Proceed</button>
 
@@ -506,6 +536,8 @@ function updateAmount() {
     var rec_amount = document.getElementById("rec-amount");
     var conversion_rate = prices[from] / prices[to];
     rec_amount.innerHTML = amount * conversion_rate;
+    var buy_amount = document.getElementById("buy-amount");
+    buy_amount.value = rec_amount.innerHTML;
 }
 </script>
 </html>
