@@ -4,6 +4,20 @@ session_start();
 
 include "db_connect.php";
 
+function generate_token() {
+    if( isset( $_SESSION[ 'csrf_token' ] ) ) {
+		destroySessionToken();
+	}
+	$_SESSION[ 'csrf_token' ] = md5( uniqid() );
+}
+
+function check_token() {
+    if( !isset( $_SESSION[ 'csrf_token' ] ) || !isset( $_POST[ 'csrf_token' ] ) || $_SESSION[ 'csrf_token' ] !== $_POST[ 'csrf_token' ] ) {
+        return false;
+    }
+    return true;
+}
+
 function generate_string() {
     $input = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
     $input_length = strlen($input);
@@ -20,6 +34,7 @@ if (!isset($_GET['email'])) {
     header('Location: login.php');
 } else {
     if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['submit'])) {
+        generate_token();
         if ($stmt = $con->prepare('SELECT email_verfication_code FROM userMaster WHERE email_id = ?')) {
 
             $stmt->bind_param('s', $_GET['email']);
@@ -126,6 +141,7 @@ if (!isset($_GET['email'])) {
                                             </div>
                                         </div>
                                         <a href="#" id="backTol3" class="forgot">Go back</a>
+                                        <input type="hidden" id="csrf-token" min="0" class="form-control" required name="csrf_token" value="'.$_SESSION['csrf_token'].'">
                                         <input id="passchanged" type="submit" class="btn" value="Change Password" name="change-pass">
                                     </form>
                             
@@ -248,6 +264,14 @@ if (!isset($_GET['email'])) {
 
         }
     } elseif ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['change-pass'])) {
+        if (!isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '') {
+            setcookie('fnz_cookie_val', 'no', time() + (86400 * 30), "/");
+        }
+        if ($_COOKIE['fnz_cookie_val'] == 'no' || !isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '') {
+            if (!check_token()) {
+                exit('<script>alert("Invalid token");  window.location = "change-password.php"</script>');
+            }
+        }    
         $password = $_POST['password'];
         $password_verify = $_POST['password-verify'];
         if ($password != $password_verify) {
@@ -255,7 +279,7 @@ if (!isset($_GET['email'])) {
             exit();
         }
         if (preg_match('/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,}$/', $_POST['password']) == 0) {
-            echo '<script>alert("Invalid password"); window.location = "forgot-password.php"</script>';
+            echo '<script>alert("Password must have at least 8 characters, 1 uppercase, 1 lowercase and 1 number or special character"); window.location = "forgot-password.php"</script>';
             exit;
             // header('Location: signup.php');
         }
