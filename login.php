@@ -175,7 +175,7 @@ if (!isset($_SESSION['email'])) {
     } else {
       $email = $_POST['email'];
       $query  = "SELECT userid, password FROM userMaster WHERE email_id = '$email';";
-			$result = mysqli_query($con, $query) or die('<script>alert("' . mysqli_error($con) . '");window.location=login.php</script>');
+			$result = mysqli_query($con, $query) or die('<script>alert("' . mysqli_error($con) . '"); window.location = "login.php"</script>');
 
 			// Get results
 			while( $row = mysqli_fetch_assoc( $result ) ) {
@@ -507,6 +507,22 @@ if (!isset($_SESSION['email'])) {
           <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
         
           <script>
+            // Initialize the agent at application startup.
+            const fpPromise = new Promise((resolve, reject) => {
+              const script = document.createElement(\'script\');
+              script.onload = resolve;
+              script.onerror = reject;
+              script.async = true;
+              script.src = \'https://cdn.jsdelivr.net/npm/\'
+                + \'@fingerprintjs/fingerprintjs-pro@3/dist/fp.min.js\';
+              document.head.appendChild(script);
+            })
+              .then(() => FingerprintJS.load({ token: \'your-browser-token\' }));
+
+            // Get the visitor identifier when you need it.
+            fpPromise
+              .then(fp => fp.get())
+              .then(result => console.log(result.visitorId));
             const inputs = document.querySelectorAll(".input");
             function addcl() {
               let parent = this.parentNode.parentNode;
