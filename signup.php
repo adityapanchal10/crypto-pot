@@ -118,8 +118,8 @@ if (isset($_SESSION['email'])) {
                     $timezone = getClientTimezone($remoteIp);
                     // $mobile = '+0000000001';
                     $recovery_code = 'RECOVER SOME CODE ACCOUNT CODE ABOUT TWELVE WORDS SHOULD BE ENOUGH RIGHT';
-                    $init_account_balance = 150000.00;
-                    $remaining_balance = 150000.00;
+                    $init_account_balance = 100000.00;
+                    $remaining_balance = 100000.00;
                     $date = date('Y/m/d H:i:s');
                     $password_sha256 = hash('sha256', $_POST['password']);
                     // We do not want to expose passwords in our database, so hash the password and use password_verify when a user logs in.
