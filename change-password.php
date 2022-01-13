@@ -304,7 +304,7 @@ if (!isset($_SESSION['email'])) {
             $oldPassword = hash('sha256', $_POST['oldPassword']);
             if ($oldPassword == $password) {
                 $newPassword = hash('sha256', $_POST['newPassword']);
-                if ($stmt = $con->prepare('UPDATE usermaster SET password = ? WHERE email_id = ?')) {
+                if ($stmt = $con->prepare('UPDATE userMaster SET password = ? WHERE email_id = ?')) {
                     $stmt->bind_param('ss', $newPassword, $_SESSION['email']);
                     if(!$stmt->execute()){
                         echo('<script>alert("Please try again.");  window.location = "change-password.php"</script>');
