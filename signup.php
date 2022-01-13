@@ -137,7 +137,7 @@ if (isset($_SESSION['email'])) {
                           $stmt_3->bind_param('isssss', $user_id, $lastLogin, $ip, $ipv6, $location, $_SERVER['HTTP_USER_AGENT']);
                         } else {
                           $ipv4 = '0.0.0.0';
-                          $stmt_3->bind_param('issss', $user_id, $lastLogin, $ipv4, $ip, $location, $_SERVER['HTTP_USER_AGENT']);
+                          $stmt_3->bind_param('isssss', $user_id, $lastLogin, $ipv4, $ip, $location, $_SERVER['HTTP_USER_AGENT']);
                         }
                         if (!$stmt_3->execute()){
                           echo('<script>alert("Please try again"); window.location = "login.php";</script>');
