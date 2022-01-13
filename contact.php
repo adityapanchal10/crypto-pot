@@ -48,10 +48,10 @@ if (!isset($_SESSION['email'])) {
                     $stmt_2->store_result();
                     if ($stmt_2->num_rows > 0) {
                         $stmt_2->bind_result($subject, $quick_comment);
-                        $subject = htmlspecialchars($subject);
-                        $quick_comment = htmlspecialchars(stripslashes($quick_comment));
                         $i = 1;
                         while ($stmt_2->fetch()) {
+                            $subject = htmlspecialchars($subject);
+                            $quick_comment = htmlspecialchars(stripslashes($quick_comment));
                             $contactHistory .= '<div class="history">
                                 <a href="#contact'.$i.'" data-toggle="collapse">'.$subject.'</a>
                                 <div id="contact'.$i.'" class="collapse">
@@ -373,7 +373,7 @@ if (!isset($_SESSION['email'])) {
         $message = $_POST['message'];        
         $message = stripslashes( $message );
         // $message = filter_var($message, FILTER_SANITIZE_STRING);;
-        $message = htmlspecialchars( $message );
+        // $message = htmlspecialchars( $message );
     }
     if ($_COOKIE['fnz_cookie_val'] == 'no' || !isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '' || !isset($_COOKIE['email'])) {
         $email_id = $_SESSION['email'];
