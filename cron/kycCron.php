@@ -73,7 +73,9 @@ function create_wallets($user_id, $con) {
     $currency = 'USD';
     $name = 'UnitedStates Dollar';
     $stmt->bind_param('ss', $name, $currency);
-    $stmt->execute();
+    if (!$stmt->execute()) {
+        return false;
+    }
     $stmt->close();
     create_wallet_mapping($user_id, $con->insert_id, 'USD', $con);
     $currencies = [
@@ -92,7 +94,9 @@ function create_wallets($user_id, $con) {
         $stmt = $con->prepare('INSERT INTO walletMaster (wallet_type, wallet_name) VALUES (?, ?)');
         $stmt->bind_param('ss', $name, $currency);
         $stmt->execute();
-        create_wallet_mapping($user_id, $con->insert_id, $currency, $con);
+        if (!create_wallet_mapping($user_id, $stmt->insert_id, $currency, $con)) {
+            return false;
+        }
     }
     $stmt->close();
     return true;
