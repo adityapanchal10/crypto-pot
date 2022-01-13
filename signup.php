@@ -113,7 +113,7 @@ if (isset($_SESSION['email'])) {
                 echo '<script>alert("Email exists, please choose another!"); window.location = "signup.php";</script>';
                 exit;
             } else {
-                if ($stmt = $con->prepare('INSERT INTO userMaster (first_name, last_name, email_id, country, mobile, password, sign_up_date, recovery_code, init_account_balance, remaining_balance, lastLogin, lastLogin_http_user_agent, timezone) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')) {
+                if ($stmt = $con->prepare('INSERT INTO userMaster (first_name, last_name, email_id, country, mobile, password, sign_up_date, recovery_code, init_account_balance, remaining_balance, lastLogin, lastLogin_http_user_agent, timezone) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')) {
                     $country = getClientCountry($remoteIp);
                     $timezone = getClientTimezone($remoteIp);
                     // $mobile = '+0000000001';
@@ -124,11 +124,12 @@ if (isset($_SESSION['email'])) {
                     $password_sha256 = hash('sha256', $_POST['password']);
                     // We do not want to expose passwords in our database, so hash the password and use password_verify when a user logs in.
                     // $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-                    $stmt->bind_param('ssssssssiiss', $_POST['fname'], $_POST['lname'], $_POST['email'], $country, $_POST['mobile_no'], $password_sha256, $date, $recovery_code, $init_account_balance, $remaining_balance, $date, $_SERVER['HTTP_USER_AGENT'], $timezone);
+                    $stmt->bind_param('ssssssssiisss', $_POST['fname'], $_POST['lname'], $_POST['email'], $country, $_POST['mobile_no'], $password_sha256, $date, $recovery_code, $init_account_balance, $remaining_balance, $date, $_SERVER['HTTP_USER_AGENT'], $timezone);
                     if(!$stmt->execute()){
                       echo $stmt->error;
                       exit;
                     } else {
+                      $user_id = $stmt->insert_id;
                       if ($stmt_3 = $con->prepare('INSERT INTO logMaster (userid, loginDatetime, loginIPv4, loginIPv6, login_location, login_http_user_agent) VALUES (?, ?, ?, ?, ?, ?)')) {
                         $ip = getClientIP();
                         $location = getClientLocation($ip);
