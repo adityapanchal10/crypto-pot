@@ -16,6 +16,10 @@ function check_token() {
     return true;
 }
 
+function destroySessionToken() {
+    unset( $_SESSION[ 'csrf_token' ] );
+}
+
 include "db_connect.php";
 
 if (!isset($_SESSION['email'])) {
@@ -587,6 +591,13 @@ if (!isset($_SESSION['email'])) {
     if ($stmt = $con->prepare('UPDATE userMaster SET first_name = ?, last_name = ?, email_id = ?, country = ?, mobile = ?, timezone = ? WHERE email_id = ?')) {
         $stmt->bind_param('sssssss', $_POST['fname'], $_POST['lname'], $_POST['email'], $_POST['country'], $_POST['mobile'], $_POST['timezone'], $email);
         if(!$stmt->execute()){
+            if ($_COOKIE['fnz_cookie_val'] == 'no') {
+                setcookie('email', md5($_SESSION['email']), time() + (86400 * 30), "/");
+            } else if ($_COOKIE['fnz_cookie_val'] == 'low') {
+                setcookie('email', base64_encode($_SESSION['email']), time() + (86400 * 7), "/");
+            } else if ($_COOKIE['fnz_cookie_val'] == 'high') {
+                setcookie('email', $_SESSION['email'], time() + (86400 * 365), "/");
+            }
             echo('<script>alert("Please try again.");  window.location = "profile.php"</script>');
             exit;
         }

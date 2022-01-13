@@ -30,6 +30,10 @@ function generate_string() {
     return $random_string;
 }
 
+function destroySessionToken() {
+    unset( $_SESSION[ 'csrf_token' ] );
+}
+
 if (!isset($_GET['email'])) {
     header('Location: login.php');
 } else {

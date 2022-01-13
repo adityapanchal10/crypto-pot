@@ -16,6 +16,10 @@ function check_token() {
     return true;
 }
 
+function destroySessionToken() {
+    unset( $_SESSION[ 'csrf_token' ] );
+}
+
 if (!isset($_SESSION['email']) || !isset($_SESSION['id'])) {
 	header('Location: login.php');
 	exit();
