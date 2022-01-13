@@ -25,19 +25,19 @@ if (!isset($_SESSION['email'])) {
         $id = $_SESSION['id'];
     } else if ($_COOKIE['fnz_cookie_val'] == 'low') {
         $email = base64_decode($_COOKIE['email']);
-        $id = base64_decode($_COOKIE['id']);
+        //$id = base64_decode($_COOKIE['id']);
     } else if ($_COOKIE['fnz_cookie_val'] == 'high') {
         $email = $_COOKIE['email'];
-        $id = $_COOKIE['id'];
+        //$id = $_COOKIE['id'];
     }
-    if ($stmt = $con->prepare('SELECT remaining_balance, isKYCverified FROM userMaster WHERE email_id = ?')) {
+    if ($stmt = $con->prepare('SELECT userid, remaining_balance, isKYCverified FROM userMaster WHERE email_id = ?')) {
         $stmt->bind_param('s', $email);
         $stmt->execute();
         // Store the result so we can check if the account exists in the database.
         $stmt->store_result();
 
         if ($stmt->num_rows > 0) {
-            $stmt->bind_result($balance, $kyc_verified);
+            $stmt->bind_result($id, $balance, $kyc_verified);
             $stmt->fetch();
 
             if ($kyc_verified == 1) {
