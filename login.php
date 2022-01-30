@@ -30,16 +30,20 @@ if (!isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '') {
 if (!isset($_SESSION['email'])) {
   if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['login'])) {          
     if (!isset($_POST['email'], $_POST['password'], $_POST['g-recaptcha-response']) ) {
-      echo('<script>alert("Please fill both the email and password fields!"); window.location = "login.php";</script>');
+      $_SESSION['error'] = "Please fill both the email and password fields!";
+      //echo('<script>alert("Please fill both the email and password fields!"); window.location = "login.php";</script>');
+      echo('<script>window.location = "login.php";</script>');
       exit;
     }
 
     if (empty($_POST['email']) || empty($_POST['password'])) {
-      echo('<script>alert("Please fill both the email and password fields!"); window.location = "login.php";</script>');
+      $_SESSION['error'] = "Please fill both the email and password fields!";
+      echo('<script>window.location = "login.php";</script>');
       exit;
     }
     if (empty($_POST['g-recaptcha-response'])) {
-      echo('<script>alert("Please complete the captcha!"); window.location = "login.php";</script>');
+      $_SESSION['error'] = "Please complete the captcha!";
+      echo('<script>window.location = "login.php";</script>');
       exit;
     }
     $secret = '6Lfv_cEcAAAAAKAB_TEZdFFYrPqlUWMKy4dH25mr';
@@ -53,7 +57,8 @@ if (!isset($_SESSION['email'])) {
       // Verified!
     } else {
       $errors = $resp->getErrorCodes();
-      echo('<script>alert("Please complete the captcha!"); window.location = "login.php";</script>');
+      $_SESSION['error'] = "Please complete the captcha!";
+      echo('<script>window.location = "login.php";</script>');
       exit;
     }
     if ($_COOKIE['fnz_cookie_val'] == 'no') {
@@ -61,10 +66,12 @@ if (!isset($_SESSION['email'])) {
         $stmt->bind_param('s', $email);
         if (!$stmt->execute()) {
           if ($_COOKIE['fnz_cookie_val'] == 'no') {
-            echo('<script>alert('.$stmt->error.'); window.location = "login.php";</script>');
+            $_SESSION['error'] = $stmt->error;
+            echo('<script>window.location = "login.php";</script>');
             exit;
           }
-          echo('<script>alert("Error in executing query!"); window.location = "login.php";</script>');
+          $_SESSION['error'] = 'An error occurred. Please try again.';
+          echo('<script>window.location = "login.php";</script>');
           exit;
         }
         // Store the result so we can check if the account exists in the database.
@@ -86,10 +93,12 @@ if (!isset($_SESSION['email'])) {
               $stmt_2->bind_param('sss', $lastLogin, $_SERVER['HTTP_USER_AGENT'], $email);
               if(!$stmt_2->execute()){
                 if ($_COOKIE['fnz_cookie_val'] == 'no') {
-                  echo('<script>alert('.$stmt_2->error.'); window.location = "login.php";</script>');
+                  $_SESSION['error'] = $stmt_2->error;
+                  echo('<script>window.location = "login.php";</script>');
                   exit;
                 }
-                echo('<script>alert("Please try again"); window.location = "login.php";</script>');
+                $_SESSION['error'] = 'An error occurred. Please try again.';
+                echo('<script>window.location = "login.php";</script>');
                 exit;
               } else {
                 if ($stmt_3 = $con->prepare('INSERT INTO logMaster (userid, loginDatetime, loginIPv4, loginIPv6, login_location, login_http_user_agent) VALUES (?, ?, ?, ?, ?, ?)')) {
@@ -104,10 +113,12 @@ if (!isset($_SESSION['email'])) {
                   }
                   if (!$stmt_3->execute()){
                     if ($_COOKIE['fnz_cookie_val'] == 'no') {
-                      echo('<script>alert('.$stmt_3->error.'); window.location = "login.php";</script>');
+                      $_SESSION['error'] = $stmt_3->error;
+                      echo('<script>window.location = "login.php";</script>');
                       exit;
                     }
-                    echo('<script>alert("Please try again"); window.location = "login.php";</script>');
+                    $_SESSION['error'] = 'An error occurred. Please try again.';
+                    echo('<script>window.location = "login.php";</script>');
                     exit;
                   } else {
                     // header('Location: dashboard.php');
@@ -129,53 +140,68 @@ if (!isset($_SESSION['email'])) {
                   }
                 } else {
                   if ($_COOKIE['fnz_cookie_val'] == 'no') {
-                    echo('<script>alert("Please try again"); window.location = "login.php";</script>');
+                    $_SESSION['error'] = 'An error occurred. Please try again.';
+                    echo('<script>window.location = "login.php";</script>');
                     exit;
                   }
-                  echo('<script>alert('.$stmt_3->error.'); window.location = "login.php";</script>');
+                  $_SESSION['error'] = $stmt_3->error;
+                  echo('<script>window.location = "login.php";</script>');
                   exit;
                 }
               }
             } else {
               if ($_COOKIE['fnz_cookie_val'] == 'no') {
-                echo('<script>alert("An error occured. Please try again"); window.location = "login.php";</script>');
+                $_SESSION['error'] = 'An error occurred. Please try again.';
+                echo('<script>window.location = "login.php";</script>');
                 exit;
               }
-              echo('<script>alert('.$stmt_2->error.'); window.location = "login.php";</script>');
+              $_SESSION['error'] = $stmt_2->error;
+              echo('<script>window.location = "login.php";</script>');
               exit;
             }
           } else {
               // Incorrect password
               if ($_COOKIE['fnz_cookie_val'] == 'no') {
-                echo('<script>alert("Incorrect email and/or password"); window.location = "login.php";</script>');
+                $_SESSION['error'] = 'Incorrect email and/or password. Please try again.';
+                echo('<script>window.location = "login.php";</script>');
                 exit;
               }
-              echo('<script>alert("The password you\'ve entered is incorrect. Please try again."); window.location = "login.php";</script>');
+              $_SESSION['error'] = 'The password you\'ve entered is incorrect. Please try again.';
+              echo('<script>window.location = "login.php";</script>');
               exit;
           }
         } else {
             // Incorrect email
             if ($_COOKIE['fnz_cookie_val'] == 'no') {
-              echo('<script>alert("Incorrect email and/or password"); window.location = "login.php";</script>');
+              $_SESSION['error'] = 'Incorrect email and/or password. Please try again.';
+              echo('<script>window.location = "login.php";</script>');
               exit;
             }
-            echo('<script>alert("The email you\'ve entered does not match our records. Please try again."); window.location = "login.php";</script>');
+            $_SESSION['error'] = 'The email you\'ve entered does not match our records. Please try again.';
+            echo('<script>window.location = "login.php";</script>');
             exit;
         }
   
           //$stmt->close();
       } else {
         if ($_COOKIE['fnz_cookie_val'] == 'no') {
-          echo('<script>alert("An error occured. Please try again"); window.location = "login.php";</script>');
+          $_SESSION['error'] = 'An error occurred. Please try again.';
+          echo('<script>window.location = "login.php";</script>');
           exit;
         }
-        echo('<script>alert('.$stmt->error.'); window.location = "login.php";</script>');
+        $_SESSION['error'] = $stmt->error;
+        echo('<script>window.location = "login.php";</script>');
         exit;
       }
     } else {
       $email = $_POST['email'];
       $query  = "SELECT userid, password FROM userMaster WHERE email_id = '$email';";
-			$result = mysqli_query($con, $query) or die('<script>alert("' . mysqli_error($con) . '"); window.location = "login.php"</script>');
+      $result = mysqli_query($con, $query) or function() {
+        $_SESSION['error'] = mysqli_error($con);
+        echo('<script>window.location = "login.php";</script>');
+        exit;
+      };
+			// $result = mysqli_query($con, $query) or die('<script>alert("' . mysqli_error($con) . '"); window.location = "login.php"</script>');
 
 			// Get results
 			while( $row = mysqli_fetch_assoc( $result ) ) {
@@ -203,10 +229,12 @@ if (!isset($_SESSION['email'])) {
             $stmt_2->bind_param('sss', $lastLogin, $user_agent, $email);
             if(!$stmt_2->execute()){
               if ($_COOKIE['fnz_cookie_val'] == 'no') {
-                echo('<script>alert('.$stmt_2->error.'); window.location = "login.php";</script>');
+                $_SESSION['error'] = $stmt_2->error;
+                echo('<script>window.location = "login.php";</script>');
                 exit;
               }
-              echo('<script>alert("Please try again"); window.location = "login.php";</script>');
+              $_SESSION['error'] = 'Please try again';
+              echo('<script>window.location = "login.php";</script>');
               exit;
             } else {
               if ($stmt_3 = $con->prepare('INSERT INTO logMaster (userid, loginDatetime, loginIPv4, loginIPv6, login_location, login_http_user_agent) VALUES (?, ?, ?, ?, ?, ?)')) {
@@ -221,10 +249,12 @@ if (!isset($_SESSION['email'])) {
                 }
                 if (!$stmt_3->execute()){
                   if ($_COOKIE['fnz_cookie_val'] == 'no') {
-                    echo('<script>alert('.$stmt_3->error.'); window.location = "login.php";</script>');
+                    $_SESSION['error'] = $stmt_3->error;
+                    echo('<script>window.location = "login.php";</script>');
                     exit;
                   }
-                  echo('<script>alert("Please try again"); window.location = "login.php";</script>');
+                  $_SESSION['error'] = 'Please try again';
+                  echo('<script>window.location = "login.php";</script>');
                   exit;
                 } else {
                   // header('Location: dashboard.php');
@@ -247,28 +277,34 @@ if (!isset($_SESSION['email'])) {
                 }
               } else {
                 if ($_COOKIE['fnz_cookie_val'] == 'no') {
-                  echo('<script>alert("Please try again"); window.location = "login.php";</script>');
+                  $_SESSION['error'] = 'An error occured. Please try again';
+                  echo('<script>window.location = "login.php";</script>');
                   exit;
                 }
-                echo('<script>alert('.$stmt_3->error.'); window.location = "login.php";</script>');
+                $_SESSION['error'] = $stmt_3->error;
+                echo('<script>window.location = "login.php";</script>');
                 exit;
               }
             }
           } else {
             if ($_COOKIE['fnz_cookie_val'] == 'no') {
-              echo('<script>alert("An error occured. Please try again"); window.location = "login.php";</script>');
+              $_SESSION['error'] = 'An error occured. Please try again';
+              echo('<script>window.location = "login.php";</script>');
               exit;
             }
-            echo('<script>alert('.$stmt_2->error.'); window.location = "login.php";</script>');
+            $_SESSION['error'] = $stmt_2->error;
+            echo('<script>window.location = "login.php";</script>');
             exit;
           }
         } else {
             // Incorrect password
             if ($_COOKIE['fnz_cookie_val'] == 'no') {
-              echo('<script>alert("Incorrect email and/or password"); window.location = "login.php";</script>');
+              $_SESSION['error'] = 'Incorrect email and/or password';
+              echo('<script>window.location = "login.php";</script>');
               exit;
             }
-            echo('<script>alert("The password you\'ve entered is incorrect. Please try again."); window.location = "login.php";</script>');
+            $_SESSION['error'] = 'The password you\'ve entered is incorrect. Please try again.';
+            echo('<script>window.location = "login.php";</script>');
             exit;
         }
 			}
@@ -277,6 +313,12 @@ if (!isset($_SESSION['email'])) {
     
   
   } else {
+        if (isset($_SESSION['error'])) {
+          $error = '<p id="password-message" style="font-size:75% ; color: #f00;">'.$_SESSION['error'].'</p>';
+          unset($_SESSION['error']);
+        } else {
+          $error = '';
+        }
         echo '<!DOCTYPE html>
         <html lang="en">
         
@@ -388,6 +430,7 @@ if (!isset($_SESSION['email'])) {
                       <input type="password" class="input" name="password">
                     </div>
                   </div>
+                  '.$error.'
                   <div style="display: flex; justify-content: center;" class="div g-recaptcha" data-sitekey="6Lfv_cEcAAAAAHjezfbopIsXDtuGNMHzFTO1mbIE"></div>
                   <a href="#" id="forgotPwd" class="forgot">Forgot Password?</a>
                   <button id="login-btn" class="btn" value="Login" name="login" type="submit">LOGIN</button>

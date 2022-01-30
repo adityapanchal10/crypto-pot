@@ -45,7 +45,8 @@ if (isset($_SESSION['email'])) {
         // Now we check if the data was submitted, isset() function will check if the data exists.
         if (!isset($_POST['email'], $_POST['password'])) {
             // Could not get the data that should have been sent.
-            echo '<script>alert("Please complete the registration form"); window.location = "signup.php";</script>';
+            $_SESSION['error'] = "Please complete the registration form";
+            echo('<script>window.location = "login.php";</script>');
             exit;
             // header('Location: signup.php');
 
@@ -53,41 +54,53 @@ if (isset($_SESSION['email'])) {
         // Make sure the submitted registration values are not empty.
         if (empty($_POST['email']) || empty($_POST['password']) || empty($_POST['fname']) || empty($_POST['lname']) || empty($_POST['mobile_no'])) {
             // One or more values are empty.
-            echo '<script>alert("Please complete the registration form"); window.location = "signup.php"</script>';
+            $_SESSION['error'] = "Please complete the registration form";
+            echo('<script>window.location = "signup.php";</script>');
             exit;
             // header('Location: signup.php');
         }
 
         if (!filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
-          echo '<script>alert("Invalid email address"); window.location = "signup.php"</script>';
+          $_SESSION['error'] = "Invalid e-mail address";
+          echo('<script>window.location = "signup.php";</script>');
           exit;
           // header('Location: signup.php');
       }
 
       if (preg_match('/[A-Za-z]{3,}/', $_POST['fname']) == 0) {
-          echo '<script>alert("Invalid first name"); window.location = "signup.php"</script>';
+          $_SESSION['error'] = "Invalid first name";
+          echo('<script>window.location = "signup.php";</script>');
           exit;
           // header('Location: signup.php');
       }
 
       if (preg_match('/[A-Za-z]{3,}/', $_POST['lname']) == 0) {
-          echo '<script>alert("Invalid last name"); window.location = "signup.php"</script>';
+          $_SESSION['error'] = "Invalid last name";
+          echo('<script>window.location = "signup.php";</script>');
           exit;
           // header('Location: signup.php');
       }
 
       if (preg_match('/[0-9]{10}/', $_POST['mobile_no']) == 0) {
-          echo '<script>alert("Invalid mobile number"); window.location = "signup.php"</script>';
+          $_SESSION['error'] = "Invalid mobile number";
+          echo('<script>window.location = "signup.php";</script>');
           exit;
           // header('Location: signup.php');
       }
 
       if (preg_match('/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,}$/', $_POST['password']) == 0) {
-          echo '<script>alert("Invalid password"); window.location = "signup.php"</script>';
+          $_SESSION['error'] = "Password must have at least 8 characters, 1 uppercase, 1 lowercase and 1 number and special character";
+          echo('<script>window.location = "signup.php";</script>');
           exit;
           // header('Location: signup.php');
       }
       
+      if ($_POST['password'] != $_POST['password-verify']) {
+          $_SESSION['error'] = "Password fields do not match";
+          echo('<script>window.location = "signup.php";</script>');
+          exit;
+          // header('Location: signup.php');
+      }
         $secret = '6Lfv_cEcAAAAAKAB_TEZdFFYrPqlUWMKy4dH25mr';
         // $gRecaptchaResponse = $_POST['g-recaptcha-response'];
         $remoteIp = getClientIP();
@@ -98,19 +111,23 @@ if (isset($_SESSION['email'])) {
           // Verified!
         } else {
           $errors = $resp->getErrorCodes();
-          echo $errors;
+          // echo $errors;
+          $_SESSION['error'] = "Please complete the captcha!";
+          echo('<script>window.location = "signup.php";</script>');
+          exit;
         }
 
-        if ($stmt = $con->prepare('SELECT userid, password FROM userMaster WHERE email_id = ?')) {
+        if ($stmt = $con->prepare('SELECT userid, password FROM userMaster WHERE email_id = ? OR mobile = ?')) {
             // Bind parameters (s = string, i = int, b = blob, etc), hash the password using the PHP password_hash function.
-            $stmt->bind_param('s', $_POST['email']);
+            $stmt->bind_param('ss', $_POST['email'], $_POST['mobile_no']);
             $stmt->execute();
             $stmt->store_result();
             // Store the result so we can check if the account exists in the database.
             if ($stmt->num_rows > 0) {
                 // email already exists
                 // echo 'Email exists, please choose another!';
-                echo '<script>alert("Email exists, please choose another!"); window.location = "signup.php";</script>';
+                $_SESSION['error'] = "Account already exists!";
+                echo('<script>window.location = "login.php";</script>');
                 exit;
             } else {
                 if ($stmt = $con->prepare('INSERT INTO userMaster (first_name, last_name, email_id, country, mobile, password, sign_up_date, recovery_code, init_account_balance, remaining_balance, lastLogin, lastLogin_http_user_agent, timezone) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')) {
@@ -126,7 +143,8 @@ if (isset($_SESSION['email'])) {
                     // $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
                     $stmt->bind_param('ssssssssiisss', $_POST['fname'], $_POST['lname'], $_POST['email'], $country, $_POST['mobile_no'], $password_sha256, $date, $recovery_code, $init_account_balance, $remaining_balance, $date, $_SERVER['HTTP_USER_AGENT'], $timezone);
                     if(!$stmt->execute()){
-                      echo $stmt->error;
+                      $_SESSION['error'] = "Account already exists!";
+                      echo('<script>window.location = "login.php";</script>');
                       exit;
                     } else {
                       $user_id = $stmt->insert_id;
@@ -141,7 +159,8 @@ if (isset($_SESSION['email'])) {
                           $stmt_3->bind_param('isssss', $user_id, $lastLogin, $ipv4, $ip, $location, $_SERVER['HTTP_USER_AGENT']);
                         }
                         if (!$stmt_3->execute()){
-                          echo('<script>alert("Please try again"); window.location = "login.php";</script>');
+                          $_SESSION['error'] = "Please try again later!";
+                          echo('<script>window.location = "signup.php";</script>');
                           exit;
                         } else {
                           // header('Location: dashboard.php');
@@ -189,7 +208,8 @@ if (isset($_SESSION['email'])) {
                     }
                 } else {
                     // Something is wrong with the sql statement, check to make sure accounts table exists with all 3 fields.
-                    echo 'Could not prepare statement!';
+                    $_SESSION['error'] = "Please try again later!";
+                    echo('<script>window.location = "signup.php";</script>');
                     exit;
                 }
             }
@@ -197,11 +217,18 @@ if (isset($_SESSION['email'])) {
         } else {
             // Something is wrong with the sql statement, check to make sure accounts table exists with all 3 fields.
             // echo 'Could not prepare statement!';
-            echo '<script>alert("Please complete the registration form"); window.location = "signup.php";</script>';
+            $_SESSION['error'] = "Please try again later!";
+            echo('<script>window.location = "signup.php";</script>');
             exit;
         }
         $con->close();
-    } 
+    }
+    if (isset($_SESSION['error'])) {
+      $error = '<p id="password-message" style="font-size:75% ; color: #f00;">'.$_SESSION['error'].'</p>';
+      unset($_SESSION['error']);
+    } else {
+      $error = '';
+    }
     echo '<!DOCTYPE html>
         <html lang="en">
         
@@ -320,7 +347,7 @@ if (isset($_SESSION['email'])) {
                     </div>
                   </div>
                   <p id="password-message" style="font-size:75% ; color:#999"> Must have at least 8 characters, 1 uppercase, 1 lowercase and 1 number
-                    or special character</p>
+                    and special character</p>
                   <div class="input-div conf-pass">
                     <div class="inc">
                       <i class="conf-pass"></i>
@@ -330,6 +357,7 @@ if (isset($_SESSION['email'])) {
                       <input type="password" class="input" name="password-verify" id="password-verify">
                     </div>
                   </div>
+                  '.$error.'
                   <div style="display: flex; justify-content: center;" class="div g-recaptcha" data-sitekey="6Lfv_cEcAAAAAHjezfbopIsXDtuGNMHzFTO1mbIE"></div>
                   <button id="reg-btn" class="btn" value="Signup" name="signup" type="submit">Signup</button>
                   Already a member?&nbsp<a href="login.php" class="sign-up">login here</a>
