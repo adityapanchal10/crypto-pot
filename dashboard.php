@@ -29,27 +29,13 @@ if (!isset($_SESSION['email'])) {
             $stmt->fetch();
             $stmt->close();
         } else {
-            echo '<script>alert("Error!! Please try again."); window.location = "login.php";</script>';
+            $_SESSION['error'] = "Error!! Please try again";
+            header('Location: dashboard.php');
+            exit();
+            // echo '<script>alert("Error!! Please try again."); window.location = "login.php";</script>';
         }
     } else {
         $userid = $_SESSION['id'];
-    }
-    if ($stmt = $con->prepare('SELECT remaining_balance, isVerified, is_KYC_request_sent FROM userMaster WHERE email_id = ?')) {
-        $stmt->bind_param('s', $_SESSION['email']);
-        $stmt->execute();
-        $stmt->bind_result($balance, $isVerified, $is_KYC_request_sent);
-        $stmt->fetch();
-        $stmt->close();
-        if ($isVerified == 0) {
-            $notifications += 1;
-            $notification .= '<a class="dropdown-item" href="verify-email.php">Please verify your account</a>';
-        }
-        if ($is_KYC_request_sent == 0) {
-            $notifications += 1;
-            $notification .= '<a class="dropdown-item" href="kyc.php">Please upload your KYC documents</a>';
-        }
-    } else {
-        echo '<script>alert("Error!! Please try again."); window.location = "login.php";</script>';
     }
     if ($stmt = $con->prepare('SELECT wallet_id, wallet_balance, currency_id FROM walletMappingMaster WHERE userid = ?')) {
         $stmt->bind_param('s', $_SESSION['id']);
@@ -108,7 +94,42 @@ if (!isset($_SESSION['email'])) {
         $series .= ']';
         $labels .= ']';
     } else {
+        $_SESSION['error'] = "Error!! Please try again";
+        header('Location: dashboard.php');
+        exit();
         echo '<script>alert("Error!! Please try again."); window.location = "dashboard.php";</script>';
+    }
+    if ($stmt = $con->prepare('SELECT remaining_balance, isVerified, is_KYC_request_sent FROM userMaster WHERE email_id = ?')) {
+        $stmt->bind_param('s', $_SESSION['email']);
+        $stmt->execute();
+        $stmt->bind_result($balance, $isVerified, $is_KYC_request_sent);
+        $stmt->fetch();
+        $stmt->close();
+        $graph = '
+            <div id="chartPreferences" class="ct-chart ct-perfect-fourth"></div>
+            <div class="legend">
+                <!--<i class="fa fa-circle pie1"></i> USD-->
+                '.$legends.'
+            </div>
+            <hr>
+            <div class="stats">
+                <i class="fa fa-clock-o"></i> Campaign sent 2 days ago
+            </div>';
+        if ($isVerified == 0) {
+            $notifications += 1;
+            $notification .= '<a class="dropdown-item" href="verify-email.php">Please verify your account</a>';
+            $graph = '<img src="assets/img/graph_greyed.png" alt="profile-statistics" style="width: 100%;">';
+        }
+        if ($is_KYC_request_sent == 0) {
+            $notifications += 1;
+            $notification .= '<a class="dropdown-item" href="kyc.php">Please upload your KYC documents</a>';
+            $graph = '<img src="assets/img/graph_greyed.png" alt="profile-statistics" style="width: 100%;">';
+        }
+    } else {
+        $_SESSION['error'] = "Error!! Please try again";
+        header('Location: dashboard.php');
+        exit();
+        // echo '<script>alert("Error!! Please try again."); window.location = "login.php";</script>';
     }
     if ($stmt = $con->prepare('SELECT currency_purchase_amount, fromWallet, toWallet, transaction_amount FROM transactionMaster WHERE userid = ? AND isTransactionApproved = 1 ORDER BY transaction_id DESC LIMIT 5')) {
         $stmt->bind_param('i', $userid);
@@ -129,9 +150,36 @@ if (!isset($_SESSION['email'])) {
             }
         }
     } else {
-        echo '<script>alert("Error!! Please try again."); window.location = "dashboard.php";</script>';
+        $_SESSION['error'] = 'Error!! Please try again.';
+        header('Location: dashboard.php');
+        exit;
+        // echo '<script>alert("Error!! Please try again."); window.location = "dashboard.php";</script>';
     }
-    
+    if (isset($_SESSION['error'])) {
+        $error = '
+        <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="false">
+            <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Error!</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                </div>
+                <div class="modal-body">
+                '.$_SESSION['error'].'
+                </div>
+                <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+            </div>
+        </div>';
+        // $error = '<p id="password-message" style="font-size:75% ; color: #f00;">'.$_SESSION['error'].'</p>';
+        unset($_SESSION['error']);
+      } else {
+        $error = '';
+      }
     echo '
     <!DOCTYPE html>
 <html lang="en">
@@ -152,6 +200,7 @@ if (!isset($_SESSION['email'])) {
     <link href="./assets/css/search.css" rel="stylesheet" />
 </head>
 <body>
+    '.$error.'
     <div class="wrapper">
         <div class="sidebar" data-image="./assets/img/sidebar-5.jpg">
             <!--
@@ -268,15 +317,7 @@ if (!isset($_SESSION['email'])) {
                                     <p class="card-category">Your portfolio diversity</p>
                                 </div>
                                 <div class="card-body ">
-                                    <div id="chartPreferences" class="ct-chart ct-perfect-fourth"></div>
-                                    <div class="legend">
-                                        <!--<i class="fa fa-circle pie1"></i> USD-->
-                                        '.$legends.'
-                                    </div>
-                                    <hr>
-                                    <div class="stats">
-                                        <i class="fa fa-clock-o"></i> Campaign sent 2 days ago
-                                    </div>
+                                    '.$graph.'
                                 </div>
                             </div>
                         </div>
@@ -296,6 +337,8 @@ if (!isset($_SESSION['email'])) {
                                                 <option value="5">USD Tether</option>
                                                 <option value="6">Solana</option>
                                                 <option value="7">Cardano</option>
+                                                <option value="8">Monero</option>
+                                                <option value="9">Uniswap</option>
                                             </select>
                                         </div>
                                         <!-- <p class="card-category" id="weekly_perf">weekly</p>
@@ -483,7 +526,7 @@ if (!isset($_SESSION['email'])) {
         }
     });
     function updateGraph() {
-        coin_list = ["bitcoin", "ethereum", "dogecoin", "matic-network", "shiba-inu", "tether", "solana", "cardano"]
+        coin_list = ["bitcoin", "ethereum", "dogecoin", "matic-network", "shiba-inu", "tether", "solana", "cardano", "ripple", "uniswap"]
         time_duration = $("#time-dur :selected").val();
         if (time_duration == 1)
             time_interval = "hourly"
@@ -584,6 +627,10 @@ if (!isset($_SESSION['email'])) {
         });
     }
     updateGraph();
+    
+    $(document).ready(function(){
+        $("#errorModal").modal("show");
+    });
 </script>
 <script src="./assets/js/search.js"></script>
 
