@@ -70,7 +70,7 @@ function approve_transactions($con) {
                     $purchase_amount = $amount * ($from_currency_price / $to_currency_price);
                     $to_wallet_balance = $to_wallet_balance + $purchase_amount;
                     if ($stmt_5 = $con->prepare('UPDATE walletMappingMaster SET wallet_last_balance = wallet_balance, wallet_balance = ? WHERE wallet_id = ?')) {
-                        $stmt_5->bind_param('ii', $from_wallet_balance, $from_wallet_id);
+                        $stmt_5->bind_param('di', $from_wallet_balance, $from_wallet_id);
                         $stmt_5->execute();
                         $stmt_5->close();
                     } else {
@@ -78,7 +78,7 @@ function approve_transactions($con) {
                         exit();
                     }
                     if ($stmt_5 = $con->prepare('UPDATE walletMappingMaster SET wallet_last_balance = wallet_balance,  wallet_balance = ? WHERE wallet_id = ?')) {
-                        $stmt_5->bind_param('ii', $to_wallet_balance, $to_wallet_id);
+                        $stmt_5->bind_param('di', $to_wallet_balance, $to_wallet_id);
                         $stmt_5->execute();
                         $stmt_5->close();
                     } else {
@@ -87,17 +87,17 @@ function approve_transactions($con) {
                     }
                     if ($to_wallet == 'USD') {
                         $stmt_5 = $con->prepare('UPDATE userMaster SET remaining_balance = ? WHERE userid = ?');
-                        $stmt_5->bind_param('ii', $to_wallet_balance, $userid);
+                        $stmt_5->bind_param('di', $to_wallet_balance, $userid);
                         $stmt_5->execute();
                         $stmt_5->close();
                     } else if ($from_wallet == 'USD') {
                         $stmt_5 = $con->prepare('UPDATE userMaster SET remaining_balance = ? WHERE userid = ?');
-                        $stmt_5->bind_param('ii', $from_wallet_balance, $userid);
+                        $stmt_5->bind_param('di', $from_wallet_balance, $userid);
                         $stmt_5->execute();
                         $stmt_5->close();
                     }
                     if ($stmt_2 = $con->prepare('UPDATE transactionMaster SET currency_purchase_amount = ?, remaining_balance = ?, isTransactionApproved = 1, transaction_approved_time = CURDATE() WHERE transaction_id = ?')) {
-                        if ($stmt_2->bind_param('iii', $purchase_amount, $from_wallet_balance, $transaction_id)) {
+                        if ($stmt_2->bind_param('ddi', $purchase_amount, $from_wallet_balance, $transaction_id)) {
                             if ($stmt_2->execute()) {
                                 // echo 'Transaction approved';
                             } else {

@@ -45,7 +45,10 @@ if (!isset($_SESSION['email'])) {
                     $from_wallet = $_POST['from-wallet'];
                     $to_wallet = $_POST['to-wallet'];
 					if ($from_wallet == $to_wallet) {
-						echo '<script>alert("From and to wallets cannot be the same"); window.location="dashboard.php"</script>';
+                        $_SESSION['error'] = "You can't transfer to same wallet.";
+                        header('Location: trade.php');
+						// echo '<script>alert("From and to wallets cannot be the same"); window.location="trade.php"</script>';
+                        exit;
 					}
                     $amount = $_POST['amount'];
                     if ($stmt = $con->prepare('SELECT currency_id, currency_price FROM priceMaster WHERE currency_name = ?')) {
@@ -63,11 +66,15 @@ if (!isset($_SESSION['email'])) {
                           $stmt->fetch();
                           $stmt->close();
                         } else {
-                            echo $stmt->error;
+                            $_SESSION['error'] = "Error in fetching wallet balance.";
+                            header('Location: trade.php');
+                            // echo $stmt->error;
                             exit();
                         }
                     } else {
-                        echo 'Error fetching from-currency price';
+                        $_SESSION['error'] = "Error in fetching wallet balance.";
+                        header('Location: trade.php');
+                        // echo 'Error fetching from-currency price';
                         exit();
                     }
 
@@ -86,16 +93,23 @@ if (!isset($_SESSION['email'])) {
                             $stmt->fetch();
                             $stmt->close();
                         } else {
-                            echo 'Error fetching to-wallet balance';
+                            $_SESSION['error'] = "Error in fetching wallet balance.";
+                            header('Location: trade.php');
+                            // echo 'Error fetching to-wallet balance';
                             exit();
                         }
                     } else {
-                        echo 'Error fetching to-currency price';
+                        $_SESSION['error'] = "Error in fetching to-currency price.";
+                        header('Location: trade.php');
+                        // echo 'Error fetching to-currency price';
                         exit();
                     }
                     
                     if ($amount > $from_wallet_balance) {
-                        echo 'Insufficient balance';
+                        $_SESSION['error'] = "Insufficient balance in your wallet.";
+                        header('Location: trade.php');
+                        // echo '<script>alert("Insufficient balance in your wallet."); window.location="trade.php"</script>';
+                        // echo 'Insufficient balance';
                         exit();
                     } else {
                         $from_wallet_balance = $from_wallet_balance - $amount;
@@ -107,18 +121,34 @@ if (!isset($_SESSION['email'])) {
                         } else {
                             $purchase_amount = $_POST['buy-amount'];
                         }
+                        if ($purchase_amount < 0.0001) {
+                            $_SESSION['error'] = "You can't transfer less than 0.0001";
+                            header('Location: trade.php');
+                            // echo '<script>alert("Minimum purchase amount is 0.01"); window.location="trade.php"</script>';
+                            exit;
+                        }
                         $to_wallet_balance = $to_wallet_balance + $purchase_amount;
                         if ($stmt = $con->prepare('INSERT INTO transactionMaster (userid, currency_id, currency_purchase_amount, fromWallet, toWallet, remaining_balance, transaction_amount, transaction_time) VALUES (?, ?, ?, ?, ?, ?, ?, CURDATE())')) {
-                            $stmt->bind_param('iiissii', $id, $to_currency_id, $purchase_amount, $from_wallet, $to_wallet, $from_wallet_balance, $amount);
+                            $stmt->bind_param('iidssdd', $id, $to_currency_id, $purchase_amount, $from_wallet, $to_wallet, $from_wallet_balance, $amount);
                             if ($stmt->execute()) {
-                                echo '<script>alert("Transaction queued"); window.location="transactions.php"</script>';
+                                $_SESSION['error'] = "Transaction queued";
+                                header('Location: trade.php');
+                                exit;
+                                // echo '<script>alert("Transaction queued"); window.location="transactions.php"</script>';
                             } else {
-                                echo '<script>alert("Error in transaction"); window.location="dashboard.php"</script>';
+                                $_SESSION['error'] = "Error in transaction.";
+                                header('Location: trade.php');
+                                exit;
+                                // echo '<script>alert("Error in transaction"); window.location="dashboard.php"</script>';
                             }
-                            $stmt->close();
+                            $_SESSION['error'] = "Error in transaction.";
+                            header('Location: trade.php');
+                            // $stmt->close();
                             exit();
                         } else {
-                            echo '<script>alert("Please try again."); window.location="transactions.php"</script>';
+                            $_SESSION['error'] = "Error in transaction.";
+                            header('Location: trade.php');
+                            // echo '<script>alert("Please try again."); window.location="transactions.php"</script>';
                             exit();
                         }
                         // if ($stmt = $con->prepare('UPDATE walletMappingMaster SET wallet_balance = ? WHERE wallet_id = ?')) {
@@ -265,6 +295,31 @@ if (!isset($_SESSION['email'])) {
     } else if ($_COOKIE['fnz_cookie_val'] == 'high') {
         setcookie('email', $_SESSION['email'], time() + (86400 * 365), "/");
     }
+    if (isset($_SESSION['error'])) {
+        $error = '
+        <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Error!</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                </div>
+                <div class="modal-body">
+                '.$_SESSION['error'].'
+                </div>
+                <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+            </div>
+        </div>';
+        // $error = '<p id="password-message" style="font-size:75% ; color: #f00;">'.$_SESSION['error'].'</p>';
+        unset($_SESSION['error']);
+      } else {
+        $error = '';
+      }
     echo '
     <!DOCTYPE html>
 
@@ -293,6 +348,7 @@ if (!isset($_SESSION['email'])) {
 </head>
 
 <body>
+    '.$error.'
     <div class="wrapper">
         <div class="sidebar" data-image="./assets/img/sidebar-5.jpg">
             <!--
@@ -414,13 +470,13 @@ if (!isset($_SESSION['email'])) {
                                 <div class="trade t">
                                     <form class="dasht show" action="trade.php" method="POST" id="transaction">
                                         <div class="input-wrapper">
-                                            <select id="inputFrom" style="height: 60px;" class="form-control" name="from-wallet" onchange="updateAmount();">
+                                            <select id="inputFrom" style="height: 60px; width: 270px;" class="form-control" name="from-wallet" onchange="updateAmount();">
                                                 '.$from_transfer_options.'
                                             </select>
                                             <label for="inputFrom">From</label>
                                         </div>
                                         <div class="input-wrapper">
-                                            <select id="inputTo" style="height: 60px;" class="form-control" name="to-wallet" onchange="updateAmount();">
+                                            <select id="inputTo" style="height: 60px; width: 270px;" class="form-control" name="to-wallet" onchange="updateAmount();">
                                                 '.$to_transfer_options.'
                                             </select>
                                             <label for="inputTo">To</label>
@@ -455,18 +511,18 @@ if (!isset($_SESSION['email'])) {
                                 <div class="trade t">
                                     <form class="dasht" action="trade.php" method="POST" id="transferF">
                                         <div class="input-wrapper">
-                                            <select id="inputFrom" style="height: 60px;" class="form-control" name="">
+                                            <select id="transfer-inputFrom" style="height: 60px; width: 270px;" class="form-control" name="">
                                                 <option selected>Choose...</option>
                                                 '.$from_transfer_options.'
                                             </select>
                                             <label for="inputFrom">From</label>
                                         </div>
                                         <div class="input-wrapper">
-                                            <input type="text" id="transferTo" class="transferTo" required>
+                                            <input type="text" id="transfer-transferTo" class="transferTo" required>
                                             <label for="transferTo">Enter friend\'s wallet address</label>
                                         </div>
                                         <div class="input-wrapper">
-                                            <input type="number" id="amount" min="0" class="transferTo" required name="amount" onchange="updateAmount();" value="0">
+                                            <input type="number" id="transfer-amount" min="0" class="transferTo" required name="amount" onchange="updateAmount();" value="0">
                                             <label for="transferTo">Enter amount</label>
                                         </div>
                                         <button class="submit-btn" type="submit" name="submit">Proceed</button>
@@ -536,16 +592,24 @@ if (!isset($_SESSION['email'])) {
 <script src="./assets/js/search.js"></script>
 <script>
 var prices = '.$prices.';
+
+const input = document.getElementById("amount");
+input.onkeyup = updateAmount;
+
 function updateAmount() {
     var from = document.getElementById("inputFrom").value;
     var to = document.getElementById("inputTo").value;
     var amount = document.getElementById("amount").value;
     var rec_amount = document.getElementById("rec-amount");
     var conversion_rate = prices[from] / prices[to];
-    rec_amount.innerHTML = amount * conversion_rate;
+    rec_amount.innerHTML = (amount * conversion_rate).toFixed(4);
     var buy_amount = document.getElementById("buy-amount");
     buy_amount.value = rec_amount.innerHTML;
 }
+
+$(document).ready(function(){
+    $("#errorModal").modal("show");
+});
 </script>
 </html>
     ';
