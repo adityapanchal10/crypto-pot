@@ -45,10 +45,16 @@ if (!isset($_SESSION['email'])) {
             }
             if ($_COOKIE['fnz_cookie_val'] == 'no') {
                 setcookie('email', md5($_SESSION['email']), time() + (86400 * 30), "/");
+                $change_security_level = '<a class="dropdown-item" href="security.php?level=low">Decrease Security Level</a>';
+                $security_level = 'Maximum';
             } else if ($_COOKIE['fnz_cookie_val'] == 'low') {
                 setcookie('email', base64_encode($_SESSION['email']), time() + (86400 * 7), "/");
+                $change_security_level = '<a class="dropdown-item" href="security.php?level=high">Increase Security Level</a> <a class="dropdown-item" href="security.php?level=low">Decrease Security Level</a>';
+                $security_level = 'High';
             } else if ($_COOKIE['fnz_cookie_val'] == 'high') {
                 setcookie('email', $_SESSION['email'], time() + (86400 * 365), "/");
+                $change_security_level = '<a class="dropdown-item" href="security.php?level=max">Increase Security Level</a>';
+                $security_level = 'Low';
             }
             echo '
             <!DOCTYPE html>
@@ -233,6 +239,14 @@ if (!isset($_SESSION['email'])) {
                                                             </div>
                                                         </div>
                                                     </div>
+                                                    <div class="row">
+                                                        <div class="col-md-6 pr-1">
+                                                            <div class="form-group">
+                                                                <label>Current Scurity Level:'.$security_level.'</label>
+                                                                '.$change_security_level.'
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                     <button type="submit" class="btn btn-info btn-fill pull-right" name="edit-profile">Edit Profile</button>
                                                     <a href="dashboard.php">Back to Dashboard</a>
                                                     <div class="clearfix"></div>
@@ -323,10 +337,16 @@ if (!isset($_SESSION['email'])) {
             }
             if ($_COOKIE['fnz_cookie_val'] == 'no') {
                 setcookie('email', md5($_SESSION['email']), time() + (86400 * 30), "/");
+                $change_security_level = '<a class="dropdown-item" href="security.php?level=low">Decrease Security Level</a>';
+                $security_level = 'Maximum';
             } else if ($_COOKIE['fnz_cookie_val'] == 'low') {
                 setcookie('email', base64_encode($_SESSION['email']), time() + (86400 * 7), "/");
+                $change_security_level = '<a class="dropdown-item" href="security.php?level=high">Increase Security Level</a> <a class="dropdown-item" href="security.php?level=low">Decrease Security Level</a>';
+                $security_level = 'High';
             } else if ($_COOKIE['fnz_cookie_val'] == 'high') {
                 setcookie('email', $_SESSION['email'], time() + (86400 * 365), "/");
+                $change_security_level = '<a class="dropdown-item" href="security.php?level=max">Increase Security Level</a>';
+                $security_level = 'Low';
             }
             echo '
             <!DOCTYPE html>
@@ -508,6 +528,14 @@ if (!isset($_SESSION['email'])) {
                                                             <div class="form-group">
                                                                 <label>Timezone</label>
                                                                 <input type="text" class="form-control" placeholder="Timezone" value="'.$timezone.'" name="timezone">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="row">
+                                                        <div class="col-md-6 pr-1">
+                                                            <div class="form-group">
+                                                                <label>Current Scurity Level:'.$security_level.'</label>
+                                                                '.$change_security_level.'
                                                             </div>
                                                         </div>
                                                     </div>
