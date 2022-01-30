@@ -631,6 +631,14 @@ if (!isset($_SESSION['email'])) {
             }
         }
     </script>
+    <script>
+        $(document).ready(function(){
+            $("#errorModal").modal("show");
+            if (document.getElementsByClassName("dropdown-menu")[0].childElementCount == 0) {
+                document.getElementsByClassName("dropdown-menu")[0].innerHTML = "<center style=\'padding:5px; margin:5px; color: ##818181\'>No notifications</center>";
+            }
+        });
+    </script>
 </html>
 ';
             }
