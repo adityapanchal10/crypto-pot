@@ -45,15 +45,15 @@ if (!isset($_SESSION['email'])) {
             }
             if ($_COOKIE['fnz_cookie_val'] == 'no') {
                 setcookie('email', md5($_SESSION['email']), time() + (86400 * 30), "/");
-                $change_security_level = '<a class="dropdown-item" href="security.php?level=low">Decrease Security Level</a>';
+                $change_security_level = '<a class="dropdown-item security" href="security.php?level=high" style="color: red; margin-top: 10px;">Decrease Security Level</a>';
                 $security_level = 'Maximum';
             } else if ($_COOKIE['fnz_cookie_val'] == 'low') {
                 setcookie('email', base64_encode($_SESSION['email']), time() + (86400 * 7), "/");
-                $change_security_level = '<a class="dropdown-item" href="security.php?level=high">Increase Security Level</a> <a class="dropdown-item" href="security.php?level=low">Decrease Security Level</a>';
-                $security_level = 'High';
+                $change_security_level = '<a class="dropdown-item security" href="security.php?level=max" style="color: green; margin-top: 10px;">Increase Security Level</a> <a class="dropdown-item security" href="security.php?level=low" style="color: red; margin-top: 0;">Decrease Security Level</a>';
+                $security_level = 'Medium';
             } else if ($_COOKIE['fnz_cookie_val'] == 'high') {
                 setcookie('email', $_SESSION['email'], time() + (86400 * 365), "/");
-                $change_security_level = '<a class="dropdown-item" href="security.php?level=max">Increase Security Level</a>';
+                $change_security_level = '<a class="dropdown-item security" href="security.php?level=high" style="color: green; margin-top: 10px;">Increase Security Level</a>';
                 $security_level = 'Low';
             }
             echo '
@@ -168,9 +168,9 @@ if (!isset($_SESSION['email'])) {
                                             <span class="no-icon">Account</span>
                                         </a>
                                         <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                                            <a class="dropdown-item active" href="profile.php">Profile</a>
-                                            <a class="dropdown-item" href="change-password.php">Change Password</a>
-                                            <a class="dropdown-item" href="kyc.php">View KYC Status</a>
+                                            <a class="dropdown-item active d-item" href="profile.php">Profile</a>
+                                            <a class="dropdown-item d-item" href="change-password.php">Change Password</a>
+                                            <a class="dropdown-item d-item" href="kyc.php">View KYC Status</a>
                                             <div class="divider"></div>
                                             <a class="dropdown-item" href="login-history.php">Login History</a>
                                         </div>
@@ -190,21 +190,21 @@ if (!isset($_SESSION['email'])) {
                                 <div class="row d-flex justify-content-center">
                                     <div class="col-md-10">
                                         <div class="card">
-                                            <div class="card-header">
+                                            <div class="card-header" style="padding-bottom: 15px;">
                                                 <h4 class="card-title">Edit Profile</h4>
                                             </div>
                                             <div class="card-body">
                                                 <form method="POST">
                                                     <div class="row">
                                                         <div class="col-md-6 pr-1">
-                                                            <div class="form-group">
-                                                                <label>First Name</label>
+                                                            <div class="form-group" style="padding-bottom: 10px;">
+                                                                <label style="top: 5px;">First Name</label>
                                                                 <input type="text" class="form-control" placeholder="First Name" value="'.$first_name.'" disabled>
                                                             </div>
                                                         </div>
                                                         <div class="col-md-6 pl-1">
-                                                            <div class="form-group">
-                                                                <label>Last Name</label>
+                                                            <div class="form-group" style="padding-bottom: 10px;">
+                                                                <label style="top: 5px;">Last Name</label>
                                                                 <input type="text" class="form-control" placeholder="Last Name" value="'.$last_name.'" disabled>
                                                             </div>
                                                         </div>
@@ -212,14 +212,14 @@ if (!isset($_SESSION['email'])) {
             
                                                     <div class="row">
                                                         <div class="col-md-6 pr-1">
-                                                            <div class="form-group">
-                                                                <label for="exampleInputEmail1">Email address</label>
+                                                            <div class="form-group" style="padding-bottom: 10px;">
+                                                                <label for="exampleInputEmail1" style="top: 5px;">Email address</label>
                                                                 <input type="email" class="form-control" placeholder="Email" value="'.$email_id.'" disabled>
                                                             </div>
                                                         </div>
                                                         <div class="col-md-6 pl-1">
-                                                            <div class="form-group">
-                                                                <label>Mobile</label>
+                                                            <div class="form-group" style="padding-bottom: 10px;">
+                                                                <label style="top: 5px;">Mobile</label>
                                                                 <input type="number" class="form-control" placeholder="Mobile" value="'.$mobile.'" disabled>
                                                             </div>
                                                         </div>
@@ -227,14 +227,14 @@ if (!isset($_SESSION['email'])) {
             
                                                     <div class="row">
                                                         <div class="col-md-6 pr-1">
-                                                            <div class="form-group">
-                                                                <label>Country</label>
+                                                            <div class="form-group" style="padding-bottom: 10px;">
+                                                                <label style="top: 5px;">Country</label>
                                                                 <input type="text" class="form-control" placeholder="Country" value="'.$country.'" disabled>
                                                             </div>
                                                         </div>
                                                         <div class="col-md-6 pl-1">
-                                                            <div class="form-group">
-                                                                <label>Timezone</label>
+                                                            <div class="form-group" style="padding-bottom: 10px;">
+                                                                <label style="top: 5px;">Timezone</label>
                                                                 <input type="text" class="form-control" placeholder="Timezone" value="'.$timezone.'" disabled>
                                                             </div>
                                                         </div>
@@ -242,7 +242,7 @@ if (!isset($_SESSION['email'])) {
                                                     <div class="row">
                                                         <div class="col-md-6 pr-1">
                                                             <div class="form-group">
-                                                                <label>Current Scurity Level:'.$security_level.'</label>
+                                                                <label class="security" style="font-size: 16px; font-weight: 500; color: black">Current Security Level: '.$security_level.'</label>
                                                                 '.$change_security_level.'
                                                             </div>
                                                         </div>
@@ -460,11 +460,11 @@ if (!isset($_SESSION['email'])) {
                                             <span class="no-icon">Account</span>
                                         </a>
                                         <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                                            <a class="dropdown-item active" href="profile.php">Profile</a>
-                                            <a class="dropdown-item" href="change-password.php">Change Password</a>
-                                            <a class="dropdown-item" href="kyc.php">View KYC Status</a>
+                                            <a class="dropdown-item active d-item" href="profile.php">Profile</a>
+                                            <a class="dropdown-item d-item" href="change-password.php">Change Password</a>
+                                            <a class="dropdown-item d-item" href="kyc.php">View KYC Status</a>
                                             <div class="divider"></div>
-                                            <a class="dropdown-item" href="login-history.php">Login History</a>
+                                            <a class="dropdown-item d-item" href="login-history.php">Login History</a>
                                         </div>
                                     </li>
                                     <li class="nav-item">
@@ -482,7 +482,7 @@ if (!isset($_SESSION['email'])) {
                                 <div class="row d-flex justify-content-center">
                                     <div class="col-md-10">
                                         <div class="card">
-                                            <div class="card-header">
+                                            <div class="card-header" style="padding-bottom: 15px;>
                                                 <h4 class="card-title">Edit Profile</h4>
                                             </div>
                                             <div class="card-body">
@@ -531,14 +531,14 @@ if (!isset($_SESSION['email'])) {
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div class="row">
+                                                    <!--<div class="row">
                                                         <div class="col-md-6 pr-1">
                                                             <div class="form-group">
                                                                 <label>Current Scurity Level:'.$security_level.'</label>
                                                                 '.$change_security_level.'
                                                             </div>
                                                         </div>
-                                                    </div>
+                                                    </div> -->
                                                     <input type="hidden" id="csrf-token" min="0" class="form-control" required name="csrf_token" value="'.$_SESSION['csrf_token'].'">
                                                     <button type="submit" class="btn btn-info btn-fill pull-right" name="submit">Update Profile</button>
                                                     <button type="submit" class="btn btn-danger btn-fill pull-right" style="margin-right:10px" name="delete-account">Delete Account</button>

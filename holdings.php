@@ -38,7 +38,7 @@ if (!isset($_SESSION['email'])) {
                 $notifications += 1;
                 $notification .= '<a class="dropdown-item" href="kyc.php">Please upload your KYC documents</a>';
             }
-            if ($stmt = $con->prepare('SELECT currency_id, wallet_balance FROM walletMappingMaster WHERE userid = ?')) {
+            if ($stmt = $con->prepare('SELECT currency_id, wallet_balance, wallet_address FROM walletMappingMaster WHERE userid = ?')) {
                 $stmt->bind_param('i', $userid);
                 $stmt->execute();
                 $stmt->store_result();
@@ -49,9 +49,10 @@ if (!isset($_SESSION['email'])) {
                     <th>Balance</th>
                     <th>Est. Value in USD</th>
                     <th>24h Change</th>
+                    <th>Wallet Address</th>
                 </tr>';
                 if ($stmt->num_rows > 0) {
-                    $stmt->bind_result($currency_id, $wallet_balance);
+                    $stmt->bind_result($currency_id, $wallet_balance, $wallet_address);
                     while ($stmt->fetch()) {
                         //add currency symbol
                         if ($stmt_2 = $con->prepare('SELECT currency_name, currency_price, change_24hr FROM priceMaster WHERE currency_id = ?')) {
@@ -67,6 +68,7 @@ if (!isset($_SESSION['email'])) {
                                 <td data-th="Login IPv6">'.$wallet_balance.'</td>
                                 <td data-th="Login User Agent">'.$wallet_balance_usd.'</td>
                                 <td data-th="Login User Agent">'.$change_24hr.'</td>
+                                <td data-th="Login User Agent">'.$wallet_address.'</td>
                             </tr>';
                         }
                         

@@ -249,7 +249,7 @@
 	*/
 
 	// Crypto Price list
-	var list = {
+	/*var list = {
 		url:
 			"https://api.nomics.com/v1/currencies/ticker?key=f1e32917e66702d7c7c609a36eadd0f8e0bbf836&ids=BTC,ETH,XRP,EOS,LTC,XMR,ADA,BNB,SOL,DOT,DOGE,UNI,LUNA&convert=USD&per-page=100&page=1",
 		method: "GET",
@@ -280,7 +280,7 @@
 	});
 
 	// Chart with d3.js and dynamic values
-
+	// Chart with c3.js and dynamic values
 	const monthNames = [
 		"Jan",
 		"Feb",
@@ -299,6 +299,9 @@
 	var url =
 		"https://min-api.cryptocompare.com/data/histoday?fsym=BTC&tsym=USD&limit=30&aggregate=2&e=CCCAGG";
 
+	*/
+
+	/*
 	d3.json(url).get(function (error, d) {
 		var data = d.Data;
 		data.forEach(function (d) {
@@ -368,4 +371,59 @@
 			.attr("stroke-width", 2)
 			.attr("d", line);
 	});
+	*/
+	/* var portfolio_data = [];
+	var x = [];
+	portfolio_data[0] = 'BTC';
+	x[0] = 'x';
+	var worth = {
+		url:
+			"https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=10&interval=daily",
+		method: "GET",
+		timeout: 0,
+	};
+
+	$.ajax(worth).done(function (response) {
+		var dataObject = response.prices;
+		var i = 1;
+		dataObject.forEach((item) => {
+			portfolio_data[i] = parseFloat(item[1]).toFixed(2);
+			var d = new Date(item[0]);
+			x[i] = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+			i++;
+		});
+		console.log(x);
+
+		var chart = c3.generate({
+			bindto: '#portfolio-chart',
+			data: {
+				x: 'x',
+				columns: [
+					x,
+					portfolio_data
+				],
+				type: 'spline'
+			},
+			legend: {
+				show: false
+			},
+			axis: {
+				x: {
+					show: false,
+					type: 'timeseries',
+					tick: {
+						// this also works for non timeseries data
+						values: ['2021-09-19', '2021-09-29']
+					}
+				},
+				y: {
+					show: false,
+				}
+			},
+			size: {
+				width: 400,
+				height: 300
+			}
+		});
+	});*/
 })();

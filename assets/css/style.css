@@ -31,6 +31,20 @@ h6 {
 	font-family: "Exo", sans-serif;
 }
 
+::-webkit-scrollbar {
+	width: 0px;
+}
+
+/* ::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+	background-color: rgba(155, 155, 155, 0.5);
+	border-radius: 20px;
+	border: transparent;
+} */
+
 /*--------------------------------------------------------------
 # Back to top button
 --------------------------------------------------------------*/
@@ -107,9 +121,9 @@ h6 {
 	background: rgba(26, 24, 22, 0.85);
 }
 
-#header.header-transparent {
+/* #header.header-transparent {
 	background: transparent;
-}
+} */
 
 #header.header-scrolled {
 	top: 0;
@@ -516,14 +530,14 @@ h6 {
 	margin: 0 10px;
 	-webkit-animation-delay: 0.8s;
 	animation-delay: 0.8s;
-	color: #fff;
+	background-color: #ffb03b;
 	border: 2px solid #ffb03b;
 }
 
 #hero .btn-menu:hover,
 #hero .signup-btn:hover {
 	background: #ffb03b;
-	color: #fff;
+	color: #ffb03b;
 }
 
 @media (max-width: 768px) {
@@ -555,7 +569,7 @@ section {
 }
 
 .section-title {
-	text-align: center;
+	/* text-align: center; */
 	padding-bottom: 30px;
 }
 
@@ -571,7 +585,7 @@ section {
 }
 
 .section-title p {
-	margin: 15px auto 0 auto;
+	margin: 15px 0;
 	font-weight: 300;
 }
 
@@ -582,8 +596,81 @@ section {
 }
 
 /*--------------------------------------------------------------
+# Title
+--------------------------------------------------------------*/
+
+#title {
+	background: #fffaf3;
+	background-image: url(./../img/Untitled2.png);
+	background-size: cover;
+	background-repeat: no-repeat;
+}
+
+.title-section {
+	margin-top: 70px;
+}
+
+.title-section h1 {
+	font-weight: 900;
+}
+
+.title-btn button {
+	margin-top: 15px;
+	font-size: 14px;
+	display: inline-block;
+	padding: 20px 70px;
+	width: 300px;
+	border-radius: 5px;
+	transition: 0.5s;
+	line-height: 1;
+	-webkit-animation-delay: 0.8s;
+	animation-delay: 0.8s;
+	background-color: #ffc219;
+	color: #000000;
+	border: none;
+}
+
+.title-btn button:hover {
+	text-decoration: underline;
+}
+
+.title-btn button a {
+	color: #000000;
+	text-decoration: none;
+}
+
+.slider {
+	margin-top: 50px;
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	flex-wrap: wrap;
+}
+
+.slider-item {
+	min-width: 170px;
+	padding: 20px;
+	border-radius: 20px;
+}
+
+.slider-price {
+	font-size: 22px;
+	font-weight: 800;
+	margin-bottom: 0;
+}
+
+.slider-price-change {
+	margin-bottom: 0;
+	font-size: smaller;
+}
+/*--------------------------------------------------------------
 # About
 --------------------------------------------------------------*/
+
+#about {
+	padding-left: 100px;
+}
+
 .about {
 	background: #fffaf3;
 }
@@ -727,7 +814,7 @@ section {
 }
 
 @media (max-width: 992px) {
-	.about .content {
+	.about .zzz {
 		padding-top: 30px;
 	}
 
@@ -956,7 +1043,7 @@ section {
 	color: #fff;
 	font-size: 14px;
 	text-align: center;
-	padding: 30px 0;
+	padding: 20px 0;
 }
 
 #footer h3 {
@@ -1152,12 +1239,19 @@ input:focus+label {
 }
 
 /* Markets */
+
 #listitem {
 	display: flex;
 	flex-direction: column;
 	flex-wrap: wrap;
 	align-items: center;
 	justify-items: center;
+}
+
+.row0 {
+	display: flex;
+	align-items: flex-start;
+	margin-bottom: 20px;
 }
 
 .row1 {
@@ -1169,19 +1263,41 @@ input:focus+label {
 .row1 .logo {
 	height: 20px;
 	width: 20px;
+	margin-right: 20px;
+}
+
+.row1 .graph {
+	height: 30px;
+	width: 100px;
+}
+
+.row1 .title,
+.row0 .title0 {
+	width: 300px;
+}
+
+.row1 .symbol,
+.row0 .symbol0 {
+	min-width: 60px;
+	font-size: smaller;
+	color: rgb(122, 121, 121);
+}
+
+.row1 .amount,
+.row0 .amount0 {
+	width: 200px;
+}
+
+.row1 .change,
+.row0 .change0 {
+	width: 200px;
+}
+
+.row1 .graph {
+	min-width: 130px;
+	margin-top: -10px;
 	margin-right: 10px;
-}
-
-.row1 .title {
-	width: 45%;
-}
-
-.row1 .symbol {
-	width: 20%;
-}
-
-.row1 .amount {
-	width: 35%;
+	padding-right: 30px;
 }
 
 .scrollable-content {
@@ -1189,4 +1305,103 @@ input:focus+label {
 	overflow: scroll;
 	overflow-x: hidden;
 	scrollbar-width: thin;
+}
+
+.scrollable-content::-webkit-scrollbar {
+	width: 7px;
+}
+
+.scrollable-content::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+.scrollable-content::-webkit-scrollbar-thumb {
+	background-color: rgba(155, 155, 155, 0.5);
+	border-radius: 20px;
+	border: transparent;
+}
+
+.links a {
+	color: #fff;
+	text-decoration: none;
+	margin-left: 20px;
+}
+
+.links a:hover {
+	color: #ffc56e;
+	text-decoration: none;
+}
+
+@media screen and (max-width: 1200px) {
+	.row1 .title,
+	.row0 .title0 {
+		width: 250px;
+	}
+	.row1 .amount,
+	.row0 .amount0 {
+		width: 180px;
+	}
+
+	.row1 .change,
+	.row0 .change0 {
+		width: 180px;
+	}
+
+}
+
+@media screen and (max-width: 1120px) {
+
+	.row1 .title,
+	.row0 .title0 {
+		width: 180px;
+	}
+
+	.row1 .amount,
+	.row0 .amount0 {
+		width: 170px;
+	}
+
+	.row1 .change,
+	.row0 .change0 {
+		width: 170px;
+	}
+
+}
+
+@media screen and (max-width: 890px) {
+
+	.row1 .title,
+	.row0 .title0 {
+		min-width: 180px;
+	}
+
+	.row1 .amount,
+	.row0 .amount0 {
+		min-width: 170px;
+	}
+
+	.row1 .change,
+	.row0 .change0 {
+		min-width: 170px;
+	}
+
+	.about .content {
+		margin-left: 0;
+	}
+
+	.scrollable-content{
+		overflow-x: scroll;
+	}
+
+	
+}
+
+@media screen and (max-width: 992px) {
+	#about {
+		padding: 15px;
+	}
+
+	.mrkt {
+		padding-top: 0;
+	}
 }

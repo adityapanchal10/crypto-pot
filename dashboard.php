@@ -125,7 +125,7 @@ if (!isset($_SESSION['email'])) {
             $notification .= '<a class="dropdown-item" href="kyc.php">Please upload your KYC documents</a>';
             $graph = '<img src="assets/img/graph_greyed.png" alt="profile-statistics" style="width: 100%;">';
             $kyc_status = 'Pending';
-            $kyc_tooltip = 'KYC documents are not uploaded yet, please upload your KYC documents';
+            $kyc_tooltip = 'KYC documents are not uploaded yet, please upload your KYC documents to recieve $100000 and start trading';
         } else {
             $kyc_status = 'Requested';
             $kyc_tooltip = 'You have sent your verification request. Your KYC will be verified soon.';
@@ -150,10 +150,10 @@ if (!isset($_SESSION['email'])) {
             while ($stmt->fetch()) {
                 $transactions .= '<li>
                     <div class="row1">
-                        <div class="title">'.$fromWallet.'</div>
-                        <div class="symbol">'.$toWallet.'</div>
-                        <div class="amount">'.$transaction_amount.'</div>
-                        <div class="change">'.$currency_purchase_amount.'</div>
+                        <div class="title" style="width:100px;">'.$fromWallet.'</div>
+                        <div class="symbol" style="width:100px;">'.$toWallet.'</div>
+                        <div class="amount" style="width:150px;">'.$transaction_amount.'</div>
+                        <div class="change" style="width:150px;">'.$currency_purchase_amount.'</div>
                     </div>
                 </li>';
             }
@@ -330,7 +330,7 @@ if (!isset($_SESSION['email'])) {
                                     <h4 class="card-title">Portfolio Statistics</h4>
                                     <p class="card-category">Your portfolio diversity</p>
                                 </div>
-                                <div class="card-body ">
+                                <div class="card-body" style="min-height: 412px;">
                                     '.$graph.'
                                 </div>
                             </div>
@@ -426,10 +426,10 @@ if (!isset($_SESSION['email'])) {
                                 <div class="scrollable-content">
                                     <div class="row0">
                                         <div class="logo0"></div>
-                                        <div class="title0" align="center">From</div>
-                                        <div class="symbol0" align="center">To</div>
-                                        <div class="amount0" align="center">From Volume</div>
-                                        <div class="change0" align="center">To Volume</div>
+                                        <div class="title0" align="center" style="width:100px;">From</div>
+                                        <div class="symbol0" align="center" style="width:100px;">To</div>
+                                        <div class="amount0" align="center" style="width:150px;">From Volume</div>
+                                        <div class="change0" align="center" style="width:150px;">To Volume</div>
                                     </div>
                                     <ul style="list-style-type:none;">
                                         '.$transactions.'
@@ -496,7 +496,7 @@ if (!isset($_SESSION['email'])) {
         },
         {
             donut: true,
-            showLabel: true,
+            showLabel: false,
         }
     );
 

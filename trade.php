@@ -439,11 +439,11 @@ if (!isset($_SESSION['email'])) {
                                     <span class="no-icon">Account</span>
                                 </a>
                                 <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                                    <a class="dropdown-item" href="profile.php">Profile</a>
-                                    <a class="dropdown-item" href="change-password.php">Change Password</a>
-                                    <a class="dropdown-item" href="kyc.php">View KYC Status</a>
+                                    <a class="dropdown-item d-item" href="profile.php">Profile</a>
+                                    <a class="dropdown-item d-item" href="change-password.php">Change Password</a>
+                                    <a class="dropdown-item d-item" href="kyc.php">View KYC Status</a>
                                     <div class="divider"></div>
-                                    <a class="dropdown-item" href="login-history.php">Login History</a>
+                                    <a class="dropdown-item d-item" href="login-history.php">Login History</a>
                                 </div>
                             </li>
                             <li class="nav-item">
@@ -473,17 +473,17 @@ if (!isset($_SESSION['email'])) {
                                             <select id="inputFrom" style="height: 60px; width: 270px;" class="form-control" name="from-wallet" onchange="updateAmount();">
                                                 '.$from_transfer_options.'
                                             </select>
-                                            <label for="inputFrom">From</label>
+                                            <label for="inputFrom" style="top: 14px;">From</label>
                                         </div>
                                         <div class="input-wrapper">
                                             <select id="inputTo" style="height: 60px; width: 270px;" class="form-control" name="to-wallet" onchange="updateAmount();">
                                                 '.$to_transfer_options.'
                                             </select>
-                                            <label for="inputTo">To</label>
+                                            <label for="inputTo" style="top: 14px;">To</label>
                                         </div>
                                         <div class="input-wrapper">
                                             <input type="number" id="amount" min="0" class="transferTo" required name="amount" onchange="updateAmount();" value="0">
-                                            <label for="transferTo">Enter amount</label>
+                                            <label for="transferTo" style="top: 14px;">Enter amount</label>
                                         </div>
                                         <input type="hidden" id="buy-amount" min="0" class="transferTo" required name="buy-amount" value="0">
                                         <p class="card-category">You\'ll receive approximately <span id="rec-amount" style="text-decoration-line: underline; text-decoration-style: dotted;">0.0</span> units.<p>
@@ -515,15 +515,15 @@ if (!isset($_SESSION['email'])) {
                                                 <option selected>Choose...</option>
                                                 '.$from_transfer_options.'
                                             </select>
-                                            <label for="inputFrom">From</label>
+                                            <label for="inputFrom" style="top: 14px;">From</label>
                                         </div>
                                         <div class="input-wrapper">
                                             <input type="text" id="transfer-transferTo" class="transferTo" required>
-                                            <label for="transferTo">Enter friend\'s wallet address</label>
+                                            <label for="transferTo" style="top: 14px;">Enter friend\'s wallet address</label>
                                         </div>
                                         <div class="input-wrapper">
                                             <input type="number" id="transfer-amount" min="0" class="transferTo" required name="amount" onchange="updateAmount();" value="0">
-                                            <label for="transferTo">Enter amount</label>
+                                            <label for="transferTo" style="top: 14px;">Enter amount</label>
                                         </div>
                                         <button class="submit-btn" type="submit" name="submit">Proceed</button>
 
