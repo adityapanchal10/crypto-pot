@@ -99,10 +99,10 @@ if (!isset($_SESSION['email'])) {
         exit();
         echo '<script>alert("Error!! Please try again."); window.location = "dashboard.php";</script>';
     }
-    if ($stmt = $con->prepare('SELECT remaining_balance, isVerified, is_KYC_request_sent FROM userMaster WHERE email_id = ?')) {
+    if ($stmt = $con->prepare('SELECT remaining_balance, isVerified, is_KYC_request_sent, isKYCverified FROM userMaster WHERE email_id = ?')) {
         $stmt->bind_param('s', $_SESSION['email']);
         $stmt->execute();
-        $stmt->bind_result($balance, $isVerified, $is_KYC_request_sent);
+        $stmt->bind_result($balance, $isVerified, $is_KYC_request_sent, $isKYCverified);
         $stmt->fetch();
         $stmt->close();
         $graph = '
@@ -124,6 +124,15 @@ if (!isset($_SESSION['email'])) {
             $notifications += 1;
             $notification .= '<a class="dropdown-item" href="kyc.php">Please upload your KYC documents</a>';
             $graph = '<img src="assets/img/graph_greyed.png" alt="profile-statistics" style="width: 100%;">';
+            $kyc_status = 'Pending';
+            $kyc_tooltip = 'KYC documents are not uploaded yet, please upload your KYC documents';
+        } else {
+            $kyc_status = 'Requested';
+            $kyc_tooltip = 'You have sent your verification request. Your KYC will be verified soon.';
+            if ($isKYCverified == 1) {
+                $kyc_status = 'Verified';
+                $kyc_tooltip = 'Your KYC is already verified.';
+            }
         }
     } else {
         $_SESSION['error'] = "Error!! Please try again";
@@ -284,6 +293,11 @@ if (!isset($_SESSION['email'])) {
                             </li>
                         </ul>
                         <ul class="navbar-nav ml-auto">
+                            <li class="nav-item">
+                                <a class="nav-link" href="kyc.php" data-toggle="tooltip" data-placement="bottom" title="'.$kyc_tooltip.'">
+                                    <span class="no-icon">KYC Status: '.$kyc_status.'</span>
+                                </a>
+                            </li>
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink"
                                     data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -634,6 +648,9 @@ if (!isset($_SESSION['email'])) {
             document.getElementsByClassName("dropdown-menu")[0].innerHTML = "<center style=\'padding:5px; margin:5px; color: ##818181\'>No notifications</center>";
         }
     });
+    $(function () {
+        $(\'[data-toggle="tooltip"]\').tooltip()
+      })
 </script>
 <script src="./assets/js/search.js"></script>
 
