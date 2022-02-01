@@ -69,7 +69,11 @@ if (!isset($_SESSION['email'])) {
                     $email = base64_decode($_COOKIE['email']);
                 }
                 $query  = "SELECT subject, quick_comment FROM contactMaster WHERE email_addr =  '$email';";
-                $result = mysqli_query($con, $query) or die('<script>alert("' . mysqli_error($con) . '");</script>');
+                $result = mysqli_query($con, $query) or function() {
+                    $_SESSION['error'] = mysqli_error($con);
+                    header('Location: contact.php');
+                    exit;
+                };
                 // Get results
                 $i = 1;
                 while( $row = mysqli_fetch_assoc( $result ) ) {
@@ -100,6 +104,31 @@ if (!isset($_SESSION['email'])) {
             } else if ($_COOKIE['fnz_cookie_val'] == 'high') {
                 setcookie('email', $_SESSION['email'], time() + (86400 * 365), "/");
             }
+            if (isset($_SESSION['error'])) {
+                $error = '
+                <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="false">
+                    <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Error!</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        </div>
+                        <div class="modal-body">
+                        '.$_SESSION['error'].'
+                        </div>
+                        <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                    </div>
+                </div>';
+                // $error = '<p id="password-message" style="font-size:75% ; color: #f00;">'.$_SESSION['error'].'</p>';
+                unset($_SESSION['error']);
+            } else {
+            $error = '';
+            }
             echo '
             <!DOCTYPE html>
             <html lang="en">
@@ -123,6 +152,7 @@ if (!isset($_SESSION['email'])) {
             </head>
             
             <body>
+                '.$error.'
                 <div class="wrapper">
                 <div class="sidebar" data-image="./assets/img/sidebar-5.jpg">
                     <!--
@@ -368,7 +398,10 @@ if (!isset($_SESSION['email'])) {
     //     exit("Please enter your message");
     // }
     if (empty($_POST['uname']) || empty($_POST['subject']) || empty($_POST['message'])) {
-        exit('<script>alert("Please fill in all the fields");  window.location = "contact.php"</script>');
+        $_SESSION['error'] = 'Please fill in all the fields';
+        header('Location: contact.php');
+        exit;
+        // exit('<script>alert("Please fill in all the fields");  window.location = "contact.php"</script>');
     }
     if ($_COOKIE['fnz_cookie_val'] == 'high') {
         $message = $_POST['message'];       
@@ -399,8 +432,10 @@ if (!isset($_SESSION['email'])) {
     if ($stmt = $con->prepare('INSERT INTO contactMaster (first_name, email_addr, subject, quick_comment) VALUES (?, ?, ?, ?)')) {
         $stmt->bind_param('ssss', $uname, $email_id, $subject, $message);
         if(!$stmt->execute()){
-            echo('<script>alert("Please try again.");  window.location = "contact.php"</script>');
+            $_SESSION['error'] = 'Please try again';
+            header('Location: contact.php');
             exit;
+            // echo('<script>alert("Please try again.");  window.location = "contact.php"</script>');
         }
         if ($_COOKIE['fnz_cookie_val'] == 'no') {
             setcookie('email', md5($_SESSION['email']), time() + (86400 * 30), "/");
@@ -409,7 +444,10 @@ if (!isset($_SESSION['email'])) {
         } else if ($_COOKIE['fnz_cookie_val'] == 'high') {
             setcookie('email', $_SESSION['email'], time() + (86400 * 365), "/");
         }
-        echo('<script>alert("Message sent successfully.");  window.location = "dashboard.php"</script>');
+        $_SESSION['error'] = 'Message sent successfully.';
+        header('Location: dashboard.php');
+        exit;
+        // echo('<script>alert("Message sent successfully.");  window.location = "dashboard.php"</script>');
 
     }
 }

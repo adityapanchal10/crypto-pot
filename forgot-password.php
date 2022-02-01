@@ -54,6 +54,31 @@ if (!isset($_GET['email'])) {
                         $stmt->bind_param('s', $_GET['email']);                        
                         if($stmt->execute()){
                             //header('Refresh:5; url=dashboard.php');
+                            if (isset($_SESSION['error'])) {
+                                $error = '
+                                <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="false">
+                                    <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLabel">Error!</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                        </div>
+                                        <div class="modal-body">
+                                        '.$_SESSION['error'].'
+                                        </div>
+                                        <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                        </div>
+                                    </div>
+                                    </div>
+                                </div>';
+                                // $error = '<p id="password-message" style="font-size:75% ; color: #f00;">'.$_SESSION['error'].'</p>';
+                                unset($_SESSION['error']);
+                            } else {
+                                $error = '';
+                            }
                             echo '<!DOCTYPE html>
                             <html lang="en">
                             
@@ -74,6 +99,7 @@ if (!isset($_GET['email'])) {
                             </head>
                             
                             <body>
+                            '.$error.'
                             <div class="center">
                                 <div class="container">
                                 <div id="carouselExampleCaptions" class="text_login carousel slide carousel-fade" data-bs-ride="carousel">
@@ -240,6 +266,9 @@ if (!isset($_GET['email'])) {
                                     $(".toast").toast("show")
                                 })
                                 });
+                                $(document).ready(function(){
+                                    $("#errorModal").modal("show");
+                                });
                             </script>
                             </body>
                             
@@ -264,18 +293,25 @@ if (!isset($_GET['email'])) {
         }
         if ($_COOKIE['fnz_cookie_val'] == 'no' || !isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '') {
             if (!check_token()) {
-                exit('<script>alert("Invalid token");  window.location = "change-password.php"</script>');
+                $_SESSION['error'] = 'Please fill in all the fields';
+                header('Location: forgot-password.php');
+                exit;
+                // exit('<script>alert("Invalid token");  window.location = "forgot-password.php"</script>');
             }
         }    
         $password = $_POST['password'];
         $password_verify = $_POST['password-verify'];
         if ($password != $password_verify) {
-            echo '<script>alert("Passwords do not match!"); window.location="forgot-password.php"</script>';
-            exit();
+            $_SESSION['error'] = 'Passwords do not match';
+            header('Location: forgot-password.php');
+            exit;
+            // echo '<script>alert("Passwords do not match!"); window.location="forgot-password.php"</script>';
         }
         if (preg_match('/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,}$/', $_POST['password']) == 0) {
-            echo '<script>alert("Password must have at least 8 characters, 1 uppercase, 1 lowercase and 1 number or special character"); window.location = "forgot-password.php"</script>';
+            $_SESSION['error'] = 'Password must have at least 8 characters, 1 uppercase, 1 lowercase and 1 number or special character';
+            header('Location: forgot-password.php');
             exit;
+            // echo '<script>alert("Password must have at least 8 characters, 1 uppercase, 1 lowercase and 1 number or special character"); window.location = "forgot-password.php"</script>';
             // header('Location: signup.php');
         }
         if ($stmt = $con->prepare('UPDATE userMaster SET password = ? WHERE email_id = ?')) {
@@ -283,7 +319,10 @@ if (!isset($_GET['email'])) {
             $stmt->bind_param('ss', $password_hash, $_GET['email']);                        
             if($stmt->execute()){
                 //header('Refresh:5; url=dashboard.php');
-                exit('<script>alert("Password Changed successfully!"); window.location="login.php"</script>');
+                $_SESSION['error'] = 'Password changed successfully';
+                header('Location: login.php');
+                exit;
+                // exit('<script>alert("Password Changed successfully!"); window.location="login.php"</script>');
             }
         }
     } else {
@@ -331,6 +370,31 @@ if (!isset($_GET['email'])) {
                         $mail->Body    = 'Your password reset code is '.$code.'';
                         if($mail->Send()) {
                             // echo "Check Your Email box and Click on the email verification link.";
+                            if (isset($_SESSION['error'])) {
+                                $error = '
+                                <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="false">
+                                    <div class="modal-dialog" role="document">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                        <h5 class="modal-title" id="exampleModalLabel">Error!</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                        </div>
+                                        <div class="modal-body">
+                                        '.$_SESSION['error'].'
+                                        </div>
+                                        <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                        </div>
+                                    </div>
+                                    </div>
+                                </div>';
+                                // $error = '<p id="password-message" style="font-size:75% ; color: #f00;">'.$_SESSION['error'].'</p>';
+                                unset($_SESSION['error']);
+                            } else {
+                                $error = '';
+                            }
                             echo '<!DOCTYPE html>
                             <html lang="en">
                             
@@ -350,6 +414,7 @@ if (!isset($_GET['email'])) {
                             </head>
                             
                             <body>
+                            '.$error.'
                             <div class="center">
                                 <div class="container">
                                 <div id="carouselExampleCaptions" class="text_login carousel slide carousel-fade" data-bs-ride="carousel">
@@ -503,6 +568,9 @@ if (!isset($_GET['email'])) {
                                     $(".toast").toast()
                                     $(".toast").toast("show")
                                 })
+                                });
+                                $(document).ready(function(){
+                                    $("#errorModal").modal("show");
                                 });
                             </script>
                             </body>

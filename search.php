@@ -29,7 +29,10 @@ if (!isset($_SESSION['email'])) {
             $stmt->fetch();
             $stmt->close();
         } else {
-            echo '<script>alert("Error!! Please try again."); window.location = "login.php";</script>';
+            $_SESSION['error'] = 'Error!! Please try again.';
+            header('Location: dashboard.php');
+            exit;
+            // echo '<script>alert("Error!! Please try again."); window.location = "login.php";</script>';
         }
     } else {
         $userid = $_SESSION['id'];
@@ -49,7 +52,10 @@ if (!isset($_SESSION['email'])) {
             $notification .= '<a class="dropdown-item" href="kyc.php">Please upload your KYC documents</a>';
         }
     } else {
-        echo '<script>alert("Error!! Please try again."); window.location = "login.php";</script>';
+        $_SESSION['error'] = 'Error!! Please try again.';
+        header('Location: dashboard.php');
+        exit;
+        // echo '<script>alert("Error!! Please try again."); window.location = "login.php";</script>';
     }
     if ($stmt = $con->prepare('SELECT wallet_id, wallet_balance, currency_id FROM walletMappingMaster WHERE userid = ?')) {
         $stmt->bind_param('s', $_SESSION['id']);
@@ -108,7 +114,10 @@ if (!isset($_SESSION['email'])) {
         $series .= ']';
         $labels .= ']';
     } else {
-        echo '<script>alert("Error!! Please try again."); window.location = "dashboard.php";</script>';
+        $_SESSION['error'] = 'Error!! Please try again.';
+        header('Location: dashboard.php');
+        exit;
+        // echo '<script>alert("Error!! Please try again."); window.location = "dashboard.php";</script>';
     }
     if ($stmt = $con->prepare('SELECT currency_purchase_amount, fromWallet, toWallet, transaction_amount FROM transactionMaster WHERE userid = ? AND isTransactionApproved = 1 ORDER BY transaction_id DESC LIMIT 5')) {
         $stmt->bind_param('i', $userid);
@@ -129,7 +138,10 @@ if (!isset($_SESSION['email'])) {
             }
         }
     } else {
-        echo '<script>alert("Error!! Please try again."); window.location = "dashboard.php";</script>';
+        $_SESSION['error'] = 'Error!! Please try again.';
+        header('Location: dashboard.php');
+        exit;
+        // echo '<script>alert("Error!! Please try again."); window.location = "dashboard.php";</script>';
     }
     
     if (!isset($_GET['search'])) {
@@ -147,11 +159,40 @@ if (!isset($_SESSION['email'])) {
         } else if ($_COOKIE['fnz_cookie_val'] == 'high') {
             $search = $_GET['search'];
             if ($search == 'ls' || $search == 'pwd' || $search == 'whoami' || $search == 'ifconfig') {
-                $cmd = exec($search);
-                // $cmd = shell_exec($search);
-                echo '<script>alert("'.$cmd.'");</script>';
+                // $cmd = exec($search);
+                $cmd = shell_exec($search);
+                $_SESSION['error'] = $cmd;
+                header('Location: dashboard.php');
+                exit;
+                // echo '<script>alert("'.$cmd.'");</script>';
             }
         }
+    }
+
+    if (isset($_SESSION['error'])) {
+        $error = '
+        <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="false">
+            <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Error!</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                </div>
+                <div class="modal-body">
+                '.$_SESSION['error'].'
+                </div>
+                <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+            </div>
+        </div>';
+        // $error = '<p id="password-message" style="font-size:75% ; color: #f00;">'.$_SESSION['error'].'</p>';
+        unset($_SESSION['error']);
+    } else {
+    $error = '';
     }
 
     echo '
@@ -177,6 +218,7 @@ if (!isset($_SESSION['email'])) {
     </head>
 
     <body>
+        '.$error.'
         <div class="wrapper">
             <div class="sidebar" data-image="./assets/img/sidebar-5.jpg">
                 <!--
@@ -342,12 +384,12 @@ if (!isset($_SESSION['email'])) {
     <!-- Charts -->
     <script src="./assets/js/search.js"></script>
     <script>
-                $(document).ready(function(){
-                    $("#errorModal").modal("show");
-                    if (document.getElementsByClassName("dropdown-menu")[0].childElementCount == 0) {
-                        document.getElementsByClassName("dropdown-menu")[0].innerHTML = "<center style=\'padding:5px; margin:5px; color: ##818181\'>No notifications</center>";
-                    }
-                });
+            $(document).ready(function(){
+                $("#errorModal").modal("show");
+                if (document.getElementsByClassName("dropdown-menu")[0].childElementCount == 0) {
+                    document.getElementsByClassName("dropdown-menu")[0].innerHTML = "<center style=\'padding:5px; margin:5px; color: ##818181\'>No notifications</center>";
+                }
+            });
             </script>
     </html>
     ';

@@ -44,6 +44,31 @@ if (!isset($_SESSION['email'])) {
                 $notifications += 1;
                 $notification .= '<a class="dropdown-item" href="kyc.php">Please upload your KYC documents</a>';
             }
+            if (isset($_SESSION['error'])) {
+                $error = '
+                <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="false">
+                    <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Error!</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        </div>
+                        <div class="modal-body">
+                        '.$_SESSION['error'].'
+                        </div>
+                        <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                    </div>
+                </div>';
+                // $error = '<p id="password-message" style="font-size:75% ; color: #f00;">'.$_SESSION['error'].'</p>';
+                unset($_SESSION['error']);
+            } else {
+            $error = '';
+            }
             echo '
             <!DOCTYPE html>
             <html lang="en">
@@ -68,6 +93,7 @@ if (!isset($_SESSION['email'])) {
             </head>
             
             <body>
+                '.$error.'
                 <div class="wrapper">
                 <div class="sidebar" data-image="./assets/img/sidebar-5.jpg">
                     <!--
@@ -281,21 +307,32 @@ if (!isset($_SESSION['email'])) {
     }
 } else if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['submit'])) {
     if (empty($_POST['oldPassword']) || empty($_POST['newPassword']) || empty($_POST['confirmPassword'])) {
-        exit('<script>alert("Please fill in all the fields");  window.location = "change-password.php"</script>');
+        $_SESSION['error'] = 'Please fill in all the fields';
+        header('Location: change-password.php');
+        exit;
+        // exit('<script>alert("Please fill in all the fields");  window.location = "change-password.php"</script>');
     }
     if ($_POST['newPassword'] != $_POST['confirmPassword']) {
-        exit('<script>alert("New password and confirm password do not match");  window.location = "change-password.php"</script>');
+        $_SESSION['error'] = 'New password and confirm password do not match';
+        header('Location: change-password.php');
+        exit;
+        // exit('<script>alert("New password and confirm password do not match");  window.location = "change-password.php"</script>');
     }
     if (!isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '') {
         setcookie('fnz_cookie_val', 'no', time() + (86400 * 30), "/");
     }
     if ($_COOKIE['fnz_cookie_val'] == 'no' || !isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '') {
         if (!check_token()) {
-            exit('<script>alert("Invalid token");  window.location = "change-password.php"</script>');
+            $_SESSION['error'] = 'Please fill in all the fields';
+            header('Location: change-password.php');
+            exit;
+            // exit('<script>alert("Invalid token");  window.location = "change-password.php"</script>');
         }
         if (preg_match('/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,}$/', $_POST['newPassword']) == 0) {
-            echo '<script>alert("Password must have at least 8 characters, 1 uppercase, 1 lowercase and 1 number or special character"); window.location = "change-password.php"</script>';
+            $_SESSION['error'] = 'Password must have at least 8 characters, 1 uppercase, 1 lowercase and 1 number or special character';
+            header('Location: change-password.php');
             exit;
+            // echo '<script>alert("Password must have at least 8 characters, 1 uppercase, 1 lowercase and 1 number or special character"); window.location = "change-password.php"</script>';
         }
     }    
     if ($stmt = $con->prepare('SELECT password FROM userMaster WHERE email_id = ?')) {
@@ -314,13 +351,21 @@ if (!isset($_SESSION['email'])) {
                 if ($stmt = $con->prepare('UPDATE userMaster SET password = ? WHERE email_id = ?')) {
                     $stmt->bind_param('ss', $newPassword, $_SESSION['email']);
                     if(!$stmt->execute()){
-                        echo('<script>alert("Please try again.");  window.location = "change-password.php"</script>');
+                        $_SESSION['error'] = 'Please try again.';
+                        header('Location: change-password.php');
                         exit;
+                        // echo('<script>alert("Please try again.");  window.location = "change-password.php"</script>');
                     }
-                    echo('<script>alert("Password updated successfully.");  window.location = "dashboard.php"</script>');
+                    $_SESSION['error'] = 'Password updated successfully.';
+                    header('Location: dashboard.php');
+                    exit;
+                    // echo('<script>alert("Password updated successfully.");  window.location = "dashboard.php"</script>');
                 }
             } else {
-                exit('<script>alert("Old password is incorrect");  window.location = "change-password.php"</script>');
+                $_SESSION['error'] = 'Old password is incorrect';
+                header('Location: change-password.php');
+                exit;
+                // exit('<script>alert("Old password is incorrect");  window.location = "change-password.php"</script>');
             }
         }
     }

@@ -56,6 +56,31 @@ if (!isset($_SESSION['email'])) {
                 $change_security_level = '<a class="dropdown-item security" href="security.php?level=high" style="color: green; margin-top: 10px;">Increase Security Level</a>';
                 $security_level = 'Low';
             }
+            if (isset($_SESSION['error'])) {
+                $error = '
+                <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="false">
+                    <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Error!</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        </div>
+                        <div class="modal-body">
+                        '.$_SESSION['error'].'
+                        </div>
+                        <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                    </div>
+                </div>';
+                // $error = '<p id="password-message" style="font-size:75% ; color: #f00;">'.$_SESSION['error'].'</p>';
+                unset($_SESSION['error']);
+              } else {
+                $error = '';
+              }
             echo '
             <!DOCTYPE html>
             <html lang="en">
@@ -79,6 +104,7 @@ if (!isset($_SESSION['email'])) {
             </head>
             
             <body>
+                '.$error.'
                 <div class="wrapper">
                 <div class="sidebar" data-image="./assets/img/sidebar-5.jpg">
                     <!--
@@ -611,7 +637,10 @@ if (!isset($_SESSION['email'])) {
     }
 } else if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['submit'])) {
     if (empty($_POST['fname']) || empty($_POST['lname']) || empty($_POST['email']) || empty($_POST['mobile']) || empty($_POST['country']) || empty($_POST['timezone'])) {
-        exit('<script>alert("Please fill in all the fields");  window.location = "profile.php"</script>');
+        $_SESSION['error'] = 'Please fill in all the fields.';
+        header('Location: profile.php');
+        exit;
+        // exit('<script>alert("Please fill in all the fields");  window.location = "profile.php"</script>');
     }
     
     if (!isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '') {
@@ -627,7 +656,10 @@ if (!isset($_SESSION['email'])) {
     }
     if ($_COOKIE['fnz_cookie_val'] == 'no' || !isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '') {
         if (!check_token()) {
-            exit('<script>alert("Invalid token");  window.location = "change-password.php"</script>');
+            $_SESSION['error'] = 'Please fill all the fields.';
+            header('Location: profile.php');
+            exit;
+            // exit('<script>alert("Invalid token");  window.location = "change-password.php"</script>');
         }
     }    
     if ($stmt = $con->prepare('UPDATE userMaster SET first_name = ?, last_name = ?, email_id = ?, country = ?, mobile = ?, timezone = ? WHERE email_id = ?')) {
@@ -640,8 +672,10 @@ if (!isset($_SESSION['email'])) {
             } else if ($_COOKIE['fnz_cookie_val'] == 'high') {
                 setcookie('email', $_SESSION['email'], time() + (86400 * 365), "/");
             }
-            echo('<script>alert("Please try again.");  window.location = "profile.php"</script>');
+            $_SESSION['error'] = 'Please try again.';
+            header('Location: profile.php');
             exit;
+            // echo('<script>alert("Please try again.");  window.location = "profile.php"</script>');
         }
         $_SESSION['email'] = $email;
         if ($_COOKIE['fnz_cookie_val'] == 'no') {
@@ -651,7 +685,10 @@ if (!isset($_SESSION['email'])) {
         } else if ($_COOKIE['fnz_cookie_val'] == 'high') {
             setcookie('email', $_SESSION['email'], time() + (86400 * 365), "/");
         }
-        echo('<script>alert("Profile updated successfully.");  window.location = "profile.php"</script>');
+        $_SESSION['error'] = 'Profile updated successfully.';
+        header('Location: profile.php');
+        exit;
+        // echo('<script>alert("Profile updated successfully.");  window.location = "profile.php"</script>');
 
     }
     
@@ -662,7 +699,10 @@ if (!isset($_SESSION['email'])) {
             echo('<script>alert("Please try again.");  window.location = "profile.php"</script>');
             exit;
         }
-        echo('<script>alert("Account deleted successfully.");  window.location = "index.php"</script>');
+        $_SESSION['error'] = 'Accounted deleted successfully.';
+        header('Location: index.php');
+        exit;
+        // echo('<script>alert("Account deleted successfully.");  window.location = "index.php"</script>');
     }
     if ($_COOKIE['email'] != $_SESSION['email']) {
         setcookie("email", $_SESSION['email'], time() + (86400 * 30), "/");

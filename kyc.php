@@ -80,6 +80,31 @@ if (!isset($_SESSION['email']) || !isset($_SESSION['id'])) {
                 $stmt->close();
             }
             if ($kyc_verified == 1) {
+                if (isset($_SESSION['error'])) {
+                    $error = '
+                    <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="false">
+                        <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Error!</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                            </div>
+                            <div class="modal-body">
+                            '.$_SESSION['error'].'
+                            </div>
+                            <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                        </div>
+                    </div>';
+                    // $error = '<p id="password-message" style="font-size:75% ; color: #f00;">'.$_SESSION['error'].'</p>';
+                    unset($_SESSION['error']);
+                  } else {
+                    $error = '';
+                  }
                 echo '
                 <!DOCTYPE html>
 
@@ -105,6 +130,7 @@ if (!isset($_SESSION['email']) || !isset($_SESSION['id'])) {
                 </head>
             
                 <body>
+                '.$error.'
                 <div class="wrapper">
                 <div class="sidebar" data-image="./assets/img/sidebar-5.jpg">
                     <!--
@@ -939,7 +965,7 @@ if (!isset($_SESSION['email']) || !isset($_SESSION['id'])) {
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="gridCheck" name="agree">
                                     <label class="form-check-label" for="gridCheck">
-                                        I agree to the terms and conditions...
+                                        I agree to the terms and conditions. I confirm that all the information provided above is true.
                                     </label>
                                 </div>
                             </div>
@@ -1068,7 +1094,10 @@ if (!isset($_SESSION['email']) || !isset($_SESSION['id'])) {
     }
     if ($_COOKIE['fnz_cookie_val'] == 'no' || !isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '') {
         if (!check_token()) {
-            exit('<script>alert("Invalid token");  window.location = "change-password.php"</script>');
+            $_SESSION['error'] = 'Please fill in all the fields';
+            header('Location: kyc.php');
+            exit;
+            // exit('<script>alert("Invalid token");  window.location = "change-password.php"</script>');
         }
     }    
 
@@ -1088,8 +1117,20 @@ if (!isset($_SESSION['email']) || !isset($_SESSION['id'])) {
             } else if ($kyc_request == 1) {
                 echo '<script>window.location = "kyc.php";</script>';
             } else if ($email != $_POST['email']) {
-                echo '<script>alert("Please check your details"); window.location = "kyc.php";</script>';
+                $_SESSION['error'] = 'Please check your details.';
+                header('Location: kyc.php');
+                exit;
+                // echo '<script>alert("Please check your details"); window.location = "kyc.php";</script>';
             } else {
+                if (!isset($_POST['fname']) || !isset($_POST['mname']) || !isset($_POST['lname']) || !isset($email) || !isset($_POST['gridRadios']) || !isset($_POST['address_line_1']) || !isset($_POST['address_line_2']) || !isset($_POST['city']) || !isset($_POST['state']) || !isset($_POST['zipCode']) || !isset($_POST['document_type']) || !isset($imgContent)) {
+                    $_SESSION['error'] = 'Please fill in all the fields';
+                    header('Location: kyc.php');
+                    exit;
+                } else if (empty($_POST['fname']) || empty($_POST['mname']) || empty($_POST['lname']) || empty($email) || empty($_POST['gridRadios']) || empty($_POST['address_line_1']) || empty($_POST['address_line_2']) || empty($_POST['city']) || empty($_POST['state']) || empty($_POST['zipCode']) || empty($_POST['document_type']) || empty($imgContent)) {
+                    $_SESSION['error'] = 'Please fill in all the fields';
+                    header('Location: kyc.php');
+                    exit;
+                }
                 if ($stmt = $con->prepare('INSERT INTO kycMaster (userid, fname, mname, lname, email, gender, addressLine1, addressLine2, city, state, zipCode, documentType, document) values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)')) {
                     if(!empty($_FILES['document']['name'])) { 
                         // Get file info 
@@ -1115,7 +1156,10 @@ if (!isset($_SESSION['email']) || !isset($_SESSION['id'])) {
                             }
                         }
                     } else {
-                        echo '<script>alert("An error occurred! Please check your file"); window.location = "kyc.php";</script>';
+                        $_SESSION['error'] = 'An error occurred! Please check your file';
+                        header('Location: kyc.php');
+                        exit;
+                        // echo '<script>alert("An error occurred! Please check your file"); window.location = "kyc.php";</script>';
                     }
                 }
             }

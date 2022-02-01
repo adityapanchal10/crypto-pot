@@ -97,7 +97,7 @@ if (!isset($_SESSION['email'])) {
         $_SESSION['error'] = "Error!! Please try again";
         header('Location: dashboard.php');
         exit();
-        echo '<script>alert("Error!! Please try again."); window.location = "dashboard.php";</script>';
+        // echo '<script>alert("Error!! Please try again."); window.location = "dashboard.php";</script>';
     }
     if ($stmt = $con->prepare('SELECT remaining_balance, isVerified, is_KYC_request_sent, isKYCverified FROM userMaster WHERE email_id = ?')) {
         $stmt->bind_param('s', $_SESSION['email']);
