@@ -282,7 +282,6 @@ if (!isset($_SESSION['email'])) {
                                             </div>
                                         </div>
                                         <div class="contactHistory">
-                                            <br />
                                             <a href="#contactHistory" data-toggle="collapse">
                                             <h4 style="margin-top: 15px;">Previous Contact History.</h4>
                                             </a>
