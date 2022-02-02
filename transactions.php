@@ -45,8 +45,8 @@ if (!isset($_SESSION['email'])) {
         $email = $_COOKIE['email'];
     }
     if ($stmt = $con->prepare('SELECT userid, remaining_balance, isVerified, is_KYC_request_sent FROM userMaster WHERE email_id = ?')) {
-      $notification = '';
-      $notifications = 0;
+        $notification = '';
+        $notifications = 0;
 
         $stmt->bind_param('s', $email);
         $stmt->execute();
@@ -57,8 +57,8 @@ if (!isset($_SESSION['email'])) {
             $stmt->bind_result($userid, $balance, $isVerified, $is_KYC_request_sent);
             $stmt->fetch();
             if ($isVerified == 0) {
-              $notifications += 1;
-              $notification .= '<a class="dropdown-item" href="verify-email.php">Please verify your account</a>';
+                $notifications += 1;
+                $notification .= '<a class="dropdown-item" href="verify-email.php">Please verify your account</a>';
             }
             if ($is_KYC_request_sent == 0) {
                 $notifications += 1;
@@ -73,6 +73,7 @@ if (!isset($_SESSION['email'])) {
             $buy_page_nav = '';
             $sell_page_nav = '';
             $trade_page_nav = '';
+            //$transfer_page_nav = '';
             if (!isset($_GET['type']) || $_GET['type'] == 'all') {
                 if ($stmt = $con->prepare('SELECT transaction_id, currency_id, currency_purchase_amount, fromWallet, toWallet, remaining_balance, transaction_amount, isTransactionApproved, isTransactionBlocked FROM transactionMaster WHERE userid = ?  ORDER BY transaction_id DESC')) {
                     $stmt->bind_param('i', $userid);
@@ -87,33 +88,33 @@ if (!isset($_SESSION['email'])) {
                         }
                         $page_nav .= '<nav aria-label="...">
                         <ul class="pagination">';
-                    
+
                         $next_page_no = $page_no + 1;
                         $prev_page_no = $page_no - 1;
                         if ($page_no == 1) {
                             $page_nav .= '<li class="page-item disabled"><a class="page-link" href="#" tabindex="-1">Previous</a></li>';
                         } else {
-                            $page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page='.($prev_page_no).'" tabindex="-1">Previous</a></li>';
+                            $page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page=' . ($prev_page_no) . '" tabindex="-1">Previous</a></li>';
                         }
                         while ($i < $limit) {
                             if ($page_no == $i + 1) {
-                                $page_nav .= '<li class="page-item active"><a class="page-link" href="transactions.php?page='.($i + 1).'">'.($i + 1).'  <span class="sr-only">(current)</span></a></li>';
+                                $page_nav .= '<li class="page-item active"><a class="page-link" href="transactions.php?page=' . ($i + 1) . '">' . ($i + 1) . '  <span class="sr-only">(current)</span></a></li>';
                             } else {
-                                $page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page='.($i + 1).'">'.($i + 1).'</a></li>';
+                                $page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page=' . ($i + 1) . '">' . ($i + 1) . '</a></li>';
                             }
                             ++$i;
                         }
                         if ($page_no == $limit) {
                             $page_nav .= '<li class="page-item disabled"><a class="page-link" href="#">Next</a></li>';
                         } else {
-                            $page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page='.($next_page_no).'">Next</a></li>';
+                            $page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page=' . ($next_page_no) . '">Next</a></li>';
                         }
                         $page_nav .= '
                             </ul>
                         </nav>';
                     }
                 }
-                $type_css = '#trade, #sell, #buy {
+                $type_css = '#trade, #sell, #buy, #transfer {
                     display: none;
                 }';
             } else if ($_GET['type'] == 'buy') {
@@ -130,33 +131,33 @@ if (!isset($_SESSION['email'])) {
                         }
                         $buy_page_nav .= '<nav aria-label="...">
                         <ul class="pagination">';
-                    
+
                         $next_page_no = $page_no + 1;
                         $prev_page_no = $page_no - 1;
                         if ($page_no == 1) {
                             $buy_page_nav .= '<li class="page-item disabled"><a class="page-link" href="#" tabindex="-1">Previous</a></li>';
                         } else {
-                            $buy_page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page='.($prev_page_no).'" tabindex="-1">Previous</a></li>';
+                            $buy_page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page=' . ($prev_page_no) . '" tabindex="-1">Previous</a></li>';
                         }
                         while ($i < $limit) {
                             if ($page_no == $i + 1) {
-                                $buy_page_nav .= '<li class="page-item active"><a class="page-link" href="transactions.php?page='.($i + 1).'">'.($i + 1).'  <span class="sr-only">(current)</span></a></li>';
+                                $buy_page_nav .= '<li class="page-item active"><a class="page-link" href="transactions.php?page=' . ($i + 1) . '">' . ($i + 1) . '  <span class="sr-only">(current)</span></a></li>';
                             } else {
-                                $buy_page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page='.($i + 1).'">'.($i + 1).'</a></li>';
+                                $buy_page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page=' . ($i + 1) . '">' . ($i + 1) . '</a></li>';
                             }
                             ++$i;
                         }
                         if ($page_no == $limit) {
                             $buy_page_nav .= '<li class="page-item disabled"><a class="page-link" href="#">Next</a></li>';
                         } else {
-                            $buy_page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page='.($next_page_no).'">Next</a></li>';
+                            $buy_page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page=' . ($next_page_no) . '">Next</a></li>';
                         }
                         $buy_page_nav .= '
                             </ul>
                         </nav>';
                     }
                 }
-                $type_css = '#all, #sell, #trade {
+                $type_css = '#all, #sell, #trade, #transfer {
                     display: none;
                 }';
             } else if ($_GET['type'] == 'sell') {
@@ -173,33 +174,33 @@ if (!isset($_SESSION['email'])) {
                         }
                         $sell_page_nav .= '<nav aria-label="...">
                         <ul class="pagination">';
-                    
+
                         $next_page_no = $page_no + 1;
                         $prev_page_no = $page_no - 1;
                         if ($page_no == 1) {
                             $sell_page_nav .= '<li class="page-item disabled"><a class="page-link" href="#" tabindex="-1">Previous</a></li>';
                         } else {
-                            $sell_page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page='.($prev_page_no).'" tabindex="-1">Previous</a></li>';
+                            $sell_page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page=' . ($prev_page_no) . '" tabindex="-1">Previous</a></li>';
                         }
                         while ($i < $limit) {
                             if ($page_no == $i + 1) {
-                                $sell_page_nav .= '<li class="page-item active"><a class="page-link" href="transactions.php?page='.($i + 1).'">'.($i + 1).'  <span class="sr-only">(current)</span></a></li>';
+                                $sell_page_nav .= '<li class="page-item active"><a class="page-link" href="transactions.php?page=' . ($i + 1) . '">' . ($i + 1) . '  <span class="sr-only">(current)</span></a></li>';
                             } else {
-                                $sell_page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page='.($i + 1).'">'.($i + 1).'</a></li>';
+                                $sell_page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page=' . ($i + 1) . '">' . ($i + 1) . '</a></li>';
                             }
                             ++$i;
                         }
                         if ($page_no == $limit) {
                             $sell_page_nav .= '<li class="page-item disabled"><a class="page-link" href="#">Next</a></li>';
                         } else {
-                            $sell_page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page='.($next_page_no).'">Next</a></li>';
+                            $sell_page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page=' . ($next_page_no) . '">Next</a></li>';
                         }
                         $sell_page_nav .= '
                             </ul>
                         </nav>';
                     }
                 }
-                $type_css = '#all, #buy, #trade {
+                $type_css = '#all, #buy, #trade, #transfer {
                     display: none;
                 }';
             } else if ($_GET['type'] == 'trade') {
@@ -216,33 +217,76 @@ if (!isset($_SESSION['email'])) {
                         }
                         $trade_page_nav .= '<nav aria-label="...">
                         <ul class="pagination">';
-                    
+
                         $next_page_no = $page_no + 1;
                         $prev_page_no = $page_no - 1;
                         if ($page_no == 1) {
                             $trade_page_nav .= '<li class="page-item disabled"><a class="page-link" href="#" tabindex="-1">Previous</a></li>';
                         } else {
-                            $trade_page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page='.($prev_page_no).'" tabindex="-1">Previous</a></li>';
+                            $trade_page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page=' . ($prev_page_no) . '" tabindex="-1">Previous</a></li>';
                         }
                         while ($i < $limit) {
                             if ($page_no == $i + 1) {
-                                $trade_page_nav .= '<li class="page-item active"><a class="page-link" href="transactions.php?page='.($i + 1).'">'.($i + 1).'  <span class="sr-only">(current)</span></a></li>';
+                                $trade_page_nav .= '<li class="page-item active"><a class="page-link" href="transactions.php?page=' . ($i + 1) . '">' . ($i + 1) . '  <span class="sr-only">(current)</span></a></li>';
                             } else {
-                                $trade_page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page='.($i + 1).'">'.($i + 1).'</a></li>';
+                                $trade_page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page=' . ($i + 1) . '">' . ($i + 1) . '</a></li>';
                             }
                             ++$i;
                         }
                         if ($page_no == $limit) {
                             $trade_page_nav .= '<li class="page-item disabled"><a class="page-link" href="#">Next</a></li>';
                         } else {
-                            $trade_page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page='.($next_page_no).'">Next</a></li>';
+                            $trade_page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page=' . ($next_page_no) . '">Next</a></li>';
                         }
                         $trade_page_nav .= '
                             </ul>
                         </nav>';
                     }
                 }
-                $type_css = '#all, #buy, #sell {
+                $type_css = '#all, #buy, #sell, #transfer {
+                    display: none;
+                }';
+            } else if ($_GET['type'] == 'transfer') {
+                if ($stmt = $con->prepare('SELECT transfer_id, currency_id, transfer_amount, fromWallet, toWallet, remaining_balance, transfer_amount_recieved, isTransferApproved, isTranferBlocked FROM transferMaster WHERE userid = ? ORDER BY transfer_id DESC')) {
+                    $stmt->bind_param('i', $userid);
+                    $stmt->execute();
+                    $stmt->store_result();
+                    if ($stmt->num_rows > 20) {
+                        $i = 0;
+                        $limit = $stmt->num_rows / 20;
+                        $limit = ceil($limit);
+                        if ($page_no > $limit) {
+                            $page_no = $limit;
+                        }
+                        $sell_page_nav .= '<nav aria-label="...">
+                        <ul class="pagination">';
+
+                        $next_page_no = $page_no + 1;
+                        $prev_page_no = $page_no - 1;
+                        if ($page_no == 1) {
+                            $sell_page_nav .= '<li class="page-item disabled"><a class="page-link" href="#" tabindex="-1">Previous</a></li>';
+                        } else {
+                            $sell_page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page=' . ($prev_page_no) . '" tabindex="-1">Previous</a></li>';
+                        }
+                        while ($i < $limit) {
+                            if ($page_no == $i + 1) {
+                                $sell_page_nav .= '<li class="page-item active"><a class="page-link" href="transactions.php?page=' . ($i + 1) . '">' . ($i + 1) . '  <span class="sr-only">(current)</span></a></li>';
+                            } else {
+                                $sell_page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page=' . ($i + 1) . '">' . ($i + 1) . '</a></li>';
+                            }
+                            ++$i;
+                        }
+                        if ($page_no == $limit) {
+                            $sell_page_nav .= '<li class="page-item disabled"><a class="page-link" href="#">Next</a></li>';
+                        } else {
+                            $sell_page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page=' . ($next_page_no) . '">Next</a></li>';
+                        }
+                        $sell_page_nav .= '
+                            </ul>
+                        </nav>';
+                    }
+                }
+                $type_css = '#all, #buy, #trade, #sell {
                     display: none;
                 }';
             } else {
@@ -259,33 +303,33 @@ if (!isset($_SESSION['email'])) {
                         }
                         $page_nav .= '<nav aria-label="...">
                         <ul class="pagination">';
-                    
+
                         $next_page_no = $page_no + 1;
                         $prev_page_no = $page_no - 1;
                         if ($page_no == 1) {
                             $page_nav .= '<li class="page-item disabled"><a class="page-link" href="#" tabindex="-1">Previous</a></li>';
                         } else {
-                            $page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page='.($prev_page_no).'" tabindex="-1">Previous</a></li>';
+                            $page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page=' . ($prev_page_no) . '" tabindex="-1">Previous</a></li>';
                         }
                         while ($i < $limit) {
                             if ($page_no == $i + 1) {
-                                $page_nav .= '<li class="page-item active"><a class="page-link" href="transactions.php?page='.($i + 1).'">'.($i + 1).'  <span class="sr-only">(current)</span></a></li>';
+                                $page_nav .= '<li class="page-item active"><a class="page-link" href="transactions.php?page=' . ($i + 1) . '">' . ($i + 1) . '  <span class="sr-only">(current)</span></a></li>';
                             } else {
-                                $page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page='.($i + 1).'">'.($i + 1).'</a></li>';
+                                $page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page=' . ($i + 1) . '">' . ($i + 1) . '</a></li>';
                             }
                             ++$i;
                         }
                         if ($page_no == $limit) {
                             $page_nav .= '<li class="page-item disabled"><a class="page-link" href="#">Next</a></li>';
                         } else {
-                            $page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page='.($next_page_no).'">Next</a></li>';
+                            $page_nav .= '<li class="page-item"><a class="page-link" href="transactions.php?page=' . ($next_page_no) . '">Next</a></li>';
                         }
                         $page_nav .= '
                             </ul>
                         </nav>';
                     }
                 }
-                $type_css = '#buy, #sell, #trade {
+                $type_css = '#buy, #sell, #trade, #transfer {
                     display: none;
                 }';
             }
@@ -332,8 +376,53 @@ if (!isset($_SESSION['email'])) {
                     <th>Transaction Amount</th>
                     <th>Transaction Approved</th>
                 </tr>';
+                $transfer_table = '<table class="rwd-table" id="transfer">
+                    <tr>
+                        <th>Transfer Id</th>
+                        <th>Transaction Type</th>
+                        <th>Transfer Amount</th>
+                        <th>From Wallet</th>
+                        <th>To Wallet</th>
+                        <th>Remaining Balance</th>
+                        <th>Transfer Amount Recieved</th>
+                        <th>Transfer Approved</th>
+                    </tr>';
+
+
+                if ($stmt_2 = $con->prepare('SELECT transfer_id, currency_id, transfer_amount, fromWallet, toWallet, remaining_balance, transfer_amount_recieved, isTransferApproved, isTransferBlocked FROM transferMaster WHERE userid = ?  ORDER BY transfer_id DESC')) {
+                    $stmt_2->bind_param('i', $userid);
+                    $stmt_2->execute();
+                    $stmt_2->store_result();
+
+                    if ($stmt_2->num_rows > 0) {
+                        $stmt_2->bind_result($transfer_id, $tr_currency_id, $transfer_amount, $tr_fromWallet, $tr_toWallet, $tr_remaining_balance, $transfer_amount_recieved, $isTransferApproved, $isTransferBlocked);
+
+                        while ($stmt_2->fetch()) {
+                            $transfer_type = 'Transfer';
+                            $transfer_table .= '<tr>
+                            <td data-th="Login Date">' . $transfer_id . '</td>
+                            <td data-th="Transaction Type">' . $transfer_type . '</td>
+                            <td data-th="Login IPv6">' . $transfer_amount . '</td>
+                            <td data-th="Login User Agent">' . $tr_fromWallet . '</td>
+                            <td data-th="Login User Agent">' . $tr_toWallet . '</td>
+                            <td data-th="Login User Agent">' . $tr_remaining_balance . '</td>
+                            <td data-th="Login User Agent">' . $transfer_amount_recieved . '</td>';
+                            if ($isTransferApproved == 0) {
+                                $transfer_table .= '<td data-th="Login User Agent">Pending</td>';
+                            } else if ($isTransferBlocked == 1) {
+                                $transfer_table .= '<td data-th="Login User Agent">Blocked</td>';
+                            } else {
+                                $transfer_table .= '<td data-th="Login User Agent">Approved</td>';
+                            }
+                            $transfer_table .= '</tr>';
+                        }
+                    }
+                }
+
                 if ($stmt->num_rows > 0) {
                     $stmt->bind_result($transaction_id, $currency_id, $currency_purchase_amount, $fromWallet, $toWallet, $remaining_balance, $transaction_amount, $isTransactionApproved, $isTransactionBlocked);
+
+
                     while ($stmt->fetch()) {
                         if ($fromWallet == 'USD') {
                             $transaction_type = 'Buy';
@@ -343,27 +432,27 @@ if (!isset($_SESSION['email'])) {
                             $transaction_type = 'Trade';
                         }
                         $table .= '<tr>
-                            <td data-th="Login Date">'.$transaction_id.'</td>
-                            <td data-th="Transaction Type">'.$transaction_type.'</td>
-                            <td data-th="Login IPv6">'.$currency_purchase_amount.'</td>
-                            <td data-th="Login User Agent">'.$fromWallet.'</td>
-                            <td data-th="Login User Agent">'.$toWallet.'</td>
-                            <td data-th="Login User Agent">'.$remaining_balance.'</td>
-                            <td data-th="Login User Agent">'.$transaction_amount.'</td>';
-                            if ($isTransactionBlocked == 1) {
-                                $table .= '<td data-th="Login User Agent">Blocked</td>';
-                            } else if ($isTransactionApproved == 0) {
-                                $table .= '<td data-th="Login User Agent">Pending</td>';
-                            } else {
-                                $table .= '<td data-th="Login User Agent">Approved</td>';
-                            }
+                            <td data-th="Login Date">' . $transaction_id . '</td>
+                            <td data-th="Transaction Type">' . $transaction_type . '</td>
+                            <td data-th="Login IPv6">' . $currency_purchase_amount . '</td>
+                            <td data-th="Login User Agent">' . $fromWallet . '</td>
+                            <td data-th="Login User Agent">' . $toWallet . '</td>
+                            <td data-th="Login User Agent">' . $remaining_balance . '</td>
+                            <td data-th="Login User Agent">' . $transaction_amount . '</td>';
+                        if ($isTransactionBlocked == 1) {
+                            $table .= '<td data-th="Login User Agent">Blocked</td>';
+                        } else if ($isTransactionApproved == 0) {
+                            $table .= '<td data-th="Login User Agent">Pending</td>';
+                        } else {
+                            $table .= '<td data-th="Login User Agent">Approved</td>';
+                        }
                         if ($fromWallet == 'USD') {
                             $buy_table .= '<tr>
-                            <td data-th="Login Date">'.$transaction_id.'</td>
-                            <td>'.$currency_purchase_amount.'</td>
-                            <td>'.$toWallet.'</td>
-                            <td>'.$remaining_balance.'</td>
-                            <td>'.$transaction_amount.'</td>';
+                            <td data-th="Login Date">' . $transaction_id . '</td>
+                            <td>' . $currency_purchase_amount . '</td>
+                            <td>' . $toWallet . '</td>
+                            <td>' . $remaining_balance . '</td>
+                            <td>' . $transaction_amount . '</td>';
                             if ($isTransactionApproved == 0) {
                                 $buy_table .= '<td data-th="Login User Agent">Pending</td>';
                             } else if ($isTransactionBlocked == 1) {
@@ -372,13 +461,13 @@ if (!isset($_SESSION['email'])) {
                                 $buy_table .= '<td data-th="Login User Agent">Approved</td>';
                             }
                             $buy_table .= '</tr>';
-                        }else if ($toWallet == 'USD') {
+                        } else if ($toWallet == 'USD') {
                             $sell_table .= '<tr>
-                            <td data-th="Login Date">'.$transaction_id.'</td>
-                            <td>'.$currency_purchase_amount.'</td>
-                            <td>'.$fromWallet.'</td>
-                            <td>'.$remaining_balance.'</td>
-                            <td>'.$transaction_amount.'</td>';
+                            <td data-th="Login Date">' . $transaction_id . '</td>
+                            <td>' . $currency_purchase_amount . '</td>
+                            <td>' . $fromWallet . '</td>
+                            <td>' . $remaining_balance . '</td>
+                            <td>' . $transaction_amount . '</td>';
                             if ($isTransactionApproved == 0) {
                                 $sell_table .= '<td data-th="Login User Agent">Pending</td>';
                             } else if ($isTransactionBlocked == 1) {
@@ -389,12 +478,12 @@ if (!isset($_SESSION['email'])) {
                             $sell_table .= '</tr>';
                         } else {
                             $trade_table .= '<tr>
-                            <td data-th="Login Date">'.$transaction_id.'</td>
-                            <td data-th="Login IPv6">'.$currency_purchase_amount.'</td>
-                            <td data-th="Login User Agent">'.$fromWallet.'</td>
-                            <td data-th="Login User Agent">'.$toWallet.'</td>
-                            <td data-th="Login User Agent">'.$remaining_balance.'</td>
-                            <td data-th="Login User Agent">'.$transaction_amount.'</td>';
+                            <td data-th="Login Date">' . $transaction_id . '</td>
+                            <td data-th="Login IPv6">' . $currency_purchase_amount . '</td>
+                            <td data-th="Login User Agent">' . $fromWallet . '</td>
+                            <td data-th="Login User Agent">' . $toWallet . '</td>
+                            <td data-th="Login User Agent">' . $remaining_balance . '</td>
+                            <td data-th="Login User Agent">' . $transaction_amount . '</td>';
                             if ($isTransactionApproved == 0) {
                                 $trade_table .= '<td data-th="Login User Agent">Pending</td>';
                             } else if ($isTransactionBlocked == 1) {
@@ -407,6 +496,9 @@ if (!isset($_SESSION['email'])) {
                         $table .= '</tr>';
                     }
                 }
+
+
+
                 $table .= '
                 </table>';
                 $trade_table .= '
@@ -415,7 +507,9 @@ if (!isset($_SESSION['email'])) {
                 </table>';
                 $sell_table .= '
                 </table>';
-                
+                $transfer_table .= '
+                </table>';
+
                 if ($_COOKIE['fnz_cookie_val'] == 'no') {
                     setcookie('email', md5($_SESSION['email']), time() + (86400 * 30), "/");
                 } else if ($_COOKIE['fnz_cookie_val'] == 'low') {
@@ -445,7 +539,7 @@ if (!isset($_SESSION['email'])) {
         <link href="assets/css/login-history.css" rel="stylesheet">
         <link href="./assets/css/search.css" rel="stylesheet" />
         <style>
-            '.$type_css.'
+            ' . $type_css . '
         </style>
 
     </head>
@@ -465,7 +559,7 @@ if (!isset($_SESSION['email'])) {
                         </a>
                     </div>
                     <div class="logo">
-                        <span style="color: #FFFFFF; opacity: .86; border-radius: 4px; display: block; padding: 10px 15px;">USD Balance: '.$balance.'</span>
+                        <span style="color: #FFFFFF; opacity: .86; border-radius: 4px; display: block; padding: 10px 15px;">USD Balance: ' . $balance . '</span>
                     </div>
                     <ul class="nav" style="border-bottom: 1px solid rgba(255, 255, 255, 0.2);">
                         <li class="nav-item">
@@ -519,11 +613,11 @@ if (!isset($_SESSION['email'])) {
                                 <li class="dropdown nav-item">
                                     <a href="#" class="dropdown-toggle nav-link" data-toggle="dropdown">
                                         <i class="nc-icon nc-planet"></i>
-                                        <span class="notification">'.$notifications.'</span>
+                                        <span class="notification">' . $notifications . '</span>
                                         <span class="d-lg-none">Notification</span>
                                     </a>
                                     <ul class="dropdown-menu">
-                                        '.$notification.'
+                                        ' . $notification . '
                                     </ul>
                                 </li>
                                 <li class="nav-item">
@@ -565,21 +659,24 @@ if (!isset($_SESSION['email'])) {
                             <option value="1">Buy</option>
                             <option value="2">Sell</option>
                             <option value="3">Trade</option>
+                            <option value="4">Transfer</option>
                         </select>
                     </div>
                     <div class="row d-flex align-items-center justify-content-between animate__animated animate__fadeInUp">
                       <div class="col-lg-12">
-                        '.$table.'
-                        '.$buy_table.'
-                        '.$sell_table.'
-                        '.$trade_table.'
+                        ' . $table . '
+                        ' . $buy_table . '
+                        ' . $sell_table . '
+                        ' . $trade_table . '
+                        ' . $transfer_table . '
                       </div>
                     </div>
                   </div>
-                  <!--'.$page_nav.'
-                  '.$buy_page_nav.'
-                  '.$sell_page_nav.'
-                  '.$trade_page_nav.'-->
+                  <!--' . $page_nav . '
+                  ' . $buy_page_nav . '
+                  ' . $sell_page_nav . '
+                  ' . $trade_page_nav . '
+                  ' . $transfer_page_nav . '-->
                 </div>
                 <footer class="footer">
                     <div class="container-fluid">
@@ -639,21 +736,31 @@ if (!isset($_SESSION['email'])) {
                 $("#buy").hide();
                 $("#sell").hide();
                 $("#trade").hide();
+                $("#transfer").hide();
             } else if (table_index == 1) {
                 $("#all").hide();
                 $("#buy").show();
                 $("#sell").hide();
                 $("#trade").hide();
+                $("#transfer").hide();
             } else if (table_index == 2) {
                 $("#all").hide();
                 $("#buy").hide();
                 $("#sell").show();
                 $("#trade").hide();
+                $("#transfer").hide();
+            } else if (table_index == 4) {
+                $("#all").hide();
+                $("#buy").hide();
+                $("#sell").hide();
+                $("#trade").hide();
+                $("#transfer").show();
             } else {
                 $("#all").hide();
                 $("#buy").hide();
                 $("#sell").hide();
                 $("#trade").show();
+                $("#transfer").hide();
             }
         }
     </script>
@@ -671,4 +778,3 @@ if (!isset($_SESSION['email'])) {
         }
     }
 }
-?>
