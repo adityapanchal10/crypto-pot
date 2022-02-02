@@ -131,7 +131,7 @@ if (!isset($_SESSION['email'])) {
                         if ($stmt = $con->prepare('INSERT INTO transactionMaster (userid, currency_id, currency_purchase_amount, fromWallet, toWallet, remaining_balance, transaction_amount, transaction_time) VALUES (?, ?, ?, ?, ?, ?, ?, CURDATE())')) {
                             $stmt->bind_param('iidssdd', $id, $to_currency_id, $purchase_amount, $from_wallet, $to_wallet, $from_wallet_balance, $amount);
                             if ($stmt->execute()) {
-                                $_SESSION['error'] = "Transaction queued";
+                                $_SESSION['success'] = "Transaction queued";
                                 header('Location: trade.php');
                                 exit;
                                 // echo '<script>alert("Transaction queued"); window.location="transactions.php"</script>';
@@ -320,6 +320,31 @@ if (!isset($_SESSION['email'])) {
       } else {
         $error = '';
       }
+      if (isset($_SESSION['success'])) {
+        $success = '
+        <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Success!</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                </div>
+                <div class="modal-body">
+                '.$_SESSION['success'].'
+                </div>
+                <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+            </div>
+        </div>';
+        // $error = '<p id="password-message" style="font-size:75% ; color: #f00;">'.$_SESSION['error'].'</p>';
+        unset($_SESSION['success']);
+      } else {
+        $success = '';
+      }
     echo '
     <!DOCTYPE html>
 
@@ -349,6 +374,7 @@ if (!isset($_SESSION['email'])) {
 
 <body>
     '.$error.'
+    '.$success.'
     <div class="wrapper">
         <div class="sidebar" data-image="./assets/img/sidebar-5.jpg">
             <!--
