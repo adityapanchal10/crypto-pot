@@ -22,7 +22,33 @@ function destroySessionToken() {
 
 include "db_connect.php";
 
+// If the user is not logged in redirect to the login page...
 if (!isset($_SESSION['email'])) {
+	header('Location: login.php');
+	exit();
+} else if ($_SERVER['REMOTE_ADDR'] != $_SESSION['ipaddress']) {
+    session_unset();
+    session_destroy();
+    header('Location: login.php');
+} else if ($_SERVER['HTTP_USER_AGENT'] != $_SESSION['useragent']) {
+    session_unset();
+    session_destroy();
+    header('Location: login.php');
+} else if (time() > ($_SESSION['lastaccess'] + 3600)) {
+    session_unset();
+    session_destroy();
+    header('Location: login.php');
+} else if (!isset($_COOKIE['fnz_id'])) {
+    session_unset();
+    session_destroy();
+    header('Location: login.php');
+} else if (($_COOKIE['fnz_id'] != hash('sha256', $_COOKIE['v_id'] + $_SESSION['visitor_gen_time'])) && (!isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == 'no')) {
+    session_unset();
+    session_destroy();
+    header('Location: login.php'); 
+} else if ($_COOKIE['fnz_cookie_val'] == 'low' && !isset($_COOKIE['fnz_id'])) {
+    session_unset();
+    session_destroy();
     header('Location: login.php');
 } else if ($_SERVER['REQUEST_METHOD'] == "GET") {
     if ($stmt = $con->prepare('SELECT userid, first_name, last_name, email_id, country, mobile, timezone, remaining_balance, isVerified, is_KYC_request_sent FROM userMaster WHERE email_id = ?')) {

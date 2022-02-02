@@ -11,12 +11,27 @@ if (!isset($_SESSION['email'])) {
 } else if ($_SERVER['REMOTE_ADDR'] != $_SESSION['ipaddress']) {
     session_unset();
     session_destroy();
+    header('Location: login.php');
 } else if ($_SERVER['HTTP_USER_AGENT'] != $_SESSION['useragent']) {
     session_unset();
     session_destroy();
+    header('Location: login.php');
 } else if (time() > ($_SESSION['lastaccess'] + 3600)) {
     session_unset();
     session_destroy();
+    header('Location: login.php');
+} else if (!isset($_COOKIE['fnz_id'])) {
+    session_unset();
+    session_destroy();
+    header('Location: login.php');
+} else if (($_COOKIE['fnz_id'] != hash('sha256', $_COOKIE['v_id'] + $_SESSION['visitor_gen_time'])) && (!isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == 'no')) {
+    session_unset();
+    session_destroy();
+    header('Location: login.php'); 
+} else if ($_COOKIE['fnz_cookie_val'] == 'low' && !isset($_COOKIE['fnz_id'])) {
+    session_unset();
+    session_destroy();
+    header('Location: login.php');
 } else {
     $_SESSION['lastaccess'] = time();
     $notifications = 0;

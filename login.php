@@ -258,6 +258,7 @@ if (!isset($_SESSION['email'])) {
                   exit;
                 } else {
                   // header('Location: dashboard.php');
+                  $visitor_gen_time = $_SESSION['visitor_gen_time'];
                   session_regenerate_id();
                   // $_SESSION['loggedin'] = TRUE;
                   $_SESSION['email'] = $email;
@@ -265,6 +266,7 @@ if (!isset($_SESSION['email'])) {
                   $_SESSION['ipaddress'] = $_SERVER['REMOTE_ADDR'];
                   $_SESSION['useragent'] = $_SERVER['HTTP_USER_AGENT'];
                   $_SESSION['lastaccess'] = time();
+                  $_SESSION['visitor_gen_time'] = $visitor_gen_time;
                   if (!isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '') {
                     setcookie('fnz_cookie_val', 'no', time() + (86400 * 30), "/");
                   }                  
@@ -550,22 +552,6 @@ if (!isset($_SESSION['email'])) {
           <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
         
           <script>
-            // Initialize the agent at application startup.
-            const fpPromise = new Promise((resolve, reject) => {
-              const script = document.createElement(\'script\');
-              script.onload = resolve;
-              script.onerror = reject;
-              script.async = true;
-              script.src = \'https://cdn.jsdelivr.net/npm/\'
-                + \'@fingerprintjs/fingerprintjs-pro@3/dist/fp.min.js\';
-              document.head.appendChild(script);
-            })
-              .then(() => FingerprintJS.load({ token: \'your-browser-token\' }));
-
-            // Get the visitor identifier when you need it.
-            fpPromise
-              .then(fp => fp.get())
-              .then(result => console.log(result.visitorId));
             const inputs = document.querySelectorAll(".input");
             function addcl() {
               let parent = this.parentNode.parentNode;
@@ -675,7 +661,20 @@ if (!isset($_SESSION['email'])) {
                 },
               });
             }
-
+            const fpPromise = import(\'https://openfpcdn.io/fingerprintjs/v3\')
+              .then(FingerprintJS => FingerprintJS.load())
+          
+            // Get the visitor identifier when you need it.
+            fpPromise
+              .then(fp => fp.get())
+              .then(result => {
+                // This is the visitor identifier:
+                const visitorId = result.visitorId
+                $.get(`visitor-id.php?id=${visitorId}`, function(data, status){
+                  console.log("Data: " + data + "\nStatus: " + status);
+                });
+                // console.log(visitorId)
+              })
           </script>
         </body>
         

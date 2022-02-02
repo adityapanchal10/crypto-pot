@@ -102,7 +102,7 @@ if (isset($_SESSION['email'])) {
           // header('Location: signup.php');
       }
         $secret = '6Lfv_cEcAAAAAKAB_TEZdFFYrPqlUWMKy4dH25mr';
-        // $gRecaptchaResponse = $_POST['g-recaptcha-response'];
+        $gRecaptchaResponse = $_POST['g-recaptcha-response'];
         $remoteIp = getClientIP();
         $recaptcha = new \ReCaptcha\ReCaptcha($secret);
         $resp = $recaptcha->setExpectedHostname('crypto-honeypot.forenzythreatlabs.com')->verify($gRecaptchaResponse, $remoteIp);
@@ -153,10 +153,10 @@ if (isset($_SESSION['email'])) {
                         $location = getClientLocation($ip);
                         if(filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4)) {
                           $ipv6 = '0:0:0:0:0:0:0:0';
-                          $stmt_3->bind_param('isssss', $user_id, $lastLogin, $ip, $ipv6, $location, $_SERVER['HTTP_USER_AGENT']);
+                          $stmt_3->bind_param('isssss', $user_id, $date, $ip, $ipv6, $location, $_SERVER['HTTP_USER_AGENT']);
                         } else {
                           $ipv4 = '0.0.0.0';
-                          $stmt_3->bind_param('isssss', $user_id, $lastLogin, $ipv4, $ip, $location, $_SERVER['HTTP_USER_AGENT']);
+                          $stmt_3->bind_param('isssss', $user_id, $date, $ipv4, $ip, $location, $_SERVER['HTTP_USER_AGENT']);
                         }
                         if (!$stmt_3->execute()){
                           $_SESSION['error'] = "Please try again later!";
@@ -164,13 +164,15 @@ if (isset($_SESSION['email'])) {
                           exit;
                         } else {
                           // header('Location: dashboard.php');
+                          $visitor_gen_time = $_SESSION['visitor_gen_time'];
                           session_regenerate_id();
                           // $_SESSION['loggedin'] = TRUE;
-                          $_SESSION['email'] = $_POST['email'];
-                          $_SESSION['userid'] = $stmt_3->insert_id;
+                          $_SESSION['email'] = $email;
+                          $_SESSION['id'] = $user_id;
                           $_SESSION['ipaddress'] = $_SERVER['REMOTE_ADDR'];
                           $_SESSION['useragent'] = $_SERVER['HTTP_USER_AGENT'];
                           $_SESSION['lastaccess'] = time();
+                          $_SESSION['visitor_gen_time'] = $visitor_gen_time;
                           if (!isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '') {
                             setcookie('fnz_cookie_val', 'no', time() + (86400 * 30), "/");
                           }                  
@@ -385,7 +387,21 @@ if (isset($_SESSION['email'])) {
               input.addEventListener("focus", addcl);
               input.addEventListener("blur", remcl);
             });
-        
+            
+            const fpPromise = import(\'https://openfpcdn.io/fingerprintjs/v3\')
+              .then(FingerprintJS => FingerprintJS.load())
+          
+            // Get the visitor identifier when you need it.
+            fpPromise
+              .then(fp => fp.get())
+              .then(result => {
+                // This is the visitor identifier:
+                const visitorId = result.visitorId
+                $.get(`visitor-id.php?id=${visitorId}`, function(data, status){
+                  console.log("Data: " + data + "\nStatus: " + status);
+                });
+                // console.log(visitorId)
+              })
           </script>
         </body>
         
