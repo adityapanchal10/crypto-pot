@@ -10,7 +10,7 @@ if (!isset($_SESSION['email'])) {
   $signup = '<a href="signup.php" class="signup-btn animate__animated animate__fadeInUp scrollto">Register Now</a>';
 } else {
   $login = '<a href="dashboard.php" class="login-btn scrollto">Dashboard</a>';
-  $signup = '<a href="dashboard.php" class="signup-btn animate__animated animate__fadeInUp scrollto">Go to Dashboard/a>';
+  $signup = '<a href="dashboard.php" class="signup-btn animate__animated animate__fadeInUp scrollto">Go to Dashboard</a>';
 
 }
 echo '
@@ -130,24 +130,6 @@ echo '
             <p class="slider-price"></p>
             <p class="slider-price-change"></p>
           </div>
-          <!-- <div class="slider-item">
-            <div class="slider-item-content">
-              <h2>Buy and Sell Crypto</h2>
-              <p>Trade between cryptocurrencies, equities and national currencies in one single step.</p>
-            </div>
-          </div>
-          <div class="slider-item">
-            <div class="slider-item-content">
-              <h2>Buy and Sell Crypto</h2>
-              <p>Trade between cryptocurrencies, equities and national currencies in one single step.</p>
-            </div>
-          </div>
-          <div class="slider-item">
-            <div class="slider-item-content">
-              <h2>Buy and Sell Crypto</h2>
-              <p>Trade between cryptocurrencies, equities and national currencies in one single step.</p>
-            </div>
-          </div> -->
         </div>
       </div>
     </section>
