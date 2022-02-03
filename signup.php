@@ -198,7 +198,6 @@ if (isset($_SESSION['email'])) {
                           require_once('phpmailer/PHPMailer.php');
                           require_once('phpmailer/SMTP.php');
                           require_once('phpmailer/Exception.php');
-                          echo 'here';
                           $mail = new PHPMailer\PHPMailer\PHPMailer(true);
                           // $mail->SMTPDebug = SMTP::DEBUG_SERVER;
                           $mail->IsSMTP();
