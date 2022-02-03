@@ -65,42 +65,43 @@ if (isset($_SESSION['email'])) {
           echo('<script>window.location = "signup.php";</script>');
           exit;
           // header('Location: signup.php');
-      }
+        }
 
-      if (preg_match('/[A-Za-z]{2,}/', $_POST['fname']) == 0) {
-          $_SESSION['error'] = "Invalid first name";
-          echo('<script>window.location = "signup.php";</script>');
-          exit;
-          // header('Location: signup.php');
-      }
+        if (preg_match('/[A-Za-z]{2,}/', $_POST['fname']) == 0) {
+            $_SESSION['error'] = "Invalid first name";
+            echo('<script>window.location = "signup.php";</script>');
+            exit;
+            // header('Location: signup.php');
+        }
 
-      if (preg_match('/[A-Za-z]{2,}/', $_POST['lname']) == 0) {
-          $_SESSION['error'] = "Invalid last name";
-          echo('<script>window.location = "signup.php";</script>');
-          exit;
-          // header('Location: signup.php');
-      }
+        if (preg_match('/[A-Za-z]{2,}/', $_POST['lname']) == 0) {
+            $_SESSION['error'] = "Invalid last name";
+            echo('<script>window.location = "signup.php";</script>');
+            exit;
+            // header('Location: signup.php');
+        }
 
-      if (preg_match('/[0-9]{10}/', $_POST['mobile_no']) == 0) {
-          $_SESSION['error'] = "Invalid mobile number";
-          echo('<script>window.location = "signup.php";</script>');
-          exit;
-          // header('Location: signup.php');
-      }
+        if (preg_match('/[0-9]{10}/', $_POST['mobile_no']) == 0) {
+            $_SESSION['error'] = "Invalid mobile number";
+            echo('<script>window.location = "signup.php";</script>');
+            exit;
+            // header('Location: signup.php');
+        }
 
-      if (preg_match('/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,}$/', $_POST['password']) == 0) {
-          $_SESSION['error'] = "Password must have at least 8 characters, 1 uppercase, 1 lowercase and 1 number and special character";
-          echo('<script>window.location = "signup.php";</script>');
-          exit;
-          // header('Location: signup.php');
-      }
-      
-      if ($_POST['password'] != $_POST['password-verify']) {
-          $_SESSION['error'] = "Password fields do not match";
-          echo('<script>window.location = "signup.php";</script>');
-          exit;
-          // header('Location: signup.php');
-      }
+        if (preg_match('/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,}$/', $_POST['password']) == 0) {
+            $_SESSION['error'] = "Password must have at least 8 characters, 1 uppercase, 1 lowercase and 1 number and special character";
+            echo('<script>window.location = "signup.php";</script>');
+            exit;
+            // header('Location: signup.php');
+        }
+        
+        if ($_POST['password'] != $_POST['password-verify']) {
+            $_SESSION['error'] = "Password fields do not match";
+            echo('<script>window.location = "signup.php";</script>');
+            exit;
+            // header('Location: signup.php');
+        }
+        
         $secret = '6Lfv_cEcAAAAAKAB_TEZdFFYrPqlUWMKy4dH25mr';
         $gRecaptchaResponse = $_POST['g-recaptcha-response'];
         $remoteIp = getClientIP();
