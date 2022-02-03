@@ -397,6 +397,14 @@ if (isset($_SESSION['email'])) {
               let parent = this.parentNode.parentNode;
               parent.classList.add("focus");
             }
+            function checkcl() {
+              let parent = this.parentNode.parentNode;
+              if (this.value == "") {
+                parent.classList.remove("focus");
+              } else {
+                parent.classList.add("focus");
+              }
+            }
             function remcl() {
               let parent = this.parentNode.parentNode;
               if (this.value == "") {
@@ -405,6 +413,7 @@ if (isset($_SESSION['email'])) {
             }
             inputs.forEach((input) => {
               input.addEventListener("focus", addcl);
+              input.addEventListener("change", checkcl);
               input.addEventListener("blur", remcl);
             });
             
