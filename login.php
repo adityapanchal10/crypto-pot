@@ -572,6 +572,7 @@ if (!isset($_SESSION['email'])) {
           <script src="assets/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
         
           <script>
+          const inputs = document.querySelectorAll(".input");
             function addcl() {
               let parent = this.parentNode.parentNode;
               parent.classList.add("focus");
