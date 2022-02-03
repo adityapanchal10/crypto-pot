@@ -336,6 +336,11 @@ if (!isset($_GET['email'])) {
             header('Location: login.php');
             exit;
         }
+        if (!filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
+            $_SESSION['error'] = "Invalid e-mail address";
+            echo('<script>window.location = "signup.php";</script>');
+            exit;
+        }
         if (!isset($_GET['g-recaptcha-response']) || $_GET['g-recaptcha-response'] == '') {
             $_SESSION['error'] = 'Please verify that you are not a robot';
             header('Location: login.php');
