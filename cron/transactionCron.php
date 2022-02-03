@@ -274,3 +274,5 @@ function approve_transfers($con)
 
 approve_transactions($con);
 approve_transfers($con);
+
+?>

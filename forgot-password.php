@@ -84,6 +84,11 @@ if (!isset($_GET['email'])) {
                             
                             <head>
                             <meta charset="UTF-8">
+
+                            <!-- Favicons -->
+                            <link href="./assets/img/crypto.png" rel="icon">
+                            <link href="./assets/img/crypto.png" rel="apple-touch-icon">
+
                             <title>Forgot Password</title>
                             
                             <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">

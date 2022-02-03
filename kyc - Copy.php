@@ -34,6 +34,11 @@ if (!isset($_SESSION['email']) || !isset($_SESSION['id'])) {
                 <html>
                 
                 <head>
+                    <title>KYC</title>
+                    <!-- Favicons -->
+                    <link href="./assets/img/kyc.png" rel="icon">
+                    <link href="./assets/img/kyc.png" rel="apple-touch-icon">
+
                     <meta charset="utf-8">
                     <meta http-equiv="X-UA-Compatible" content="IE=edge">
                     <title></title>
