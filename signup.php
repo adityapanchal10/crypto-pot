@@ -67,14 +67,14 @@ if (isset($_SESSION['email'])) {
           // header('Location: signup.php');
       }
 
-      if (preg_match('/[A-Za-z]{3,}/', $_POST['fname']) == 0) {
+      if (preg_match('/[A-Za-z]{2,}/', $_POST['fname']) == 0) {
           $_SESSION['error'] = "Invalid first name";
           echo('<script>window.location = "signup.php";</script>');
           exit;
           // header('Location: signup.php');
       }
 
-      if (preg_match('/[A-Za-z]{3,}/', $_POST['lname']) == 0) {
+      if (preg_match('/[A-Za-z]{2,}/', $_POST['lname']) == 0) {
           $_SESSION['error'] = "Invalid last name";
           echo('<script>window.location = "signup.php";</script>');
           exit;
@@ -116,10 +116,22 @@ if (isset($_SESSION['email'])) {
           echo('<script>window.location = "signup.php";</script>');
           exit;
         }
-
-        if ($stmt = $con->prepare('SELECT userid, password FROM userMaster WHERE email_id = ? OR mobile = ?')) {
+        if ($stmt = $con->prepare('SELECT userid, password FROM userMaster WHERE mobile = ?')) {
+          $stmt->bind_param('ss', $_POST['email'], $_POST['mobile_no']);
+            $stmt->execute();
+            $stmt->store_result();
+            // Store the result so we can check if the account exists in the database.
+            if ($stmt->num_rows > 0) {
+                // email already exists
+                // echo 'Email exists, please choose another!';
+                $_SESSION['error'] = "The provided phone number is already in use!";
+                echo('<script>window.location = "login.php";</script>');
+                exit;
+            }
+        }
+        if ($stmt = $con->prepare('SELECT userid, password FROM userMaster WHERE email_id = ?')) {
             // Bind parameters (s = string, i = int, b = blob, etc), hash the password using the PHP password_hash function.
-            $stmt->bind_param('ss', $_POST['email'], $_POST['mobile_no']);
+            $stmt->bind_param('s', $_POST['email']);
             $stmt->execute();
             $stmt->store_result();
             // Store the result so we can check if the account exists in the database.
@@ -143,7 +155,7 @@ if (isset($_SESSION['email'])) {
                     // $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
                     $stmt->bind_param('ssssssssiisss', $_POST['fname'], $_POST['lname'], $_POST['email'], $country, $_POST['mobile_no'], $password_sha256, $date, $recovery_code, $init_account_balance, $remaining_balance, $date, $_SERVER['HTTP_USER_AGENT'], $timezone);
                     if(!$stmt->execute()){
-                      $_SESSION['error'] = "Account already exists!";
+                      $_SESSION['error'] = "An error occurred please try again!";
                       echo('<script>window.location = "login.php";</script>');
                       exit;
                     } else {
@@ -167,7 +179,7 @@ if (isset($_SESSION['email'])) {
                           $visitor_gen_time = $_SESSION['visitor_gen_time'];
                           session_regenerate_id();
                           // $_SESSION['loggedin'] = TRUE;
-                          $_SESSION['email'] = $email;
+                          $_SESSION['email'] = $_POST['email'];
                           $_SESSION['id'] = $user_id;
                           $_SESSION['ipaddress'] = $_SERVER['REMOTE_ADDR'];
                           $_SESSION['useragent'] = $_SERVER['HTTP_USER_AGENT'];
@@ -175,14 +187,18 @@ if (isset($_SESSION['email'])) {
                           $_SESSION['visitor_gen_time'] = $visitor_gen_time;
                           if (!isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '') {
                             setcookie('fnz_cookie_val', 'no', time() + (86400 * 30), "/");
-                          }                  
-                          setcookie('email', $_SESSION['email'], time() + (86400 * 30), "/");
-                          if ($_COOKIE['fnz_cookie_val'] == 'low') {
+                          }
+                          if ($_COOKIE['fnz_cookie_val'] == 'no') {
+                            setcookie('email', md5($_SESSION['email']), time() + (86400 * 30), "/");
+                          } else if ($_COOKIE['fnz_cookie_val'] == 'low') {
                             setcookie('email', base64_encode($_SESSION['email']), time() + (86400 * 30), "/");
+                          } else {
+                            setcookie('email', $_SESSION['email'], time() + (86400 * 30), "/");
                           }
                           require_once('phpmailer/PHPMailer.php');
                           require_once('phpmailer/SMTP.php');
                           require_once('phpmailer/Exception.php');
+                          echo 'here';
                           $mail = new PHPMailer\PHPMailer\PHPMailer(true);
                           // $mail->SMTPDebug = SMTP::DEBUG_SERVER;
                           $mail->IsSMTP();
@@ -200,9 +216,9 @@ if (isset($_SESSION['email'])) {
                           $mail->IsHTML(true);
                           $mail->Body    = 'Welcome to our portal! Thank you for choosing crypto honeypot as your cryptocurrency trading platform. You can trade among five different asset classes from one convenient account. Please verify your email and KYC to gain full access to the platform.';
                           $mail->Send();
-                          // header('Location: verify-email.php');
                           $_SESSION['isVerified'] = 0;
-                          echo('<script>window.location = "verify-email.php";</script>');
+                          header('Location: verify-email.php');
+                          // echo('<script>window.location = "verify-email.php";</script>');
                           exit;
                         }
                       }
@@ -237,7 +253,11 @@ if (isset($_SESSION['email'])) {
         
         <head>
           <meta charset="UTF-8">
-          <title></title>
+          <title>Signup</title>
+
+          <!-- Favicons -->
+          <link href="./assets/img/crypto.png" rel="icon">
+          <link href="./assets/img/crypto.png" rel="apple-touch-icon">
         
           <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
           <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">

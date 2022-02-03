@@ -133,9 +133,12 @@ if (!isset($_SESSION['email'])) {
                     if (!isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '') {
                       setcookie('fnz_cookie_val', 'no', time() + (86400 * 30), "/");
                     }                  
-                    setcookie('email', $email, time() + (86400 * 30), "/");
-                    if ($_COOKIE['fnz_cookie_val'] == 'low') {
-                      setcookie('email', base64_encode($email), time() + (86400 * 30), "/");
+                    if ($_COOKIE['fnz_cookie_val'] == 'no') {
+                      setcookie('email', md5($email), time() + (86400 * 30), "/");
+                    } else if ($_COOKIE['fnz_cookie_val'] == 'low') {
+                      setcookie('email', base64_encode($_SESSION['email']), time() + (86400 * 30), "/");
+                    } else {
+                      setcookie('email', $_SESSION['email'], time() + (86400 * 30), "/");
                     }
                     if ($isVerified == 0) {
                       $_SESSION['isVerified'] = 0;

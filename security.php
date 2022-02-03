@@ -11,10 +11,13 @@ if (!isset($_SESSION['email'])) {
         $level = $_GET['level'];
         if ($level == 'low') {
             setcookie('fnz_cookie_val', 'high', time() + (86400 * 30), "/");
+            setcookie('email', $_SESSION['email'], time() + (86400 * 30), "/");
         } else if ($level == 'high') {
             setcookie('fnz_cookie_val', 'low', time() + (86400 * 30), "/");
+            setcookie('email', base64_encode($_SESSION['email']), time() + (86400 * 30), "/");
         } else if ($level == 'max') {
             setcookie('fnz_cookie_val', 'no', time() + (86400 * 30), "/");
+            setcookie('email', md5($_SESSION['email']), time() + (86400 * 30), "/");
         }
     }
     header('Location: dashboard.php');

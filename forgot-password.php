@@ -585,6 +585,10 @@ if (!isset($_GET['email'])) {
 
                     }
                 }
+            } else {
+                $_SESSION['error'] = "No account found with the provided email address.";
+                header('Location: login.php');
+                exit;
             }
     
         }
