@@ -279,7 +279,7 @@ if (isset($_SESSION['email'])) {
                 </div>
                 <div class="carousel-inner">
                   <div class="carousel-item active">
-                    <img src="assets/img/CityGrid.png" class="" alt="...">
+                    <img src="assets/img/CityGrid.jpg" class="" alt="...">
                     <div class="carousel-caption d-none d-md-block">
                       <h2 style="font-size: 300%; font-weight: 500;">The Easiest Way To Invest</h2>
                     </div>
