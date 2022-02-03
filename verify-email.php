@@ -30,10 +30,12 @@ if (!isset($_SESSION['email'])) {
                 $stmt->fetch();
                 if ($isVerified == 1) {
                     header('Location: dashboard.php');
+                    exit;
                     // exit('<script>alert("Email verified successfully!")</script>');
                 }
             }
     }
+    $_SESSION['isVerified'] = 0;
     if ($_SERVER['REQUEST_METHOD'] == "POST" && isset($_POST['submit'])) {
         if ($stmt = $con->prepare('SELECT email_verfication_code FROM userMaster WHERE email_id = ?')) {
 
@@ -52,7 +54,11 @@ if (!isset($_SESSION['email'])) {
                         if($stmt->execute()){
                             //header('Refresh:5; url=dashboard.php');
                             // header('Location: dashboard.php');
-                            exit('<script>alert("Email verified successfully!"); window.location="dashboard.php";</script>');
+                            unset($_SESSION['isVerified']);
+                            $_SESSION['error'] = "Email verified successfully! Welcome to Crypto-Pot";
+                            header('Location: dashboard.php');
+                            exit();
+                            // exit('<script>alert("Email verified successfully!"); window.location="dashboard.php";</script>');
                         }
 
                     /* $sql = "UPDATE userMaster SET isVerified = 1 where email_id='".$_SESSION['email']."'";

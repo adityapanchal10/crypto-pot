@@ -201,6 +201,7 @@ if (isset($_SESSION['email'])) {
                           $mail->Body    = 'Welcome to our portal! Thank you for choosing crypto honeypot as your cryptocurrency trading platform. You can trade among five different asset classes from one convenient account. Please verify your email and KYC to gain full access to the platform.';
                           $mail->Send();
                           // header('Location: verify-email.php');
+                          $_SESSION['isVerified'] = 0;
                           echo('<script>window.location = "verify-email.php";</script>');
                           exit;
                         }

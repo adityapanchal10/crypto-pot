@@ -62,15 +62,15 @@ if (!isset($_SESSION['email'])) {
       exit;
     }
     if ($_COOKIE['fnz_cookie_val'] == 'no') {
-      if ($stmt = $con->prepare('SELECT userid, password FROM userMaster WHERE email_id = ?')) {
+      if ($stmt = $con->prepare('SELECT userid, password, isVerified FROM userMaster WHERE email_id = ?')) {
         $stmt->bind_param('s', $email);
         if (!$stmt->execute()) {
           if ($_COOKIE['fnz_cookie_val'] == 'no') {
-            $_SESSION['error'] = $stmt->error;
+            $_SESSION['error'] = 'An error occurred. Please try again.';
             echo('<script>window.location = "login.php";</script>');
             exit;
           }
-          $_SESSION['error'] = 'An error occurred. Please try again.';
+          $_SESSION['error'] = $stmt->error;
           echo('<script>window.location = "login.php";</script>');
           exit;
         }
@@ -78,7 +78,7 @@ if (!isset($_SESSION['email'])) {
         $stmt->store_result();
     
         if ($stmt->num_rows > 0) {
-          $stmt->bind_result($user_id, $password);
+          $stmt->bind_result($user_id, $password, $isVerified);
           $stmt->fetch();
           // Account exists, now we verify the password.
           // Note: remember to use password_hash in your registration file to store the hashed passwords.
@@ -93,13 +93,14 @@ if (!isset($_SESSION['email'])) {
               $stmt_2->bind_param('sss', $lastLogin, $_SERVER['HTTP_USER_AGENT'], $email);
               if(!$stmt_2->execute()){
                 if ($_COOKIE['fnz_cookie_val'] == 'no') {
-                  $_SESSION['error'] = $stmt_2->error;
+                  $_SESSION['error'] = 'An error occurred. Please try again.';
                   echo('<script>window.location = "login.php";</script>');
                   exit;
                 }
-                $_SESSION['error'] = 'An error occurred. Please try again.';
+                $_SESSION['error'] = $stmt_2->error;
                 echo('<script>window.location = "login.php";</script>');
                 exit;
+                
               } else {
                 if ($stmt_3 = $con->prepare('INSERT INTO logMaster (userid, loginDatetime, loginIPv4, loginIPv6, login_location, login_http_user_agent) VALUES (?, ?, ?, ?, ?, ?)')) {
                   $ip = getClientIP();
@@ -113,11 +114,11 @@ if (!isset($_SESSION['email'])) {
                   }
                   if (!$stmt_3->execute()){
                     if ($_COOKIE['fnz_cookie_val'] == 'no') {
-                      $_SESSION['error'] = $stmt_3->error;
+                      $_SESSION['error'] = 'An error occurred. Please try again.';
                       echo('<script>window.location = "login.php";</script>');
                       exit;
                     }
-                    $_SESSION['error'] = 'An error occurred. Please try again.';
+                    $_SESSION['error'] = $stmt_3->error;
                     echo('<script>window.location = "login.php";</script>');
                     exit;
                   } else {
@@ -136,7 +137,13 @@ if (!isset($_SESSION['email'])) {
                     if ($_COOKIE['fnz_cookie_val'] == 'low') {
                       setcookie('email', base64_encode($email), time() + (86400 * 30), "/");
                     }
-                    echo('<script>window.location = "dashboard.php";</script>');
+                    if ($isVerified == 0) {
+                      $_SESSION['isVerified'] = 0;
+                      echo('<script>window.location = "verify-email.php";</script>');
+                      exit;
+                    } else {
+                      echo('<script>window.location = "dashboard.php";</script>');
+                    }
                   }
                 } else {
                   if ($_COOKIE['fnz_cookie_val'] == 'no') {
@@ -195,7 +202,7 @@ if (!isset($_SESSION['email'])) {
       }
     } else {
       $email = $_POST['email'];
-      $query  = "SELECT userid, password FROM userMaster WHERE email_id = '$email';";
+      $query  = "SELECT userid, password, isVerified FROM userMaster WHERE email_id = '$email';";
       $result = mysqli_query($con, $query) or function() {
         $_SESSION['error'] = mysqli_error($con);
         echo('<script>window.location = "login.php";</script>');
@@ -208,7 +215,7 @@ if (!isset($_SESSION['email'])) {
 				// Display values
 				$user_id = $row["userid"];
 				$password  = $row["password"];
-
+        $isVerified = $row['isVerified'];
 				// Feedback for end user
 				$password_hash = hash('sha256', $_POST['password']);
         if ($password_hash == $password) {
@@ -229,11 +236,11 @@ if (!isset($_SESSION['email'])) {
             $stmt_2->bind_param('sss', $lastLogin, $user_agent, $email);
             if(!$stmt_2->execute()){
               if ($_COOKIE['fnz_cookie_val'] == 'no') {
-                $_SESSION['error'] = $stmt_2->error;
+                $_SESSION['error'] = 'Please try again';
                 echo('<script>window.location = "login.php";</script>');
                 exit;
               }
-              $_SESSION['error'] = 'Please try again';
+              $_SESSION['error'] = $stmt_2->error;
               echo('<script>window.location = "login.php";</script>');
               exit;
             } else {
@@ -249,11 +256,11 @@ if (!isset($_SESSION['email'])) {
                 }
                 if (!$stmt_3->execute()){
                   if ($_COOKIE['fnz_cookie_val'] == 'no') {
-                    $_SESSION['error'] = $stmt_3->error;
+                    $_SESSION['error'] = 'Please try again';
                     echo('<script>window.location = "login.php";</script>');
                     exit;
                   }
-                  $_SESSION['error'] = 'Please try again';
+                  $_SESSION['error'] = $stmt_3->error;
                   echo('<script>window.location = "login.php";</script>');
                   exit;
                 } else {
@@ -275,7 +282,13 @@ if (!isset($_SESSION['email'])) {
                     setcookie('email', base64_encode($email), time() + (86400 * 30), "/");
                   }
                   
-                  echo('<script>window.location = "dashboard.php";</script>');
+                  if ($isVerified == 0) {
+                    $_SESSION['isVerified'] = 0;
+                    echo('<script>window.location = "verify-email.php";</script>');
+                    exit;
+                  } else {
+                    echo('<script>window.location = "dashboard.php";</script>');
+                  }
                 }
               } else {
                 if ($_COOKIE['fnz_cookie_val'] == 'no') {
@@ -453,7 +466,7 @@ if (!isset($_SESSION['email'])) {
                       <input type="email" class="input" name="email">
                     </div>
                   </div>
-        
+                  <div style="display: flex; justify-content: center;" class="div g-recaptcha" data-sitekey="6Lfv_cEcAAAAAHjezfbopIsXDtuGNMHzFTO1mbIE"></div>
                   <a href="#" id="backTol1" class="forgot">Go back</a>
                   <input type="submit" id="submit" class="btn" value="submit">
                 </form>
@@ -682,7 +695,12 @@ if (!isset($_SESSION['email'])) {
         ';
     }
 } else {
+    if (isset($_SESSION['isVerified'])) {
+      header('Location: verify-email.php');
+      exit;
+    }
     header('Location: dashboard.php');
+    exit;
 }
 
 ?>

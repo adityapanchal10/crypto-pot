@@ -21,7 +21,7 @@ function destroySessionToken() {
 }
 
 // If the user is not logged in redirect to the login page...
-if (!isset($_SESSION['email'])) {
+if (!isset($_SESSION['email']) || isset($_SESSION['isVerified'])) {
 	header('Location: login.php');
 	exit();
 } else if ($_SERVER['REMOTE_ADDR'] != $_SESSION['ipaddress']) {

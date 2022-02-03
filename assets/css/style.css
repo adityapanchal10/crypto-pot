@@ -1172,11 +1172,11 @@ input:invalid+label {
 	transform: translateY(0);
 }
 
-input:focus {
+input:focus, input:-webkit-autofill {
 	border-color: #ff7b00;
 }
 
-input:focus+label {
+input:focus+label, input:-webkit-autofill+label {
 	color: #ff7b00;
 	-webkit-transform: translateY(-20px);
 	-moz-transform: translateY(-20px);
