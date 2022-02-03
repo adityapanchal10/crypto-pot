@@ -340,6 +340,10 @@ if (!isset($_SESSION['email'])) {
         <head>
           <meta charset="UTF-8">
           <title>Login</title>
+
+          <!-- Favicons -->
+          <link href="./assets/img/crypto.png" rel="icon">
+          <link href="./assets/img/crypto.png" rel="apple-touch-icon">
         
           <link href="assets/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
           <link href="assets/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
