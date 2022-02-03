@@ -117,7 +117,7 @@ if (isset($_SESSION['email'])) {
           exit;
         }
         if ($stmt = $con->prepare('SELECT userid, password FROM userMaster WHERE mobile = ?')) {
-          $stmt->bind_param('ss', $_POST['email'], $_POST['mobile_no']);
+          $stmt->bind_param('s', $_POST['mobile_no']);
             $stmt->execute();
             $stmt->store_result();
             // Store the result so we can check if the account exists in the database.

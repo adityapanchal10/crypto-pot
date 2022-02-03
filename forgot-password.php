@@ -331,7 +331,33 @@ if (!isset($_GET['email'])) {
             }
         }
     } else {
+        if (!isset($_GET['email']) || $_GET['email'] == '') {
+            $_SESSION['error'] = 'Please enter your registered email';
+            header('Location: login.php');
+            exit;
+        }
+        if (!isset($_GET['g-recaptcha-response']) || $_GET['g-recaptcha-response'] == '') {
+            $_SESSION['error'] = 'Please verify that you are not a robot';
+            header('Location: login.php');
+            exit;
+        }
         $email = $_GET['email'];
+
+        $secret = '6Lfv_cEcAAAAAKAB_TEZdFFYrPqlUWMKy4dH25mr';
+        $gRecaptchaResponse = $_GET['g-recaptcha-response'];
+        $remoteIp = getClientIP();
+        $recaptcha = new \ReCaptcha\ReCaptcha($secret);
+        $resp = $recaptcha->setExpectedHostname('crypto-honeypot.forenzythreatlabs.com')->verify($gRecaptchaResponse, $remoteIp);
+
+        if ($resp->isSuccess()) {
+          // Verified!
+        } else {
+          $errors = $resp->getErrorCodes();
+          // echo $errors;
+          $_SESSION['error'] = "Please complete the captcha!";
+          echo('<script>window.location = "signup.php";</script>');
+          exit;
+        }
         if ($stmt = $con->prepare('SELECT first_name  FROM userMaster WHERE email_id = ?')) {
 
             $stmt->bind_param('s', $email);
