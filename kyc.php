@@ -777,7 +777,7 @@ if (!isset($_SESSION['email']) || isset($_SESSION['isVerified'])) {
                 <head>
                     <meta charset="utf-8" />
 
-                    <!-- Favicons -->
+                    <!-- Favicons --> 
                     <link href="./assets/img/kyc.png" rel="icon">
                     <link href="./assets/img/kyc.png" rel="apple-touch-icon">
                     
