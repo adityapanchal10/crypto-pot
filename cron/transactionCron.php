@@ -168,46 +168,12 @@ function approve_transfers($con)
                     $stmt_3->fetch();
                     $stmt_3->close();
                 } else {
-                    echo 'To-wallet not found, proceding with transfer';
+                    echo 'To-wallet not found, blocking transfer';
 
-                    // if to_wallet address wrong, asset is still deducted as in real life scenario
-
-                    $from_wallet_balance = $from_wallet_balance - $amount;
-
-                    if ($stmt_5 = $con->prepare('UPDATE walletMappingMaster SET wallet_last_balance = wallet_balance, wallet_balance = ? WHERE wallet_id = ?')) {
-                        $stmt_5->bind_param('di', $from_wallet_balance, $from_wallet_id);
-                        $stmt_5->execute();
-                        $stmt_5->close();
-                    } else {
-                        echo 'Error updating from-wallet balance';
-                        exit();
-                    }
-
-                    if ($from_wallet == 'USD') {
-                        $stmt_5 = $con->prepare('UPDATE userMaster SET remaining_balance = ? WHERE userid = ?');
-                        $stmt_5->bind_param('di', $from_wallet_balance, $userid);
-                        $stmt_5->execute();
-                        $stmt_5->close();
-                    }
-
-                    if ($stmt_2 = $con->prepare('UPDATE transferMaster SET transfer_amount_recieved = ?, remaining_balance = ?, isTransferApproved = 1, transfer_approved_time = CURDATE() WHERE transfer_id = ?')) {
-                        if ($stmt_2->bind_param('ddi', $transfer_amount_recieved, $from_wallet_balance, $transfer_id)) {
-                            if ($stmt_2->execute()) {
-                                echo 'Transfer approved';
-                            } else {
-                                echo 'Error updating transfer' . $stmt_2->error;
-                                exit();
-                            }
-                        } else {
-                            echo 'Error binding params' . $stmt_2->error;
-                            exit();
-                        }
-
-                        $stmt_2->close();
-                    } else {
-                        echo 'Transfer rejected';
-                    }
-
+                    $stmt_2 = $con->prepare('UPDATE transferMaster SET isTransferBlocked = 1 WHERE transfer_id = ?');
+                    $stmt_2->bind_param('i', $transfer_id);
+                    $stmt_2->execute();
+                    $stmt_2->close();
                     exit();
                 }
                 if ($amount > $from_wallet_balance) {
@@ -215,6 +181,7 @@ function approve_transfers($con)
                     $stmt_2->bind_param('i', $transfer_id);
                     $stmt_2->execute();
                     $stmt_2->close();
+                    exit();
                 } else {
                     // echo '<h3>Transfer 3</h3>';
                     $from_wallet_balance = $from_wallet_balance - $amount;
