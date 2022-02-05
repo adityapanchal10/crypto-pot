@@ -215,13 +215,13 @@ if (!isset($_SESSION['email']) || isset($_SESSION['isVerified'])) {
                             $stmt->fetch();
                             $stmt->close();
                         } else {
-                            $_SESSION['error'] = "Error in fetching to-wallet id.";
+                            $_SESSION['error'] = "Error in fetching to-wallet id. Please check wallet address";
                             header('Location: trade.php');
                             // echo $stmt->error;
                             exit();
                         }
                     } else {
-                        $_SESSION['error'] = "Error in fetching to-wallet details.";
+                        $_SESSION['error'] = "Error in fetching to-wallet details. Please check wallet address";
                         header('Location: trade.php');
                         // echo 'Error fetching to-wallet balance';
                         exit();
@@ -259,17 +259,17 @@ if (!isset($_SESSION['email']) || isset($_SESSION['isVerified'])) {
                                 exit();
                                 // echo '<script>alert("Transaction queued"); window.location="transactions.php"</script>';
                             } else {
-                                $_SESSION['error'] = "Error in transfer (excecution).";
+                                $_SESSION['error'] = "Error in transfer (invalid wallet address).";
                                 header('Location: trade.php');
                                 exit();
                                 // echo '<script>alert("Error in transaction"); window.location="dashboard.php"</script>';
                             }
-                            $_SESSION['error'] = "Error in transfer 2.";
+                            $_SESSION['error'] = "Error in transfer.";
                             header('Location: trade.php');
                             // $stmt->close();
                             exit();
                         } else {
-                            $_SESSION['error'] = "Error in transfer 3.";
+                            $_SESSION['error'] = "Error in transfer. Please try again later.";
                             header('Location: trade.php');
                             // echo '<script>alert("Please try again."); window.location="transactions.php"</script>';
                             exit();
