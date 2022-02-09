@@ -4,11 +4,11 @@ include "../db_connect.php";
 
 function approve_transactions($con)
 {
-    $stmt = $con->prepare('SELECT userid, transaction_id, fromWallet, toWallet, transaction_amount FROM transactionMaster WHERE isTransactionApproved = 0 AND isTransactionBlocked = 0');
+    $stmt = $con->prepare('SELECT userid, transaction_id, fromWallet, toWallet, transaction_amount, currency_purchase_amount FROM transactionMaster WHERE isTransactionApproved = 0 AND isTransactionBlocked = 0');
     $stmt->execute();
     $stmt->store_result();
     if ($stmt->num_rows > 0) {
-        $stmt->bind_result($userid, $transaction_id, $from_wallet, $to_wallet, $transaction_amount);
+        $stmt->bind_result($userid, $transaction_id, $from_wallet, $to_wallet, $transaction_amount, $currency_purchase_amount);
         while ($stmt->fetch()) {
             if ($from_wallet == $to_wallet) {
                 $stmt_2 = $con->prepare('UPDATE transactionMaster SET isTransactionBlocked = 1 WHERE transaction_id = ?');
@@ -16,7 +16,7 @@ function approve_transactions($con)
                 $stmt_2->execute();
                 $stmt_2->close();
             } else {
-                $amount = $transaction_amount;
+                $amount = $currency_purchase_amount;
                 if ($stmt_3 = $con->prepare('SELECT currency_id, currency_price FROM priceMaster WHERE currency_name = ?')) {
                     $stmt_3->bind_param('s', $from_wallet);
                     $stmt_3->execute();
@@ -68,7 +68,8 @@ function approve_transactions($con)
                     $stmt_2->close();
                 } else {
                     $from_wallet_balance = $from_wallet_balance - $amount;
-                    $purchase_amount = $amount * ($from_currency_price / $to_currency_price);
+                    // $purchase_amount = $amount * ($from_currency_price / $to_currency_price);
+                    $purchase_amount = $amount
                     $to_wallet_balance = $to_wallet_balance + $purchase_amount;
                     if ($stmt_5 = $con->prepare('UPDATE walletMappingMaster SET wallet_last_balance = wallet_balance, wallet_balance = ? WHERE wallet_id = ?')) {
                         $stmt_5->bind_param('di', $from_wallet_balance, $from_wallet_id);
@@ -135,6 +136,7 @@ function approve_transfers($con)
                 $stmt_2->bind_param('i', $transfer_id);
                 $stmt_2->execute();
                 $stmt_2->close();
+                exit();
             } else {
                 // echo '<h3>Transfer 2</h3>';
                 $amount = $transfer_amount;
