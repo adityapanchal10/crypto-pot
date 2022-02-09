@@ -69,7 +69,7 @@ function approve_transactions($con)
                 } else {
                     $from_wallet_balance = $from_wallet_balance - $amount;
                     // $purchase_amount = $amount * ($from_currency_price / $to_currency_price);
-                    $purchase_amount = $amount
+                    $purchase_amount = $amount;
                     $to_wallet_balance = $to_wallet_balance + $purchase_amount;
                     if ($stmt_5 = $con->prepare('UPDATE walletMappingMaster SET wallet_last_balance = wallet_balance, wallet_balance = ? WHERE wallet_id = ?')) {
                         $stmt_5->bind_param('di', $from_wallet_balance, $from_wallet_id);
