@@ -407,7 +407,7 @@ if (!isset($_SESSION['email']) || isset($_SESSION['isVerified'])) {
                             <td data-th="Login User Agent">' . $tr_toWallet . '</td>
                             <td data-th="Login User Agent">' . $tr_remaining_balance . '</td>
                             <td data-th="Login User Agent">' . $transfer_amount_recieved . '</td>';
-                            if ($isTransferApproved == 0) {
+                            if ($isTransferApproved == 0 && $isTransferBlocked == 0) {
                                 $transfer_table .= '<td data-th="Login User Agent">Pending</td>';
                             } else if ($isTransferBlocked == 1) {
                                 $transfer_table .= '<td data-th="Login User Agent">Blocked</td>';
