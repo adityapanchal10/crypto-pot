@@ -497,7 +497,7 @@ if (!isset($_SESSION['email']) || isset($_SESSION['isVerified'])) {
             setcookie('email', $_SESSION['email'], time() + (86400 * 365), "/");
         }
         $_SESSION['success'] = 'Message sent successfully.';
-        header('Location: dashboard.php');
+        header('Location: contact.php');
         exit;
         // echo('<script>alert("Message sent successfully.");  window.location = "dashboard.php"</script>');
 
