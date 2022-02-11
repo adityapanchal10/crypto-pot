@@ -1,8 +1,20 @@
 <?php
 
 session_start();
+require_once 'recaptcha/src/autoload.php';
 
 include "db_connect.php";
+
+function getClientIP() {       
+  if (array_key_exists('HTTP_X_FORWARDED_FOR', $_SERVER)){
+    return  $_SERVER["HTTP_X_FORWARDED_FOR"];  
+  }else if (array_key_exists('REMOTE_ADDR', $_SERVER)) { 
+    return $_SERVER["REMOTE_ADDR"]; 
+  }else if (array_key_exists('HTTP_CLIENT_IP', $_SERVER)) {
+    return $_SERVER["HTTP_CLIENT_IP"]; 
+  } 
+}
+
 
 function generate_token() {
     if( isset( $_SESSION[ 'csrf_token' ] ) ) {
@@ -172,7 +184,7 @@ if (!isset($_GET['email'])) {
                                             </div>
                                             <div class="div">
                                             <h5>Confirm Password</h5>
-                                            <input type="password" class="input" name="password" id="password-verify">
+                                            <input type="password" class="input" name="password-verify" id="password-verify">
                                             </div>
                                         </div>
                                         <a href="#" id="backTol3" class="forgot">Go back</a>
@@ -299,22 +311,27 @@ if (!isset($_GET['email'])) {
         if ($_COOKIE['fnz_cookie_val'] == 'no' || !isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '') {
             if (!check_token()) {
                 $_SESSION['error'] = 'Please fill in all the fields';
-                header('Location: forgot-password.php');
+                header('Location: login.php');
                 exit;
                 // exit('<script>alert("Invalid token");  window.location = "forgot-password.php"</script>');
             }
-        }    
+        }
+        if (!isset($_POST['password']) || empty($_POST['password']) || !isset ($_POST['password-verify']) || empty($_POST['password-verify'])) {
+            $_SESSION['error'] = 'Please fill in all the fields';
+            header('Location: login.php');
+            exit;            
+        }
         $password = $_POST['password'];
         $password_verify = $_POST['password-verify'];
         if ($password != $password_verify) {
             $_SESSION['error'] = 'Passwords do not match';
-            header('Location: forgot-password.php');
+            header('Location: login');
             exit;
             // echo '<script>alert("Passwords do not match!"); window.location="forgot-password.php"</script>';
         }
         if (preg_match('/^(?=.*[0-9])(?=.*[!@#$%^&*])[a-zA-Z0-9!@#$%^&*]{8,}$/', $_POST['password']) == 0) {
             $_SESSION['error'] = 'Password must have at least 8 characters, 1 uppercase, 1 lowercase and 1 number or special character';
-            header('Location: forgot-password.php');
+            header('Location: login.php');
             exit;
             // echo '<script>alert("Password must have at least 8 characters, 1 uppercase, 1 lowercase and 1 number or special character"); window.location = "forgot-password.php"</script>';
             // header('Location: signup.php');
@@ -336,9 +353,9 @@ if (!isset($_GET['email'])) {
             header('Location: login.php');
             exit;
         }
-        if (!filter_var($_POST['email'], FILTER_VALIDATE_EMAIL)) {
+        if (!filter_var($_GET['email'], FILTER_VALIDATE_EMAIL)) {
             $_SESSION['error'] = "Invalid e-mail address";
-            echo('<script>window.location = "signup.php";</script>');
+            echo('<script>window.location = "login.php";</script>');
             exit;
         }
         if (!isset($_GET['g-recaptcha-response']) || $_GET['g-recaptcha-response'] == '') {
@@ -360,7 +377,7 @@ if (!isset($_GET['email'])) {
           $errors = $resp->getErrorCodes();
           // echo $errors;
           $_SESSION['error'] = "Please complete the captcha!";
-          echo('<script>window.location = "signup.php";</script>');
+          echo('<script>window.location = "login.php";</script>');
           exit;
         }
         if ($stmt = $con->prepare('SELECT first_name  FROM userMaster WHERE email_id = ?')) {
@@ -374,15 +391,9 @@ if (!isset($_GET['email'])) {
                 $stmt->bind_result($first_name);
                 $stmt->fetch();
                 $code = generate_string();
-                /* $sql = "UPDATE userMaster SET email_verfication_code ='" .$code. "' where email_id='".$_SESSION['email']."'";
-    
-                if (!$mysqli_query($con, $sql)) {
-                    echo mysqli_error($con);
-                    exit();
-                } */
                 if ($stmt = $con->prepare('UPDATE userMaster SET email_verfication_code = ? WHERE email_id = ?')) {
 
-                    $stmt->bind_param('ss', $code, $_GET['email']);
+                    $stmt->bind_param('ss', $code, $email);
                     // echo $code;
                     if($stmt->execute()){
                         require_once('phpmailer/PHPMailer.php');
@@ -399,7 +410,7 @@ if (!isset($_GET['email'])) {
                         $mail->Port = 587;
 
                         $mail->setFrom('no-reply@forenzythreatlabs.com', 'Crypto-HoneyPot');
-                        $mail->addAddress($_GET['email']);
+                        $mail->addAddress($email);
                         $mail->addCustomHeader('X-SES-CONFIGURATION-SET','X-FNZ-THREATLABS-HDR');
                         $mail->Subject  =  'Reset your password';
                         $mail->IsHTML(true);
@@ -498,7 +509,7 @@ if (!isset($_GET['email'])) {
                             
                                 <div class="login-content">
                             
-                                <form class="loginform l4" action="forgot-password.php?email='.$_GET['email'].'" method="POST">
+                                <form class="loginform l4" action="forgot-password.php?email='.$email.'" method="POST">
                                 <img src="">
                                     <h2 class="title">Please enter the code you recieved here.</h2>
                                     <div class="input-div one">
@@ -615,7 +626,8 @@ if (!isset($_GET['email'])) {
                         }
                         else {
                             // echo "Mail Error - >".$mail->ErrorInfo;
-                            exit('<script>'.$mail->ErrorInfo.'</script>');
+                            $_SESSION['error'] = "An error occured while sending the email. Please try again later.";
+                            // exit('<script>'.$mail->ErrorInfo.'</script>');
                             header('Location: login.php');
                         }
 
