@@ -36,15 +36,12 @@ if (!isset($_SESSION['email']) || isset($_SESSION['isVerified'])) {
     if (!isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '') {
         setcookie('fnz_cookie_val', 'no', time() + (86400 * 30), "/");
     }
-    if ($_COOKIE['fnz_cookie_val'] == 'no' || !isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '' || !isset($_COOKIE['email']) || !isset($_COOKIE['id'])) {
+    if ($_COOKIE['fnz_cookie_val'] == 'no' || !isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '' || !isset($_COOKIE['email']) ) {
         $email = $_SESSION['email'];
-        $id = $_SESSION['id'];
     } else if ($_COOKIE['fnz_cookie_val'] == 'low') {
         $email = base64_decode($_COOKIE['email']);
-        //$id = base64_decode($_COOKIE['id']);
     } else if ($_COOKIE['fnz_cookie_val'] == 'high') {
         $email = $_COOKIE['email'];
-        //$id = $_COOKIE['id'];
     }
     if ($stmt = $con->prepare('SELECT userid, remaining_balance, isKYCverified FROM userMaster WHERE email_id = ?')) {
         $stmt->bind_param('s', $email);
