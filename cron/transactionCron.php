@@ -138,7 +138,7 @@ function approve_transfers($con)
                 $stmt_2->close();
                 exit();
             }
-            if ($userid == $to_userid) {
+            else if ($userid == $to_userid) {
                 $stmt_2 = $con->prepare('UPDATE transferMaster SET isTransferBlocked = 1 WHERE transfer_id = ?');
                 $stmt_2->bind_param('i', $transfer_id);
                 $stmt_2->execute();
@@ -214,10 +214,10 @@ function approve_transfers($con)
                     }
                     if ($to_wallet == 'USD') {
                         $stmt_5 = $con->prepare('UPDATE userMaster SET remaining_balance = ? WHERE userid = ?');
-                        $stmt_5->bind_param('di', $to_wallet_balance, $userid);
+                        $stmt_5->bind_param('di', $to_wallet_balance, $to_userid);
                         $stmt_5->execute();
                         $stmt_5->close();
-                    } else if ($from_wallet == 'USD') {
+                    } if ($from_wallet == 'USD') {
                         $stmt_5 = $con->prepare('UPDATE userMaster SET remaining_balance = ? WHERE userid = ?');
                         $stmt_5->bind_param('di', $from_wallet_balance, $userid);
                         $stmt_5->execute();
