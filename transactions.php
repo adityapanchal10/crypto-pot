@@ -403,21 +403,24 @@ if (!isset($_SESSION['email']) || isset($_SESSION['isVerified'])) {
                         $stmt_2->bind_result($transfer_id, $from_userid, $to_userid, $tr_currency_id, $transfer_amount, $tr_fromWallet, $tr_toWallet, $to_wallet_address, $tr_remaining_balance, $transfer_amount_recieved, $isTransferApproved, $isTransferBlocked);
 
                         while ($stmt_2->fetch()) {
-                            $stmt_3 = $con->prepare('SELECT first_name FROM userMaster WHERE userid = ?');
+                            $stmt_3 = $con->prepare('SELECT first_name, last_name FROM userMaster WHERE userid = ?');
                             $stmt_3->bind_param('i', $from_userid);
                             $stmt_3->execute();
                             $stmt_3->store_result();
-                            $stmt_3->bind_result($from_first_name);
+                            $stmt_3->bind_result($from_first_name, $from_last_name);
                             $stmt_3->fetch();
                             $stmt_3->close();
 
-                            $stmt_4 = $con->prepare('SELECT first_name FROM userMaster WHERE userid = ?');
+                            $stmt_4 = $con->prepare('SELECT first_name, last_name FROM userMaster WHERE userid = ?');
                             $stmt_4->bind_param('i', $to_userid);
                             $stmt_4->execute();
                             $stmt_4->store_result();
-                            $stmt_4->bind_result($to_first_name);
+                            $stmt_4->bind_result($to_first_name, $to_last_name);
                             $stmt_4->fetch();
                             $stmt_4->close();
+
+                            $from_name = $from_first_name . ' ' . $from_last_name;
+                            $to_name = $to_first_name . ' ' . $to_last_name;
 
                             if ($userid == $to_userid) {
                                 $stmt_5 = $con->prepare('SELECT wallet_balance FROM walletMappingMaster WHERE wallet_address = ?');
@@ -432,8 +435,8 @@ if (!isset($_SESSION['email']) || isset($_SESSION['isVerified'])) {
                             $transfer_type = 'Transfer';
                             $transfer_table .= '<tr>
                             <td data-th="Login Date">' . $transfer_id . '</td>
-                            <td data-th="Transaction Type">' . $from_first_name . '</td>
-                            <td data-th="Transaction Type">' . $to_first_name . '</td>
+                            <td data-th="Transaction Type">' . $from_name . '</td>
+                            <td data-th="Transaction Type">' . $to_name . '</td>
                             <td data-th="Login IPv6">' . $transfer_amount . '</td>
                             <td data-th="Login User Agent">' . $tr_fromWallet . '</td>
                             <td data-th="Login User Agent">' . $tr_toWallet . '</td>
