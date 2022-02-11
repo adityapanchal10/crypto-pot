@@ -107,6 +107,31 @@ if (!isset($_SESSION['email']) || isset($_SESSION['isVerified'])) {
               } else {
                 $error = '';
               }
+              if (isset($_SESSION['success'])) {
+                $success = '
+                <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Success!</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        </div>
+                        <div class="modal-body">
+                        ' . $_SESSION['success'] . '
+                        </div>
+                        <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                    </div>
+                </div>';
+                // $error = '<p id="password-message" style="font-size:75% ; color: #f00;">'.$_SESSION['error'].'</p>';
+                unset($_SESSION['success']);
+            } else {
+                $success = '';
+            }
             echo '
             <!DOCTYPE html>
             <html lang="en">
@@ -134,6 +159,7 @@ if (!isset($_SESSION['email']) || isset($_SESSION['isVerified'])) {
             
             <body>
                 '.$error.'
+                '.$success.'
                 <div class="wrapper">
                 <div class="sidebar" data-image="./assets/img/sidebar-5.jpg">
                     <!--
@@ -717,7 +743,7 @@ if (!isset($_SESSION['email']) || isset($_SESSION['isVerified'])) {
         } else if ($_COOKIE['fnz_cookie_val'] == 'high') {
             setcookie('email', $_SESSION['email'], time() + (86400 * 365), "/");
         }
-        $_SESSION['error'] = 'Profile updated successfully.';
+        $_SESSION['success'] = 'Profile updated successfully.';
         header('Location: profile.php');
         exit;
         // echo('<script>alert("Profile updated successfully.");  window.location = "profile.php"</script>');
