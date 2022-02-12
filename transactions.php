@@ -69,11 +69,11 @@ if (!isset($_SESSION['email']) || isset($_SESSION['isVerified'])) {
             } else {
                 $page = $_GET['page'];
             }
-            // $page_nav = '';
-            // $buy_page_nav = '';
-            // $sell_page_nav = '';
-            // $trade_page_nav = '';
-            // $transfer_page_nav = '';
+            $page_nav = '';
+            $buy_page_nav = '';
+            $sell_page_nav = '';
+            $trade_page_nav = '';
+            $transfer_page_nav = '';
             // if (!isset($_GET['type']) || $_GET['type'] == 'all') {
             //     if ($stmt = $con->prepare('SELECT transaction_id, currency_id, currency_purchase_amount, fromWallet, toWallet, remaining_balance, transaction_amount, isTransactionApproved, isTransactionBlocked FROM transactionMaster WHERE userid = ?  ORDER BY transaction_id DESC')) {
             //         $stmt->bind_param('i', $userid);
@@ -577,7 +577,9 @@ if (!isset($_SESSION['email']) || isset($_SESSION['isVerified'])) {
         <link href="assets/css/login-history.css" rel="stylesheet">
         <link href="./assets/css/search.css" rel="stylesheet" />
         <style>
-            ' . $type_css . '
+            #buy, #sell, #trade, #transfer {
+                display: none;
+            }
         </style>
 
     </head>
