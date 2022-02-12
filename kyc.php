@@ -775,6 +775,31 @@ if (!isset($_SESSION['email']) || isset($_SESSION['isVerified'])) {
             } else if ($kyc_request == 1) {
                 header('Location: kyc.php?type=view.php');
             } else {
+                if (isset($_SESSION['error'])) {
+                    $error = '
+                    <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="false">
+                        <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Error!</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                            </div>
+                            <div class="modal-body">
+                            '.$_SESSION['error'].'
+                            </div>
+                            <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                        </div>
+                    </div>';
+                    // $error = '<p id="password-message" style="font-size:75% ; color: #f00;">'.$_SESSION['error'].'</p>';
+                    unset($_SESSION['error']);
+                  } else {
+                    $error = '';
+                  }
                 echo '
                 <!DOCTYPE html>
 
@@ -803,6 +828,7 @@ if (!isset($_SESSION['email']) || isset($_SESSION['isVerified'])) {
                 </head>
             
                 <body>
+                '.$error.'
                 <div class="wrapper">
                 <div class="sidebar" data-image="./assets/img/sidebar-5.jpg">
                     <!--
@@ -997,7 +1023,7 @@ if (!isset($_SESSION['email']) || isset($_SESSION['isVerified'])) {
                             </div>
                             <div class="form-group">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" id="gridCheck" name="agree">
+                                    <input style="opacity: 1; visibility: visible;" class="form-check-input" type="checkbox" id="gridCheck" name="agree">
                                     <label class="form-check-label" for="gridCheck">
                                         I agree to the terms and conditions. I confirm that all the information provided above is true.
                                     </label>
@@ -1156,11 +1182,11 @@ if (!isset($_SESSION['email']) || isset($_SESSION['isVerified'])) {
                 exit;
                 // echo '<script>alert("Please check your details"); window.location = "kyc.php";</script>';
             } else {
-                if (!isset($_POST['fname']) || !isset($_POST['mname']) || !isset($_POST['lname']) || !isset($email) || !isset($_POST['gridRadios']) || !isset($_POST['address_line_1']) || !isset($_POST['address_line_2']) || !isset($_POST['city']) || !isset($_POST['state']) || !isset($_POST['zipCode']) || !isset($_POST['document_type']) || !isset($imgContent)) {
+                if (!isset($_POST['fname']) || !isset($_POST['mname']) || !isset($_POST['lname']) || !isset($email) || !isset($_POST['gridRadios']) || !isset($_POST['address_line_1']) || !isset($_POST['address_line_2']) || !isset($_POST['city']) || !isset($_POST['state']) || !isset($_POST['zipCode']) || !isset($_POST['document_type']) || !isset($_FILES['document']['tmp_name']) || !isset($_POST['agree'])) {
                     $_SESSION['error'] = 'Please fill in all the fields';
                     header('Location: kyc.php');
                     exit;
-                } else if (empty($_POST['fname']) || empty($_POST['mname']) || empty($_POST['lname']) || empty($email) || empty($_POST['gridRadios']) || empty($_POST['address_line_1']) || empty($_POST['address_line_2']) || empty($_POST['city']) || empty($_POST['state']) || empty($_POST['zipCode']) || empty($_POST['document_type']) || empty($imgContent)) {
+                } else if (empty($_POST['fname']) || empty($_POST['mname']) || empty($_POST['lname']) || empty($email) || empty($_POST['gridRadios']) || empty($_POST['address_line_1']) || empty($_POST['address_line_2']) || empty($_POST['city']) || empty($_POST['state']) || empty($_POST['zipCode']) || empty($_POST['document_type']) || empty($_FILES['document']['tmp_name']) || empty($_POST['agree'])) {
                     $_SESSION['error'] = 'Please fill in all the fields';
                     header('Location: kyc.php');
                     exit;
