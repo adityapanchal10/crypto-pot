@@ -389,7 +389,7 @@ if (!isset($_SESSION['email']) || isset($_SESSION['isVerified'])) {
                         <th>From Wallet</th>
                         <th>To Wallet</th>
                         <th>Remaining Balance</th>
-                        <th>Transfer Amount Recieved</th>
+                        <th>Transfer Amount Received/Sent</th>
                         <th>Transfer Approved</th>
                     </tr>';
 
