@@ -231,13 +231,13 @@ if (!isset($_SESSION['email']) || isset($_SESSION['isVerified'])) {
                             </li>
                             <li>
                                 <a class="nav-link" href="trade.php">
-                                    <i class="nc-icon nc-circle-09"></i>
+                                    <i class="nc-icon nc-money-coins"></i>
                                     <p>Trade</p>
                                 </a>
                             </li>
                             <li>
                                 <a class="nav-link" href="holdings.php">
-                                    <i class="nc-icon nc-circle-09"></i>
+                                    <i class="nc-icon nc-spaceship"></i>
                                     <p>Holdings</p>
                                 </a>
                             </li>
@@ -251,7 +251,7 @@ if (!isset($_SESSION['email']) || isset($_SESSION['isVerified'])) {
                         <ul class="nav">
                             <li class="nav-item active">
                                 <a class="nav-link" href="contact.php">
-                                    <i class="nc-icon nc-chart-pie-35"></i>
+                                    <i class="nc-icon nc-badge"></i>
                                     <p>Contact Us</p>
                                 </a>
                             </li>
