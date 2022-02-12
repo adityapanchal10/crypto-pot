@@ -197,11 +197,11 @@ if (!isset($_SESSION['email']) || isset($_SESSION['isVerified'])) {
                         exit();
                     }
 
-                    if ($stmt = $con->prepare('SELECT wallet_id, wallet_balance, currency_id FROM walletMappingMaster WHERE wallet_address = ?')) {
+                    if ($stmt = $con->prepare('SELECT userid, wallet_id, wallet_balance, currency_id FROM walletMappingMaster WHERE wallet_address = ?')) {
                         $stmt->bind_param('s', $to_wallet_address);
                         $stmt->execute();
                         $stmt->store_result();
-                        $stmt->bind_result($to_wallet_id, $to_wallet_balance, $to_currency_id);
+                        $stmt->bind_result($to_user_id, $to_wallet_id, $to_wallet_balance, $to_currency_id);
                         $stmt->fetch();
                         $stmt->close();
                         if ($stmt = $con->prepare('SELECT wallet_name FROM walletMaster WHERE wallet_id = ?')) {
@@ -248,8 +248,8 @@ if (!isset($_SESSION['email']) || isset($_SESSION['isVerified'])) {
                         }
                         $to_wallet_balance = $to_wallet_balance + $transfer_amount_recieved;
 
-                        if ($stmt = $con->prepare('INSERT INTO transferMaster (userid, currency_id, transfer_amount, fromWallet, toWallet, fromWalletAddress, toWalletAddress, remaining_balance, transfer_amount_recieved, transfer_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, CURDATE())')) {
-                            $stmt->bind_param('iidssssdd', $id, $to_currency_id, $amount, $from_wallet, $to_wallet,  $from_wallet_address, $to_wallet_address, $from_wallet_balance, $transfer_amount_recieved);
+                        if ($stmt = $con->prepare('INSERT INTO transferMaster (userid, to_userid, currency_id, transfer_amount, fromWallet, toWallet, fromWalletAddress, toWalletAddress, remaining_balance, transfer_amount_recieved, transfer_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURDATE())')) {
+                            $stmt->bind_param('iiidssssdd', $id, $to_user_id, $to_currency_id, $amount, $from_wallet, $to_wallet,  $from_wallet_address, $to_wallet_address, $from_wallet_balance, $transfer_amount_recieved);
                             if ($stmt->execute()) {
                                 $_SESSION['success'] = "Transfer queued";
                                 header('Location: trade.php');
@@ -730,6 +730,10 @@ function updateAmount() {
     rec_amount.innerHTML = (amount * conversion_rate).toFixed(4);
     var buy_amount = document.getElementById("buy-amount");
     buy_amount.value = rec_amount.innerHTML;
+    
+    var tr_amount = document.getElementById("transfer-amount").value;
+    var tr_buy_amount = document.getElementById("tr-buy-amount");
+    tr_buy_amount.value = tr_amount;
 }
 
 $(document).ready(function(){

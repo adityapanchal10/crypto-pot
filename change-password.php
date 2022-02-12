@@ -211,7 +211,7 @@ if (!isset($_SESSION['email'])) {
                                             </div>
                                             <div class="card-body">
                                                 <form id="change-pass" method="POST">
-                                                    <h3>Please enter your old password to continue.</h3>
+                                                    <h4 style="margin-top: 10px;margin-bottom: 20px;font-size: 20px;">Please enter your old password to continue.</h4>
                                                     <div class="row">
                                                         <div class="col-md-6 pr-1">
                                                             <div class="form-group">

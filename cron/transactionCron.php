@@ -124,14 +124,21 @@ function approve_transactions($con)
 
 function approve_transfers($con)
 {
-    $stmt = $con->prepare('SELECT userid, transfer_id, fromWallet, toWallet, toWalletAddress, transfer_amount, transfer_amount_recieved FROM transferMaster WHERE isTransferApproved = 0 AND isTransferBlocked = 0');
+    $stmt = $con->prepare('SELECT userid, to_userid, transfer_id, fromWallet, toWallet, toWalletAddress, transfer_amount, transfer_amount_recieved FROM transferMaster WHERE isTransferApproved = 0 AND isTransferBlocked = 0');
     $stmt->execute();
     $stmt->store_result();
     if ($stmt->num_rows > 0) {
         // echo '<h3>Transfer 1</h3>';
-        $stmt->bind_result($userid, $transfer_id, $from_wallet, $to_wallet, $to_wallet_address, $transfer_amount, $transfer_amount_recieved);
+        $stmt->bind_result($userid, $to_userid, $transfer_id, $from_wallet, $to_wallet, $to_wallet_address, $transfer_amount, $transfer_amount_recieved);
         while ($stmt->fetch()) {
             if ($from_wallet != $to_wallet) {
+                $stmt_2 = $con->prepare('UPDATE transferMaster SET isTransferBlocked = 1 WHERE transfer_id = ?');
+                $stmt_2->bind_param('i', $transfer_id);
+                $stmt_2->execute();
+                $stmt_2->close();
+                exit();
+            }
+            else if ($userid == $to_userid) {
                 $stmt_2 = $con->prepare('UPDATE transferMaster SET isTransferBlocked = 1 WHERE transfer_id = ?');
                 $stmt_2->bind_param('i', $transfer_id);
                 $stmt_2->execute();
@@ -207,10 +214,10 @@ function approve_transfers($con)
                     }
                     if ($to_wallet == 'USD') {
                         $stmt_5 = $con->prepare('UPDATE userMaster SET remaining_balance = ? WHERE userid = ?');
-                        $stmt_5->bind_param('di', $to_wallet_balance, $userid);
+                        $stmt_5->bind_param('di', $to_wallet_balance, $to_userid);
                         $stmt_5->execute();
                         $stmt_5->close();
-                    } else if ($from_wallet == 'USD') {
+                    } if ($from_wallet == 'USD') {
                         $stmt_5 = $con->prepare('UPDATE userMaster SET remaining_balance = ? WHERE userid = ?');
                         $stmt_5->bind_param('di', $from_wallet_balance, $userid);
                         $stmt_5->execute();

@@ -376,10 +376,15 @@ if (!isset($_SESSION['email']) || isset($_SESSION['isVerified'])) {
                     <th>Transaction Amount</th>
                     <th>Transaction Approved</th>
                 </tr>';
+                
+                //--------------- TRANSFER SECTION --------------------------------
+                
+                
                 $transfer_table = '<table class="rwd-table" id="transfer">
                     <tr>
                         <th>Transfer Id</th>
-                        <th>Transaction Type</th>
+                        <th>From</th>
+                        <th>To</th>
                         <th>Transfer Amount</th>
                         <th>From Wallet</th>
                         <th>To Wallet</th>
@@ -389,19 +394,49 @@ if (!isset($_SESSION['email']) || isset($_SESSION['isVerified'])) {
                     </tr>';
 
 
-                if ($stmt_2 = $con->prepare('SELECT transfer_id, currency_id, transfer_amount, fromWallet, toWallet, remaining_balance, transfer_amount_recieved, isTransferApproved, isTransferBlocked FROM transferMaster WHERE userid = ?  ORDER BY transfer_id DESC')) {
-                    $stmt_2->bind_param('i', $userid);
+                if ($stmt_2 = $con->prepare('SELECT transfer_id, userid, to_userid, currency_id, transfer_amount, fromWallet, toWallet, toWalletAddress, remaining_balance, transfer_amount_recieved, isTransferApproved, isTransferBlocked FROM transferMaster WHERE userid = ? OR to_userid = ? ORDER BY transfer_id DESC')) {
+                    $stmt_2->bind_param('ii', $userid, $userid);
                     $stmt_2->execute();
                     $stmt_2->store_result();
 
                     if ($stmt_2->num_rows > 0) {
-                        $stmt_2->bind_result($transfer_id, $tr_currency_id, $transfer_amount, $tr_fromWallet, $tr_toWallet, $tr_remaining_balance, $transfer_amount_recieved, $isTransferApproved, $isTransferBlocked);
+                        $stmt_2->bind_result($transfer_id, $from_userid, $to_userid, $tr_currency_id, $transfer_amount, $tr_fromWallet, $tr_toWallet, $to_wallet_address, $tr_remaining_balance, $transfer_amount_recieved, $isTransferApproved, $isTransferBlocked);
 
                         while ($stmt_2->fetch()) {
+                            $stmt_3 = $con->prepare('SELECT first_name, last_name FROM userMaster WHERE userid = ?');
+                            $stmt_3->bind_param('i', $from_userid);
+                            $stmt_3->execute();
+                            $stmt_3->store_result();
+                            $stmt_3->bind_result($from_first_name, $from_last_name);
+                            $stmt_3->fetch();
+                            $stmt_3->close();
+
+                            $stmt_4 = $con->prepare('SELECT first_name, last_name FROM userMaster WHERE userid = ?');
+                            $stmt_4->bind_param('i', $to_userid);
+                            $stmt_4->execute();
+                            $stmt_4->store_result();
+                            $stmt_4->bind_result($to_first_name, $to_last_name);
+                            $stmt_4->fetch();
+                            $stmt_4->close();
+
+                            $from_name = $from_first_name . ' ' . $from_last_name;
+                            $to_name = $to_first_name . ' ' . $to_last_name;
+
+                            if ($userid == $to_userid) {
+                                $stmt_5 = $con->prepare('SELECT wallet_balance FROM walletMappingMaster WHERE wallet_address = ?');
+                                $stmt_5->bind_param('s', $to_wallet_address);
+                                $stmt_5->execute();
+                                $stmt_5->store_result();
+                                $stmt_5->bind_result($tr_remaining_balance);
+                                $stmt_5->fetch();
+                                $stmt_5->close();
+                            }
+
                             $transfer_type = 'Transfer';
                             $transfer_table .= '<tr>
                             <td data-th="Login Date">' . $transfer_id . '</td>
-                            <td data-th="Transaction Type">' . $transfer_type . '</td>
+                            <td data-th="Transaction Type">' . $from_name . '</td>
+                            <td data-th="Transaction Type">' . $to_name . '</td>
                             <td data-th="Login IPv6">' . $transfer_amount . '</td>
                             <td data-th="Login User Agent">' . $tr_fromWallet . '</td>
                             <td data-th="Login User Agent">' . $tr_toWallet . '</td>
@@ -418,6 +453,7 @@ if (!isset($_SESSION['email']) || isset($_SESSION['isVerified'])) {
                         }
                     }
                 }
+                //------------------------------------------------------
 
                 if ($stmt->num_rows > 0) {
                     $stmt->bind_result($transaction_id, $currency_id, $currency_purchase_amount, $fromWallet, $toWallet, $remaining_balance, $transaction_amount, $isTransactionApproved, $isTransactionBlocked);
