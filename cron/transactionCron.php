@@ -98,8 +98,8 @@ function approve_transactions($con)
                         $stmt_5->execute();
                         $stmt_5->close();
                     }
-                    if ($stmt_2 = $con->prepare('UPDATE transactionMaster SET currency_purchase_amount = ?, remaining_balance = ?, isTransactionApproved = 1, transaction_approved_time = CURDATE() WHERE transaction_id = ?')) {
-                        if ($stmt_2->bind_param('ddi', $purchase_amount, $from_wallet_balance, $transaction_id)) {
+                    if ($stmt_2 = $con->prepare('UPDATE transactionMaster SET currency_purchase_amount = ?, remaining_balance = ?, isTransactionApproved = 1, transaction_approved_time = ? WHERE transaction_id = ?')) {
+                        if ($stmt_2->bind_param('ddsi', $purchase_amount, $from_wallet_balance, date('Y/m/d H:i:s'), $transaction_id)) {
                             if ($stmt_2->execute()) {
                                 echo 'Transaction approved';
                             } else {
@@ -216,9 +216,9 @@ function approve_transfers($con)
                         $stmt_5->execute();
                         $stmt_5->close();
                     }
-                    if ($stmt_2 = $con->prepare('UPDATE transferMaster SET transfer_amount_recieved = ?, remaining_balance = ?, isTransferApproved = 1, transfer_approved_time = CURDATE() WHERE transfer_id = ?')) {
+                    if ($stmt_2 = $con->prepare('UPDATE transferMaster SET transfer_amount_recieved = ?, remaining_balance = ?, isTransferApproved = 1, transfer_approved_time = ? WHERE transfer_id = ?')) {
                         // echo '<h3>Transfer 4</h3>';
-                        if ($stmt_2->bind_param('ddi', $transfer_amount_recieved, $from_wallet_balance, $transfer_id)) {
+                        if ($stmt_2->bind_param('ddsi', $transfer_amount_recieved, $from_wallet_balance, date('Y/m/d H:i:s'), $transfer_id)) {
                             if ($stmt_2->execute()) {
                                 echo 'Transfer approved';
                             } else {
