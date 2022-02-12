@@ -238,7 +238,7 @@ if (!isset($_SESSION['email']) || isset($_SESSION['isVerified'])) {
                         if ($_COOKIE['fnz_cookie_val'] == 'no' || !isset($_COOKIE['fnz_cookie_val']) || $_COOKIE['fnz_cookie_val'] == '' || !isset($_COOKIE['email'])) {
                             $transfer_amount_recieved = $amount;
                         } else {
-                            $transfer_amount_recieved = $_POST['tr-buy-amount'];
+                            $transfer_amount_recieved = $_POST['amount'];
                         }
                         if ($transfer_amount_recieved < 0.0001) {
                             $_SESSION['error'] = "You can't transfer less than 0.0001";
