@@ -505,7 +505,7 @@ if (!isset($_SESSION['email']) || isset($_SESSION['isVerified'])) {
                         <ul class="nav">
                             <li class="nav-item">
                                 <a class="nav-link" href="contact.php">
-                                    <i class="nc-icon nc-badhe"></i>
+                                    <i class="nc-icon nc-badge"></i>
                                     <p>Contact Us</p>
                                 </a>
                             </li>
