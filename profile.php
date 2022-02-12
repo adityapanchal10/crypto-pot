@@ -694,8 +694,8 @@ if (!isset($_SESSION['email']) || isset($_SESSION['isVerified'])) {
             // exit('<script>alert("Invalid token");  window.location = "change-password.php"</script>');
         }
     }    
-    if ($stmt = $con->prepare('UPDATE userMaster SET first_name = ?, last_name = ?, email_id = ?, country = ?, mobile = ?, timezone = ? WHERE email_id = ?')) {
-        $stmt->bind_param('sssssss', $_POST['fname'], $_POST['lname'], $_POST['email'], $_POST['country'], $_POST['mobile'], $_POST['timezone'], $email);
+    if ($stmt = $con->prepare('UPDATE userMaster SET first_name = ?, last_name = ?, country = ?, mobile = ?, timezone = ? WHERE email_id = ?')) {
+        $stmt->bind_param('ssssss', $_POST['fname'], $_POST['lname'], $_POST['country'], $_POST['mobile'], $_POST['timezone'], $email);
         if(!$stmt->execute()){
             if ($_COOKIE['fnz_cookie_val'] == 'no') {
                 setcookie('email', md5($_SESSION['email']), time() + (86400 * 30), "/");
@@ -703,6 +703,11 @@ if (!isset($_SESSION['email']) || isset($_SESSION['isVerified'])) {
                 setcookie('email', base64_encode($_SESSION['email']), time() + (86400 * 7), "/");
             } else if ($_COOKIE['fnz_cookie_val'] == 'high') {
                 setcookie('email', $_SESSION['email'], time() + (86400 * 365), "/");
+            }
+            if ($stmt->errno == 803) {
+                $_SESSION['error'] = 'Mobile Number already exits. Please try again';
+                header('Location: profile.php');
+                exit;
             }
             $_SESSION['error'] = 'Please try again.';
             header('Location: profile.php');
