@@ -649,7 +649,7 @@ if (!isset($_SESSION['email']) || isset($_SESSION['isVerified'])) {
                                             <input type="number" id="transfer-amount" min="0" class="transferTo" required name="tr-amount" onchange="updateAmount();" value="0">
                                             <label for="transferTo" style="top: 14px;">Enter amount</label>
                                         </div>
-                                        <input type="hidden" id="tr-buy-amount" min="0" class="transferTo" required name="tr-buy-amount" value="0">
+                                        <input type="hidden" id="tr-buy-amount" min="0" class="transferTo" required name="tr-buy-amount">
                                         <button class="submit-btn" type="submit" name="submit">Proceed</button>
 
                                     </form>
@@ -720,6 +720,9 @@ var prices = ' . $prices . ';
 
 const input = document.getElementById("amount");
 input.onkeyup = updateAmount;
+const input2 = document.getElementById("transfer-amount");
+input2.onkeyup = updateAmount;
+
 
 function updateAmount() {
     var from = document.getElementById("inputFrom").value;
