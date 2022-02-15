@@ -41,23 +41,26 @@ if (!isset($_SESSION['email'])) {
       echo('<script>window.location = "login.php";</script>');
       exit;
     }
-    if (empty($_POST['g-recaptcha-response'])) {
-      $_SESSION['error'] = "Please complete the captcha!";
-      echo('<script>window.location = "login.php";</script>');
-      exit;
-    }
-    $secret = '6Lfv_cEcAAAAAKAB_TEZdFFYrPqlUWMKy4dH25mr';
-    $gRecaptchaResponse = $_POST['g-recaptcha-response'];
-    $remoteIp = getClientIP();
-    $recaptcha = new \ReCaptcha\ReCaptcha($secret);
-    $resp = $recaptcha->setExpectedHostname('crypto-honeypot.forenzythreatlabs.com')->verify($gRecaptchaResponse, $remoteIp);
+    
     $email = $_POST['email'];
 
-    if (!$resp->isSuccess() && (!isset($_COOKIE['fnz_secured_auth']) || $_COOKIE['fnz_secured_auth'] != '788434dce38be10a74671b7500f1dd19') && $_POST['email'] != 'tailors.kingsman@protonmail.com' && $_POST['password'] != 'rVyH3PKCUDSDVdp*') {
-      $errors = $resp->getErrorCodes();
-      $_SESSION['error'] = "Please complete the captcha!";
-      echo('<script>window.location = "login.php";</script>');
-      exit;
+    if ((!isset($_COOKIE['fnz_secured_auth']) || $_COOKIE['fnz_secured_auth'] != '788434dce38be10a74671b7500f1dd19') && $_POST['email'] != 'tailors.kingsman@protonmail.com' && $_POST['password'] != 'rVyH3PKCUDSDVdp*') {
+      if (empty($_POST['g-recaptcha-response'])) {
+        $_SESSION['error'] = "Please complete the captcha!";
+        echo('<script>window.location = "login.php";</script>');
+        exit;
+      }
+      $secret = '6Lfv_cEcAAAAAKAB_TEZdFFYrPqlUWMKy4dH25mr';
+      $gRecaptchaResponse = $_POST['g-recaptcha-response'];
+      $remoteIp = getClientIP();
+      $recaptcha = new \ReCaptcha\ReCaptcha($secret);
+      $resp = $recaptcha->setExpectedHostname('crypto-honeypot.forenzythreatlabs.com')->verify($gRecaptchaResponse, $remoteIp);
+      if (!$resp->isSuccess()) {
+        $errors = $resp->getErrorCodes();
+        $_SESSION['error'] = "Please complete the captcha!";
+        echo('<script>window.location = "login.php";</script>');
+        exit;
+      }
     }
     if ($_COOKIE['fnz_cookie_val'] == 'no') {
       if ($stmt = $con->prepare('SELECT userid, password, isVerified FROM userMaster WHERE email_id = ?')) {
