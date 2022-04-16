@@ -206,8 +206,8 @@ if (!isset($_SESSION['email']) || isset($_SESSION['isVerified'])) {
       }
     echo '
     <!DOCTYPE html>
-<html lang="en">
-<head>
+    <html lang="en">
+    <head>
     <meta charset="utf-8" />
 
     <!-- Favicons -->
@@ -225,8 +225,9 @@ if (!isset($_SESSION['email']) || isset($_SESSION['isVerified'])) {
     <link href="./assets/vendor/bootstrap_dash/bootstrap.min.css" rel="stylesheet" />
     <link href="./assets/css/light-bootstrap-dashboard.css" rel="stylesheet" />
     <link href="./assets/css/search.css" rel="stylesheet" />
-</head>
-<body>
+    
+    </head>
+    <body>
     '.$error.'
     <div class="wrapper">
         <div class="sidebar" data-image="./assets/img/sidebar-5.jpg">

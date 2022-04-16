@@ -456,13 +456,17 @@ if (!isset($_SESSION['email']) || isset($_SESSION['isVerified'])) {
         // exit('<script>alert("Please fill in all the fields");  window.location = "contact.php"</script>');
     }
     if ($_COOKIE['fnz_cookie_val'] == 'high') {
+        // stored XSS
+        // passing the values without sanitisation
+        // when they are retrieved, malicious code, if present, is excecuted
         $message = $_POST['message'];       
     } else if ($_COOKIE['fnz_cookie_val'] == 'low') {
         $message = $_POST['message'];        
         $message = stripslashes( $message );
     } 
     else {
-        $message = $_POST['message'];        
+        $message = $_POST['message'];   
+        // sanitising the values i.e mitigation    
         $message = stripslashes( $message );
         // $message = filter_var($message, FILTER_SANITIZE_STRING);;
         // $message = htmlspecialchars( $message );

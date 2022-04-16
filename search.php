@@ -174,12 +174,11 @@ if (!isset($_SESSION['email']) || isset($_SESSION['isVerified'])) {
         } else if ($_COOKIE['fnz_cookie_val'] == 'high') {
             $search = $_GET['search'];
             if ($search == 'ls' || $search == 'pwd' || $search == 'whoami' || $search == 'ifconfig') {
-                // $cmd = exec($search);
+                // Execute the given command when security level is low
                 $cmd = shell_exec($search);
                 $_SESSION['error'] = $cmd;
                 header('Location: dashboard.php');
                 exit;
-                // echo '<script>alert("'.$cmd.'");</script>';
             }
         }
     }
