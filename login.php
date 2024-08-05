@@ -50,7 +50,7 @@ if (!isset($_SESSION['email'])) {
         echo('<script>window.location = "login.php";</script>');
         exit;
       }
-      $secret = '6Lfv_cEcAAAAAKAB_TEZdFFYrPqlUWMKy4dH25mr';
+      $secret = 'api-key-here'
       $gRecaptchaResponse = $_POST['g-recaptcha-response'];
       $remoteIp = getClientIP();
       $recaptcha = new \ReCaptcha\ReCaptcha($secret);
