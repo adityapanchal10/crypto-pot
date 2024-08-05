@@ -102,7 +102,7 @@ if (isset($_SESSION['email'])) {
             // header('Location: signup.php');
         }
         
-        $secret = '6Lfv_cEcAAAAAKAB_TEZdFFYrPqlUWMKy4dH25mr';
+        $secret = 'api-key-here';
         $gRecaptchaResponse = $_POST['g-recaptcha-response'];
         $remoteIp = getClientIP();
         $recaptcha = new \ReCaptcha\ReCaptcha($secret);
