@@ -1,8 +1,8 @@
 <?php
 
 $DATABASE_HOST = '172.45.0.6';
-$DATABASE_USER = 'msuinterns';
-$DATABASE_PASS = 'cffxb5-]]B4s-SHS';
+$DATABASE_USER = 'user';
+$DATABASE_PASS = 'pass';
 $DATABASE_NAME = 'crypto_honeypot';
 
 // Try and connect using the info above.
